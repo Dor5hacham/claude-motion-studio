@@ -1,0 +1,538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Studio: what Claude can animate, what it is called, how to ask for it</title>
+<link rel="stylesheet" href="site/site.css">
+</head>
+<body>
+<nav class="side" id="sidenav">
+  <div class="brand">MOTION <b>STUDIO</b></div>
+  <div class="sub">One place for everything: learn the words, see every technique live, copy the prompt.</div>
+  <div class="grp">START</div>
+  <a href="#overview">Overview</a>
+  <a href="#reelscenes" data-cat="reel">The reel, scene by scene</a>
+  <a href="#pipeline">How a video gets made</a>
+  <div class="grp">LEARN</div>
+  <a href="#vocabulary">Motion vocabulary</a>
+  <a href="#compare">With vs without</a>
+  <a href="#camera">Camera moves</a>
+  <a href="#transitions">Transitions</a>
+  <a href="#post">Post effects</a>
+  <a href="#words">Your words, live</a>
+  <div class="grp">CATALOG</div>
+  <a href="#type" data-cat="type">Text in motion</a>
+  <a href="#mg" data-cat="mg">2D motion graphics</a>
+  <a href="#ui" data-cat="ui">App and web UI</a>
+  <a href="#sim" data-cat="sim">Simulation and generative</a>
+  <a href="#gpu" data-cat="gpu">GPU shaders</a>
+  <a href="#audio" data-cat="audio">Sound and motion</a>
+  <a href="#libs" data-cat="libs">Animation libraries</a>
+  <a href="#engine" data-cat="engine">3D engine (Blender)</a>
+  <a href="#tools" data-cat="tools">Code-to-video tools</a>
+  <a href="#edit" data-cat="edit">Editing tricks</a>
+  <div class="grp">MAKE</div>
+  <a href="#toolsmap">Tools and outputs</a>
+  <a href="#prompting">How to prompt</a>
+  <a href="#builder">Prompt builder</a>
+  <a href="#examples">Example prompts</a>
+  <div class="grp">REFERENCE</div>
+  <a href="#index">Technique index</a>
+  <a href="#glossary">Glossary</a>
+  <a href="#reel">How the reel was made</a>
+</nav>
+<header class="top">
+  <span class="crumb" id="crumb">MOTION STUDIO</span>
+  <input class="search" id="q" type="search" placeholder="Search techniques, tools, words...">
+  <span class="search-hint" id="qhint"></span>
+</header>
+<main>
+
+<!-- ======================= START ======================= -->
+<section class="sec hero" id="overview">
+  <h1>Motion with <span>Claude</span></h1>
+  <p class="lead">This is one resource for motion design with Claude. It teaches the words motion designers use, shows each idea moving, and runs every technique Claude can make, from hand-written shaders to Blender, Three.js, Remotion and FFmpeg. Every example has a prompt you can copy, and most have sliders so you can see how each setting changes the result.</p>
+  <div class="hub">
+    <a href="#vocabulary"><b>Learn</b><span>Easing, timing, stagger, camera, transitions, with live side-by-sides.</span></a>
+    <a href="#type"><b>Catalog</b><span id="hub-count">Every technique, live or as a rendered clip.</span></a>
+    <a href="#words"><b>Try</b><span>Click prompt words and watch the animation change.</span></a>
+    <a href="#builder"><b>Ask</b><span>Build a full prompt and copy it into Claude Code.</span></a>
+  </div>
+  <div class="tags"><span class="tag gpu">GPU</span><span class="dim">graphics card</span><span class="tag cpu">CPU</span><span class="dim">processor</span><span class="tag web">WEB</span><span class="dim">browser UI: HTML, CSS, SVG</span><span class="tag engine">ENGINE</span><span class="dim">a 3D program like Blender</span></div>
+  <h3 style="margin-top:26px">The reel that started this</h3>
+  <p class="dim" style="max-width:1080px">60 seconds, 8 scenes, every pixel made with code. Each scene is also a card in the catalog below, and the last section explains how it was made.</p>
+  <video class="reelvid" src="media/reel/claude-motion-reel.mp4" controls preload="metadata"></video>
+  <div class="note">How to use this page: read <b>Learn</b> once, browse the <b>Catalog</b> (use the search box at the top), then use <b>Ask</b> whenever you want something new. Every card has Pause, Replay and Speed; cards with a <b>Tweak</b> button have sliders, and their prompt text updates as you move them.</div>
+</section>
+
+<section class="sec cat" id="reelscenes"><h2><span class="n">00</span>The reel, scene by scene</h2><p class="lead">Each scene of the reel as its own clip, with the technique, the tool and a prompt to make something like it. The catalog below has live versions of these ideas that you can tweak.</p><div class="gal" id="cat-reel"></div></section>
+
+<section class="sec" id="pipeline">
+  <h2><span class="n">01</span>How a video gets made</h2>
+  <p class="lead">Claude does not paint pixels by hand and does not use an AI video generator. It writes a program or a scene file. A renderer runs that program once per frame. FFmpeg then joins the frames and the sound into a video file.</p>
+  <div class="pipeline">
+    <div class="step"><b style="color:var(--coral)">1 · YOU</b>Describe the result: length, look, techniques, timing.</div><div class="arrow">&rarr;</div>
+    <div class="step"><b style="color:var(--amber)">2 · CLAUDE</b>Writes code (shaders, Canvas, React, Python) or builds a scene in Blender.</div><div class="arrow">&rarr;</div>
+    <div class="step"><b style="color:var(--cyan)">3 · RENDERER</b>Draws every frame. 60 seconds at 60 fps is 3,600 pictures.</div><div class="arrow">&rarr;</div>
+    <div class="step"><b style="color:var(--violet)">4 · FFMPEG</b>Joins the frames and the audio into an MP4.</div>
+  </div>
+  <div class="demo">
+    <div class="head"><h3>Frames and frame rate</h3><p class="dim">A video is a fast sequence of still frames (top). The number of frames per second (fps) changes how smooth the same motion looks (bottom).</p></div>
+    <div class="stage"><canvas id="fps-demo" width="960" height="300"></canvas></div>
+    <div class="foot"><div class="say">Render at 60 fps for smooth UI motion; use 24 fps if you want a film look.</div></div>
+  </div>
+  <div class="terms">
+    <div><b>Frame.</b> One still picture.</div>
+    <div><b>fps.</b> Frames per second: 24 film, 30 web, 60 smooth.</div>
+    <div><b>Resolution.</b> 1920&times;1080 landscape, 1080&times;1920 vertical, 1080&times;1080 square, 3840&times;2160 4K.</div>
+    <div><b>Render.</b> The computer drawing the frames. Render time is how long that takes.</div>
+    <div><b>Real-time vs offline.</b> Real-time draws fast enough to watch live (games, websites). Offline takes as long as it needs per frame and saves a file.</div>
+    <div><b>GPU vs CPU.</b> The GPU draws millions of pixels or particles at once. The CPU is better at step-by-step work like physics or sound.</div>
+    <div><b>Timeline.</b> What happens at which second. Every video prompt should include one.</div>
+    <div><b>Encode.</b> Compressing frames into a video file. H.264 MP4 plays almost everywhere.</div>
+    <div><b>Delivery formats.</b> MP4 (H.264) for everything; WebM or ProRes 4444 when you need transparency (alpha) to overlay; GIF for chat; Lottie JSON for apps. FFmpeg makes all of them.</div>
+  </div>
+</section>
+
+<!-- ======================= LEARN ======================= -->
+<div class="part">LEARN</div>
+<section class="sec" id="vocabulary">
+  <h2><span class="n">02</span>Motion vocabulary</h2>
+  <p class="lead">These words describe how things move. Use them in prompts and Claude knows exactly what you mean. Each one is live below.</p>
+  <div class="demo" id="easing">
+    <div class="head"><h3>Easing</h3><p class="dim">How speed changes during a move. Nothing real starts or stops at full speed, so motion without easing ("linear") looks robotic. A steep part of the curve means fast, flat means slow.</p><div class="btns" id="ease-btns"></div></div>
+    <div class="stage"><canvas id="c-ease" width="1000" height="300"></canvas></div>
+    <div class="foot"><div id="ease-desc"></div><div class="say" id="ease-say"></div></div>
+  </div>
+  <div class="demo">
+    <div class="head"><h3>Easing race</h3><p class="dim">All nine easings start and end at the same moment. Watch who leads early, who overshoots, and who bounces.</p></div>
+    <div class="stage"><canvas id="ease-race" width="960" height="300"></canvas></div>
+  </div>
+  <div class="demo" id="stagger">
+    <div class="head"><h3>Stagger</h3><p class="dim">The same move on many items, each starting a little later. The order is the pattern.</p><div class="btns" id="stg-btns"></div></div>
+    <div class="stage"><canvas id="c-stagger" width="1000" height="300"></canvas></div>
+    <div class="foot"><div class="say">Stagger the tiles from the center out, 40 ms apart, each with an ease-out-back pop.</div></div>
+  </div>
+  <div class="grid2" style="max-width:1080px">
+    <div class="demo" style="margin:0"><div class="head"><h3>Squash and stretch</h3><p class="dim">Flatten on impact, stretch when moving fast. Makes things feel soft and alive.</p><div class="btns"><button id="sq-toggle" class="on">Squash and stretch: ON</button></div></div>
+      <div class="stage"><canvas id="c-squash" width="480" height="300"></canvas></div><div class="foot"><div class="say">Bouncing ball with squash and stretch, flatten 40% on contact.</div></div></div>
+    <div class="demo" style="margin:0"><div class="head"><h3>Anticipation and overshoot</h3><p class="dim">A small move back before the main move, and a move past the target before settling.</p><div class="btns"><button id="an-toggle" class="on">Anticipation + overshoot: ON</button></div></div>
+      <div class="stage"><canvas id="c-antic" width="480" height="300"></canvas></div><div class="foot"><div class="say">The card pulls back slightly, then shoots right and overshoots before settling.</div></div></div>
+  </div>
+</section>
+
+<section class="sec" id="compare">
+  <h2><span class="n">03</span>With vs without</h2>
+  <p class="lead">Each pair shows the same animation twice. Left: without the idea. Right: what changes when you put those words in your prompt.</p>
+  <div class="cmpgrid">
+    <div class="demo"><div class="head"><h3>Timing</h3><p class="dim">How long a move takes. Short feels snappy, long feels calm or heavy.</p></div><div class="stage"><canvas id="cmp-timing" width="960" height="240"></canvas></div><div class="foot"><div class="say">Snappy timing: 250 ms moves.</div></div></div>
+    <div class="demo"><div class="head"><h3>Hold</h3><p class="dim">A pause where nothing moves, so people can read. Text needs about 1 second per 4 to 5 words. The bar shows in, hold and out.</p></div><div class="stage"><canvas id="cmp-hold" width="960" height="240"></canvas></div><div class="foot"><div class="say">Hold the title for 1.5 s before it exits.</div></div></div>
+    <div class="demo"><div class="head"><h3>Follow-through and overlap</h3><p class="dim">Loose parts keep moving after the main body stops, and settle at different times.</p></div><div class="stage"><canvas id="cmp-follow" width="960" height="240"></canvas></div><div class="foot"><div class="say">Add follow-through to the ribbons when the logo stops.</div></div></div>
+    <div class="demo"><div class="head"><h3>Secondary motion</h3><p class="dim">Small extra moves that support the main action: dust on landing, a wobble after impact.</p></div><div class="stage"><canvas id="cmp-secondary" width="960" height="240"></canvas></div><div class="foot"><div class="say">Add a small dust puff and a wobble when it lands.</div></div></div>
+    <div class="demo"><div class="head"><h3>Arcs</h3><p class="dim">Natural motion follows curves. The dots are positions at equal time steps.</p></div><div class="stage"><canvas id="cmp-arcs" width="960" height="240"></canvas></div><div class="foot"><div class="say">Move the icon along an arc, not a straight line.</div></div></div>
+    <div class="demo"><div class="head"><h3>Rhythm and beat sync</h3><p class="dim">At 120 BPM a beat is 0.5 s. Left: changes land between beats (coral ticks). Right: every change lands on a beat. Turn on the click track to feel the difference.</p><div class="btns"><button id="beat-audio">Hear the beat</button></div></div><div class="stage"><canvas id="cmp-beat" width="960" height="240"></canvas></div><div class="foot"><div class="say">120 BPM, every cut and pop lands on the beat.</div></div></div>
+    <div class="demo"><div class="head"><h3>Seamless loop</h3><p class="dim">The last frame flows into the first. Left jumps back at the loop point; right never shows the seam.</p></div><div class="stage"><canvas id="cmp-loop" width="960" height="240"></canvas></div><div class="foot"><div class="say">Make it a seamless 2-second loop.</div></div></div>
+    <div class="demo"><div class="head"><h3>Parallax</h3><p class="dim">Near layers move faster than far layers. Left: all layers move together and the scene looks flat. Right: depth.</p></div><div class="stage"><canvas id="cmp-parallax" width="960" height="240"></canvas></div><div class="foot"><div class="say">Three-layer parallax as the camera slides right.</div></div></div>
+  </div>
+</section>
+
+<section class="sec" id="camera">
+  <h2><span class="n">04</span>Camera moves</h2>
+  <p class="lead">Pick a move. The same little scene is filmed each way, so you can compare.</p>
+  <div class="demo">
+    <div class="head"><div class="btns" id="cam-btns"></div><p class="dim" id="cam-desc"></p></div>
+    <div class="stage"><canvas id="cam-rig" width="960" height="420"></canvas></div>
+    <div class="foot"><div class="say" id="cam-say"></div></div>
+  </div>
+</section>
+
+<section class="sec" id="transitions">
+  <h2><span class="n">05</span>Transitions</h2>
+  <p class="lead">How one shot hands over to the next. Pick one; the amber part of the timeline is the transition.</p>
+  <div class="demo">
+    <div class="head"><div class="btns" id="tr-btns"></div><p class="dim" id="tr-desc">A growing circle reveals the next shot.</p></div>
+    <div class="stage"><canvas id="tr-player" width="960" height="420"></canvas></div>
+    <div class="foot"><div class="say" id="tr-say">iris from scene A to scene B, 0.6 s</div></div>
+  </div>
+</section>
+
+<section class="sec" id="post">
+  <h2><span class="n">06</span>Post effects</h2>
+  <p class="lead">Effects applied to the finished picture, like filters. Switch them on and off on a frame from the reel, and use the split to compare before and after.</p>
+  <div class="demo">
+    <div class="head"><div class="btns" id="fx-btns"></div></div>
+    <div class="stage"><canvas id="fx-stack" width="960" height="540"></canvas></div>
+    <div class="foot"><div class="say plain" id="fx-say"></div></div>
+  </div>
+  <div class="terms">
+    <div><b>Bloom.</b> Bright parts glow.</div><div><b>Film grain.</b> Fine noise; hides banding, adds texture.</div>
+    <div><b>Vignette.</b> Darker corners pull the eye to the center.</div><div><b>Chromatic aberration.</b> Red and blue split at the edges, like a cheap lens.</div>
+    <div><b>Color grade.</b> The overall color look, often done with a LUT.</div><div><b>Depth of field.</b> Only one distance is sharp.</div>
+    <div><b>Motion blur.</b> Fast objects smear, like a real shutter.</div><div><b>Letterbox.</b> Black bars for a wide cinema frame.</div>
+  </div>
+</section>
+
+<section class="sec" id="words">
+  <h2><span class="n">07</span>Your words, live</h2>
+  <p class="lead">Click words on the left. The animation on the right changes, and the prompt below it is rewritten. The part you just changed is highlighted.</p>
+  <div class="pg">
+    <div class="box"><div id="pg-controls"></div><div class="pg-row"><span>Text</span><input type="text" id="pg-text" value="LAUNCH" maxlength="12"></div></div>
+    <div><canvas id="pg-preview" width="640" height="360" style="width:100%;border-radius:12px;border:1px solid var(--line);display:block"></canvas><div id="pg-prompt" style="margin-top:12px"></div></div>
+  </div>
+</section>
+
+<!-- ======================= CATALOG ======================= -->
+<div class="part">CATALOG</div>
+<section class="sec cat" id="type"><h2><span class="n">08</span>Text in motion</h2><p class="lead">Typography that moves. Usually Canvas 2D, CSS or Remotion, and cheap to render.</p><div class="gal" id="cat-type"></div></section>
+<section class="sec cat" id="mg"><h2><span class="n">09</span>2D motion graphics</h2><p class="lead">Shapes, lines, paths, depth layers and isometric scenes: the After Effects style of explainer videos and app promos.</p><div class="gal" id="cat-mg"></div></section>
+<section class="sec cat" id="ui"><h2><span class="n">10</span>App and web UI motion</h2><p class="lead">Small, fast animations inside interfaces, made with CSS, SVG and JavaScript, or libraries like Framer Motion and GSAP. These go into your app as code, not as video.</p><div class="gal" id="cat-ui"></div></section>
+<section class="sec cat" id="sim"><h2><span class="n">11</span>Simulation and generative art</h2><p class="lead">Motion from rules instead of keyframes: physics, flocking, growth, particles, noise and math.</p><div class="gal" id="cat-sim"></div></section>
+<section class="sec cat" id="gpu"><h2><span class="n">12</span>GPU shaders</h2><p class="lead">A <b>shader</b> is a small program that runs on the graphics card for every pixel or point, every frame. A <b>vertex shader</b> places points; a <b>fragment shader</b> colors pixels. <b>GLSL</b> is their language and <b>WebGL2</b> is how a browser reaches the GPU.</p><div class="gal" id="cat-gpu"></div></section>
+<section class="sec cat" id="audio"><h2><span class="n">13</span>Sound and motion</h2><p class="lead">Motion driven by audio. For a video, Claude analyzes your track the same way and syncs cuts and effects to it, or synthesizes music in Python as it did for the reel (kick, bass, pads and risers from sine waves and noise, with hits on every cut).</p><div class="gal" id="cat-audio"></div></section>
+<section class="sec cat" id="libs"><h2><span class="n">14</span>Animation libraries</h2><p class="lead">The same kinds of motion made with popular open-source libraries. Name the library in your prompt when you want code you can keep using in your own project.</p><div class="gal" id="cat-libs"></div></section>
+<section class="sec cat" id="engine"><h2><span class="n">15</span>3D engine (Blender)</h2><p class="lead">What a browser cannot simulate well: cloth, liquid, fire, shattering, photoreal light. Each clip was built by a Python script and rendered headless in Blender 5.2 on this PC. The scripts are in <code>source/blender</code>. Two renderers: <b>Eevee</b> is fast (about half a second per frame here) and <b>Cycles</b> traces real light paths for glass, caustics and soft bounce light (several seconds per frame). Ask for Cycles when you want photoreal. Unreal Engine 5 is also installed; Claude drives it through its MCP server while the editor is open.</p><div class="gal" id="cat-engine"></div></section>
+<section class="sec cat" id="tools"><h2><span class="n">16</span>Code-to-video tools</h2><p class="lead">Tools that turn code into finished video files: React (Remotion), HTML (HyperFrames), Python (Manim), TypeScript (Motion Canvas), and Three.js or WebGPU scenes rendered frame by frame. Sources are in <code>source/tools</code>.</p><div class="gal" id="cat-tools"></div></section>
+<section class="sec cat" id="edit"><h2><span class="n">17</span>Editing and post-production tricks</h2><p class="lead">What Claude can do to footage you already have, with FFmpeg and Python. Scripts are in <code>source/edit</code>.</p><div class="gal" id="cat-edit"></div></section>
+
+<!-- ======================= MAKE ======================= -->
+<div class="part">MAKE</div>
+<section class="sec" id="toolsmap">
+  <h2><span class="n">18</span>Tools and what they produce</h2>
+  <p class="lead">Every tool here was used on this PC to make something in the catalog; the last column links to it.</p>
+  <table>
+    <tr><th>Tool</th><th>What it is</th><th>Runs on</th><th>Best for</th><th>Output</th><th>See it</th></tr>
+    <tr><td><b>Canvas 2D</b></td><td>Browser 2D drawing</td><td>CPU</td><td>Type, shapes, UI, diagrams, 2D physics</td><td>Live page, frames</td><td><a href="#type">Text</a>, <a href="#sim">Simulation</a></td></tr>
+    <tr><td><b>SVG + CSS</b></td><td>Vector graphics and animation for the web</td><td>CPU</td><td>Icons, loaders, trim paths, UI</td><td>Live page</td><td><a href="#ui">UI</a>, <a href="#ex-trimpaths">Trim paths</a></td></tr>
+    <tr><td><b>WebGL2 + GLSL</b></td><td>GPU access from the browser</td><td>GPU</td><td>Particles, shaders, fluids, ray marching</td><td>Live page, frames</td><td><a href="#gpu">GPU shaders</a></td></tr>
+    <tr><td><b>WebGPU</b></td><td>Newer GPU API with compute shaders (WGSL)</td><td>GPU</td><td>Millions of particles, simulations</td><td>Live page, frames</td><td><a href="#ex-clip-webgpu">1M particles</a></td></tr>
+    <tr><td><b>Three.js</b></td><td>3D library on top of WebGL</td><td>GPU</td><td>3D scenes, PBR materials, 3D websites</td><td>Live page, frames</td><td><a href="#ex-clip-threejs-render">Clip</a>, <a href="#libs">Libraries</a></td></tr>
+    <tr><td><b>p5.js, GSAP, Motion, PixiJS, Matter.js, D3, Lottie, anime.js</b></td><td>Animation and graphics libraries</td><td>CPU/GPU</td><td>Reusable web animation code</td><td>Code for your project</td><td><a href="#libs">Libraries</a></td></tr>
+    <tr><td><b>Remotion</b></td><td>React components rendered to video</td><td>CPU + Chrome</td><td>Templated and data videos, captions</td><td>MP4</td><td><a href="#ex-clip-remotion">Clip</a></td></tr>
+    <tr><td><b>HyperFrames</b></td><td>HTML compositions rendered to video (HeyGen, open source)</td><td>CPU + Chrome</td><td>Agent-written videos from HTML, CSS, GSAP</td><td>MP4</td><td><a href="#ex-clip-hyperframes">Clip</a></td></tr>
+    <tr><td><b>Motion Canvas</b></td><td>TypeScript animation with generators</td><td>CPU + Chrome</td><td>Code explainers, diagrams</td><td>MP4</td><td><a href="#ex-clip-motion-canvas">Clip</a></td></tr>
+    <tr><td><b>Manim</b></td><td>Python math animation (3Blue1Brown style)</td><td>CPU</td><td>Math and science explainers</td><td>MP4</td><td><a href="#ex-clip-manim">Clip</a></td></tr>
+    <tr><td><b>Blender 5.2</b></td><td>3D suite, scripted with Python</td><td>CPU + GPU</td><td>Physics, photoreal 3D, geometry nodes</td><td>Frames, MP4</td><td><a href="#engine">3D engine</a></td></tr>
+    <tr><td><b>Unreal Engine 5.8</b></td><td>Game engine</td><td>GPU</td><td>Real-time cinematics, Niagara, big worlds</td><td>MP4 via Movie Render Queue</td><td class="maybe">Needs the editor open (MCP)</td></tr>
+    <tr><td><b>FFmpeg</b></td><td>Video Swiss army knife</td><td>CPU</td><td>Encode, cut, speed ramps, grades, datamosh</td><td>MP4, WebM, GIF, ProRes</td><td><a href="#edit">Editing tricks</a></td></tr>
+    <tr><td><b>Python + NumPy</b></td><td>Math and audio synthesis</td><td>CPU</td><td>Music, sound effects, data</td><td>WAV</td><td><a href="#reel">The reel's soundtrack</a></td></tr>
+    <tr><td><b>After Effects</b></td><td>Industry motion design app</td><td>CPU + GPU</td><td>Hand-made motion graphics</td><td>Any</td><td class="no">Not installed; ask for code or Lottie instead</td></tr>
+  </table>
+  <h3 style="margin-top:30px">Which tool for which job</h3>
+  <table>
+    <tr><th>You want</th><th>Ask for</th></tr>
+    <tr><td>Titles, logo reveals, lower thirds</td><td>Kinetic type and shape layers in Canvas 2D, Remotion or HyperFrames</td></tr>
+    <tr><td>Swirling dots, a logo made of particles</td><td>GPU particles in WebGL2, or WebGPU for millions</td></tr>
+    <tr><td>Abstract looping backgrounds</td><td>A procedural fragment shader, seamless loop</td></tr>
+    <tr><td>Liquid, melting 3D blobs</td><td>Ray-marched SDFs</td></tr>
+    <tr><td>Falling, crashing, cloth, water, smoke</td><td>A Blender simulation (rigid body, cloth, fluid, smoke)</td></tr>
+    <tr><td>Realistic product shot</td><td>Blender Cycles, studio lighting, turntable</td></tr>
+    <tr><td>Math or data explainer</td><td>Manim, Motion Canvas, or D3 animated charts</td></tr>
+    <tr><td>Social video from data or templates</td><td>Remotion</td></tr>
+    <tr><td>Motion inside your app or site</td><td>CSS, Motion (Framer Motion), GSAP</td></tr>
+    <tr><td>Change existing footage</td><td>FFmpeg: speed ramp, grade, split screen, datamosh</td></tr>
+  </table>
+</section>
+
+<section class="sec" id="prompting">
+  <h2><span class="n">19</span>How to prompt for motion</h2>
+  <p class="lead">A good motion prompt reads like a director's brief. Hover a part on the left to see it in the example prompt.</p>
+  <div class="anatomy" id="anatomy">
+    <div data-part="1"><b>Deliverable.</b> Length, resolution, fps, format, where to save.</div>
+    <div data-part="2"><b>Purpose.</b> Who watches and why.</div>
+    <div data-part="3"><b>Look.</b> Mood, palette (hex codes), fonts, references.</div>
+    <div data-part="4"><b>Technique.</b> Names from this page.</div>
+    <div data-part="5"><b>Timeline.</b> What happens at which second. The most useful part.</div>
+    <div data-part="6"><b>Motion feel.</b> Easing, stagger, timing.</div>
+    <div data-part="7"><b>Camera.</b> Static, orbit, push-in, depth of field.</div>
+    <div data-part="8"><b>Text on screen.</b> Exact words and when they appear.</div>
+    <div data-part="9"><b>Sound.</b> None, synthesized, or your track with beat-synced cuts.</div>
+    <div data-part="10"><b>Checks.</b> Ask for test frames before the full render.</div>
+  </div>
+  <div class="annot" id="annot" style="margin-top:16px"><span data-part="1">Make a 20-second 1920x1080 60 fps MP4 on my desktop</span> <span data-part="2">as the opener for my product launch talk.</span>
+<span data-part="3">Look: dark #0b0b10 background, coral #ff5a36 and cyan #2bc4e6 accents, Bahnschrift type, premium and calm.</span>
+<span data-part="4">Techniques: kinetic typography, then GPU particles in WebGL2 that form the logo.</span>
+<span data-part="5">0-4 s the title rises through a mask; 4-12 s particles swirl and form the logo; 12-20 s logo holds, tagline types on, fade out.</span>
+<span data-part="6">Motion: ease-out-expo, letters staggered 45 ms, generous holds.</span> <span data-part="7">Camera: slow push-in, soft depth of field.</span>
+<span data-part="8">Text: "NOVA" then "Launching March 3".</span> <span data-part="9">Sound: synthesize a calm pad with a hit when the logo forms.</span>
+<span data-part="10">Show me 6 test frames as a contact sheet before the full render.</span></div>
+  <h3 style="margin-top:34px">Mood to motion, live</h3>
+  <p class="dim" style="max-width:1080px">The same title animated six ways. Each mood is a recipe of timing, easing, stagger, palette, camera and finish.</p>
+  <div class="moods">
+    <figure><canvas id="mood-premium" width="480" height="270"></canvas><figcaption><b>Premium, calm</b>Long ease-in-out, blur-in, slow push-in, grain.</figcaption></figure>
+    <figure><canvas id="mood-energetic" width="480" height="270"></canvas><figcaption><b>Energetic</b>250 ms expo moves, shake on landing, glitch hit, neon.</figcaption></figure>
+    <figure><canvas id="mood-playful" width="480" height="270"></canvas><figcaption><b>Playful</b>Overshoot pops from the center, handheld sway, paper palette.</figcaption></figure>
+    <figure><canvas id="mood-technical" width="480" height="270"></canvas><figcaption><b>Technical</b>Mask reveals in random order, static camera, mono + red.</figcaption></figure>
+    <figure><canvas id="mood-dreamy" width="480" height="270"></canvas><figcaption><b>Dreamy</b>Slow fades from the center, glow, grain, drifting camera.</figcaption></figure>
+    <figure><canvas id="mood-cinematic" width="480" height="270"></canvas><figcaption><b>Cinematic</b>Mask reveal, push-in, letterbox bars, grain.</figcaption></figure>
+  </div>
+  <h3 style="margin-top:34px">Habits that save time</h3>
+  <div class="grid3" style="max-width:1080px">
+    <div class="box"><h3>Ask for test frames</h3><p class="dim">"Render 6 test frames as a contact sheet first." You see problems before a long render.</p></div>
+    <div class="box"><h3>Give seconds</h3><p class="dim">"At 3 s the logo lands" beats "then the logo lands".</p></div>
+    <div class="box"><h3>Point at a card</h3><p class="dim">"Like the fluid simulation card, but in my brand colors." Every card here has a name and a source file.</p></div>
+    <div class="box"><h3>Change one thing at a time</h3><p class="dim">"Keep everything, but make the transitions faster." Small edits are cheap.</p></div>
+    <div class="box"><h3>Name the tool when it matters</h3><p class="dim">"In Blender" for realistic physics, "in WebGL" for millions of particles, "in Remotion" for template videos.</p></div>
+    <div class="box"><h3>Say what to avoid</h3><p class="dim">"No lens flares, no rainbow colors, no text smaller than 28 px."</p></div>
+  </div>
+</section>
+
+<section class="sec" id="builder">
+  <h2><span class="n">20</span>Prompt builder</h2>
+  <p class="lead">Pick options on the left. The prompt on the right updates. Copy it into Claude Code and edit anything you like.</p>
+  <div class="builder box">
+    <div>
+      <label>What is it for</label><input type="text" id="b-purpose" value="a 20-second opener for my product launch video">
+      <label>Length (seconds)</label><input type="number" id="b-len" value="20" min="3" max="300">
+      <label>Format</label><select id="b-format"><option value="1920x1080 (16:9)">Landscape 1920x1080</option><option value="1080x1920 (9:16, vertical)">Vertical 1080x1920 (phone)</option><option value="1080x1080 (1:1, square)">Square 1080x1080</option><option value="3840x2160 (4K)">4K 3840x2160</option></select>
+      <label>Frame rate</label><select id="b-fps"><option>60</option><option>30</option><option>24</option></select>
+      <label>Mood</label><select id="b-mood"><option value="premium">Premium, calm</option><option value="energetic">Energetic</option><option value="playful">Playful</option><option value="tech">Technical, futuristic</option><option value="organic">Organic, dreamy</option><option value="cinematic">Cinematic</option></select>
+      <label>Palette</label><select id="b-pal"><option value="dark background #0b0b10 with coral #ff5a36, amber #ffb020 and cyan #2bc4e6 accents">Warm dark</option><option value="cream background #efe8dc with navy #1d1b3a, coral and teal shapes">Light paper</option><option value="near-black with neon magenta #ff2bd6 and electric cyan #00e5ff">Neon synthwave</option><option value="black and white only, one red accent">Monochrome + red</option><option value="soft pastels: peach, lilac, mint on off-white">Pastel</option></select>
+      <label>Techniques</label>
+      <div class="chips" id="b-tech">
+        <label><input type="checkbox" value="kinetic typography" checked>Kinetic type</label>
+        <label><input type="checkbox" value="shape-layer animation">Shape layers</label>
+        <label><input type="checkbox" value="trim-path line drawing">Trim paths</label>
+        <label><input type="checkbox" value="particle text that breaks apart and reassembles">Particle text</label>
+        <label><input type="checkbox" value="word-by-word captions synced to speech">Captions</label>
+        <label><input type="checkbox" value="GPU particles in WebGL2 that form the logo" checked>GPU particles</label>
+        <label><input type="checkbox" value="a 2D fluid simulation (stable fluids) with colored ink">Fluid sim</label>
+        <label><input type="checkbox" value="reaction-diffusion patterns growing across the frame">Reaction-diffusion</label>
+        <label><input type="checkbox" value="a procedural fragment-shader background (domain-warped noise)">Shader background</label>
+        <label><input type="checkbox" value="ray-marched SDF blobs">Ray marching</label>
+        <label><input type="checkbox" value="a field of instanced cubes">Instancing</label>
+        <label><input type="checkbox" value="a Three.js 3D scene with PBR glass and bloom">Three.js 3D</label>
+        <label><input type="checkbox" value="a Blender rigid-body physics shot rendered in Eevee">Blender physics</label>
+        <label><input type="checkbox" value="a Blender cloth simulation draping over an object">Blender cloth</label>
+        <label><input type="checkbox" value="a Blender liquid simulation (Mantaflow) with a splash">Blender liquid</label>
+        <label><input type="checkbox" value="Blender geometry nodes driving thousands of instances">Geometry nodes</label>
+        <label><input type="checkbox" value="a photoreal Blender Cycles product shot">Blender Cycles</label>
+        <label><input type="checkbox" value="animated stat cards built in Remotion">Remotion cards</label>
+        <label><input type="checkbox" value="a Manim math explainer segment">Manim math</label>
+        <label><input type="checkbox" value="audio-reactive visuals driven by the soundtrack">Audio-reactive</label>
+        <label><input type="checkbox" value="an optical-flow speed ramp on the key moment">Speed ramp</label>
+        <label><input type="checkbox" value="a datamosh transition between two shots">Datamosh</label>
+        <label><input type="checkbox" value="a teal-and-orange LUT color grade">LUT grade</label>
+        <label><input type="checkbox" value="Blender fire and smoke (Mantaflow volumetrics)">Blender fire</label>
+        <label><input type="checkbox" value="a Blender slow-motion shatter of my logo">Blender shatter</label>
+        <label><input type="checkbox" value="a furry Blender mascot that bounces">Blender fur</label>
+        <label><input type="checkbox" value="a Grease Pencil hand-drawn doodle that becomes the logo">Grease Pencil</label>
+        <label><input type="checkbox" value="a HyperFrames HTML composition with captions">HyperFrames</label>
+        <label><input type="checkbox" value="a Motion Canvas animated code walkthrough">Motion Canvas</label>
+        <label><input type="checkbox" value="a p5.js generative pattern">p5.js</label>
+        <label><input type="checkbox" value="a GSAP scroll-scrubbed timeline">GSAP scroll</label>
+        <label><input type="checkbox" value="Lottie icon animations">Lottie icons</label>
+        <label><input type="checkbox" value="a WebGPU compute-shader particle burst">WebGPU particles</label>
+      </div>
+      <label>Camera</label><select id="b-cam"><option value="static camera">Static</option><option value="slow orbit around the subject" selected>Slow orbit</option><option value="slow push-in">Push-in</option><option value="fly-over that swoops from top-down to a low angle">Fly-over</option><option value="dolly zoom on the hero moment">Dolly zoom</option></select>
+      <label>Transitions</label><select id="b-tr"><option value="iris and diagonal wipes with a thin glowing edge">Wipes with glow</option><option value="hard cuts on the beat with an RGB-split glitch">Glitch cuts</option><option value="smooth crossfades">Crossfades</option><option value="match cuts where a shape in one scene becomes the next scene">Match cuts</option><option value="whip pans with motion blur">Whip pans</option></select>
+      <label>Post effects</label>
+      <div class="chips" id="b-post">
+        <label><input type="checkbox" value="bloom" checked>Bloom</label><label><input type="checkbox" value="film grain" checked>Grain</label><label><input type="checkbox" value="vignette" checked>Vignette</label>
+        <label><input type="checkbox" value="motion blur">Motion blur</label><label><input type="checkbox" value="depth of field">Depth of field</label><label><input type="checkbox" value="chromatic aberration">Chromatic aberration</label><label><input type="checkbox" value="teal-and-orange color grade">Color grade</label>
+      </div>
+      <label>Text on screen (exact words)</label><input type="text" id="b-text" value="NOVA / Launching March 3">
+      <label>Sound</label><select id="b-sound"><option value="Synthesize a soundtrack in Python that matches the mood, with hits on every cut.">Synthesized music</option><option value="Use my track at [path] and cut to its beat.">My own track</option><option value="No audio.">No audio</option></select>
+      <label>Before the full render</label>
+      <div class="chips"><label><input type="checkbox" id="b-test" checked>Show test frames first</label><label><input type="checkbox" id="b-caps">Add captions naming each technique</label></div>
+    </div>
+    <div><label>Your prompt <button class="copy" id="b-copy">Copy</button></label><textarea id="b-out" spellcheck="false"></textarea></div>
+  </div>
+</section>
+
+<section class="sec" id="examples">
+  <h2><span class="n">21</span>Example prompts</h2>
+  <p class="lead">Copy these and change the details. The first one plays live, exactly as the prompt describes it.</p>
+  <h3>Logo reveal, 8 seconds</h3>
+  <div class="grid2" style="max-width:1280px;align-items:start">
+    <pre><button class="copy">Copy</button>Make an 8-second 1080p60 logo reveal and save it to my desktop.
+Look: dark background #0b0b10, coral #ff5a36 accent, Bahnschrift bold type.
+Technique: shape layers and kinetic typography in Canvas 2D.
+Timeline:
+0.0-1.0 s  a coral dot pops in with ease-out-back
+1.0-2.0 s  the dot stretches into a line, the line splits in two
+2.0-4.0 s  "NOVA" rises through a mask, 45 ms stagger, ease-out-expo
+4.0-6.5 s  hold, slow letter tracking, subtitle types on: "Launching March 3"
+6.5-8.0 s  letters exit upward with stagger, fade to black
+Post: light film grain, soft vignette.
+Show me 6 test frames before the full render.</pre>
+    <canvas id="logo-live" width="640" height="360" style="width:100%;border-radius:12px;border:1px solid var(--line);display:block;margin-top:10px"></canvas>
+  </div>
+  <h3>Particle logo, 12 seconds <a href="#ex-liveparticles" style="font-size:14px">see the technique</a></h3>
+  <pre><button class="copy">Copy</button>12-second 1080p60 MP4: GPU particles in WebGL2, 300,000 points.
+0-3 s   particles swirl in a curl-noise flow field
+3-5 s   they fly into the shape of my logo (file: C:\path\logo.png), 0.4 s random stagger
+5-7 s   hold with a gentle shimmer, slow push-in
+7-9 s   they explode outward and re-form as a sphere
+9-12 s  sphere dissolves back into the flow field, fade out
+Additive blending, cyan to violet gradient, bloom. No audio. Test frames first.</pre>
+  <h3>Blender physics shot, 6 seconds <a href="#engine" style="font-size:14px">see the clips</a></h3>
+  <pre><button class="copy">Copy</button>Use Blender (headless, Python script) to make a 6-second 1080p60 shot.
+A tower of 300 pastel rounded cubes; at 1 s a heavy chrome ball rolls in and knocks it over.
+Rigid-body physics, half-speed slow motion, glossy dark floor with reflections.
+Camera: low angle, slow orbit right, depth of field focused on the impact.
+Render in Eevee with motion blur. Render frame 60 and frame 200 as stills first so I can approve the look.</pre>
+  <h3>Looping background, 10 seconds <a href="#ex-meshgrad" style="font-size:14px">see the technique</a></h3>
+  <pre><button class="copy">Copy</button>Make a seamless 10-second loop for a website hero background, 1920x1080, 30 fps, MP4 and WebM.
+Procedural fragment shader: domain-warped fBm noise, slow drift, cosine palette in deep navy, violet and a little orange.
+Low contrast so white text stays readable on top. Prove the loop is seamless by showing the first and last frame side by side.</pre>
+  <h3>Data video in Remotion <a href="#ex-clip-remotion" style="font-size:14px">see the clip</a></h3>
+  <pre><button class="copy">Copy</button>Use Remotion to make a 15-second vertical (1080x1920) video from my CSV of monthly sales:
+a bar chart race of the top 8 products, values count up, the month ticks in a corner,
+bars re-sort with spring() motion, brand colors, end card with the winner. Render to MP4.</pre>
+  <h3>Edit my footage <a href="#edit" style="font-size:14px">see the tricks</a></h3>
+  <pre><button class="copy">Copy</button>Take my clip C:\path\clip.mp4: speed ramp into 0.25x optical-flow slow motion at 0:04.2,
+teal-and-orange grade with a LUT, then a boomerang of the last second with a freeze frame and flash.
+Export 1080p30 MP4 and a 720p GIF of the slow-motion part.</pre>
+  <h3>App micro-interaction <a href="#ex-like" style="font-size:14px">see the technique</a></h3>
+  <pre><button class="copy">Copy</button>In my React app, animate the settings panel with Motion (Framer Motion):
+open = slide up 24 px and fade in, spring (stiffness 320, damping 28);
+list items stagger in 30 ms apart; close = 150 ms ease-in fade.
+Respect prefers-reduced-motion.</pre>
+  <h3>The prompt that would make the reel <a href="#reel" style="font-size:14px">see how it was made</a></h3>
+  <pre><button class="copy">Copy</button>Make a 60-second 1920x1080 60 fps motion reel and save it to my desktop.
+Use code only: no stock footage and no AI video model. Render web scenes with WebGL2 in headless Chrome on my GPU, use Blender for one physics shot, synthesize the music in Python, assemble with FFmpeg.
+Palette: #0b0b10 background, coral #ff5a36, amber #ffb020, cyan #2bc4e6, violet #7a5cff. Type: Bahnschrift and Cascadia Mono.
+Scenes, each with a lower-third caption that names the technique and the tool:
+0-6 s    kinetic typography intro
+6-14 s   400k GPU particles: galaxy, the word CLAUDE, sphere, torus knot, explode
+14-22 s  ray-marched SDF metaballs, iridescent, orbit camera
+22-30 s  Blender rigid-body: chrome ball smashes a wall of cubes, slow motion
+30-38 s  shape-layer choreography on cream paper
+38-46 s  14,400 instanced cubes rippling, fly-over camera
+46-52 s  domain-warped noise with words slamming on the beat
+52-60 s  "How this was made" end card
+Transitions: iris, diagonal wipe, blinds, glitch cuts. Post: bloom, grain, vignette, chromatic aberration.
+Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames first.</pre>
+</section>
+
+<!-- ======================= REFERENCE ======================= -->
+<div class="part">REFERENCE</div>
+<section class="sec" id="index">
+  <h2><span class="n">22</span>Technique index</h2>
+  <p class="lead">Everything on this page in one table, built automatically from the catalog, so it can never fall out of date. The search box filters it too.</p>
+  <table id="tech-index"><thead><tr><th>Technique</th><th>Section</th><th>Made with</th><th>Runs on</th><th>Type</th></tr></thead><tbody></tbody></table>
+</section>
+
+<section class="sec" id="glossary">
+  <h2><span class="n">23</span>Glossary</h2>
+  <div class="gloss">
+    <div><b>Additive blending.</b> Overlapping colors add up and glow. <a href="#ex-liveparticles">see it</a></div>
+    <div><b>Alpha.</b> Transparency. A video "with alpha" can sit on top of other footage.</div>
+    <div><b>Ambient occlusion.</b> Soft darkening in corners and cracks. <a href="#ex-clip-reel-raymarch">see it</a></div>
+    <div><b>Bake.</b> Calculate a simulation once and store it, so rendering is repeatable. <a href="#ex-clip-cloth">see it</a></div>
+    <div><b>Bezier curve.</b> A smooth curve set by handles. Easing curves are Bezier curves. <a href="#easing">see it</a></div>
+    <div><b>Bloom.</b> Glow around bright areas. <a href="#post">see it</a></div>
+    <div><b>Boids.</b> Flocking agents that follow three simple rules. <a href="#ex-boids">see it</a></div>
+    <div><b>BPM.</b> Beats per minute. Sets the rhythm for cuts. <a href="#compare">see it</a></div>
+    <div><b>Compositing.</b> Combining layers into the final image.</div>
+    <div><b>Contact sheet.</b> Many frames in one grid image, to check a video at a glance.</div>
+    <div><b>Curl noise.</b> Swirling flow without clumping; the standard for particle flow. <a href="#ex-flowfield">see it</a></div>
+    <div><b>Datamosh.</b> Deleting keyframes so motion smears pixels. <a href="#ex-clip-datamosh">see it</a></div>
+    <div><b>Depth of field.</b> Only one distance is sharp. <a href="#camera">see it</a></div>
+    <div><b>Domain warping.</b> Feeding noise coordinates through more noise; marble and liquid looks. <a href="#ex-clip-reel-noise">see it</a></div>
+    <div><b>Dolly zoom.</b> Camera moves back while zooming in; the background stretches. <a href="#camera">see it</a></div>
+    <div><b>Easing.</b> How speed changes during a move. <a href="#easing">see it</a></div>
+    <div><b>Eevee / Cycles.</b> Blender's fast renderer / Blender's realistic path tracer. <a href="#ex-clip-cycles-photoreal">see it</a></div>
+    <div><b>fBm.</b> Noise layered at several scales for natural detail. <a href="#ex-clip-reel-noise">see it</a></div>
+    <div><b>Flow field.</b> A grid of directions that particles follow. <a href="#ex-flowfield">see it</a></div>
+    <div><b>Follow-through.</b> Parts keep moving after the body stops. <a href="#compare">see it</a></div>
+    <div><b>FLIP fluid.</b> A liquid simulation that moves particles and turns them into a surface. <a href="#ex-clip-liquid">see it</a></div>
+    <div><b>Compute shader.</b> A GPU program that does general math, like moving a million particles. <a href="#ex-clip-webgpu">see it</a></div>
+    <div><b>Fragment shader.</b> GPU program that colors each pixel. <a href="#ex-kaleido">see it</a></div>
+    <div><b>Geometry nodes.</b> Blender's node system for procedural geometry. <a href="#ex-clip-geometry-nodes">see it</a></div>
+    <div><b>GLSL / WGSL.</b> Shader languages of WebGL and WebGPU.</div>
+    <div><b>Grease Pencil.</b> Blender's tool for hand-drawn 2D lines inside a 3D scene. <a href="#ex-clip-grease-pencil">see it</a></div>
+    <div><b>H.264.</b> The most common video codec.</div>
+    <div><b>Headless.</b> A program running with no window, controlled by code.</div>
+    <div><b>Instancing.</b> Many copies of one object in a single GPU call. <a href="#ex-clip-reel-instancing">see it</a></div>
+    <div><b>Isometric.</b> A 3D look with no perspective: parallel lines stay parallel. <a href="#ex-isocity">see it</a></div>
+    <div><b>Keyframe.</b> A value set at a specific time; software fills in between.</div>
+    <div><b>Kinetic typography.</b> Animated text. <a href="#type">see it</a></div>
+    <div><b>LUT.</b> A lookup table that remaps every color; used for grades. <a href="#ex-clip-color-grade">see it</a></div>
+    <div><b>Lottie.</b> A JSON animation format for apps and websites. <a href="#libs">see it</a></div>
+    <div><b>Mask / matte.</b> A shape that hides or reveals part of a layer. <a href="#ex-maskreveal">see it</a></div>
+    <div><b>Metaballs.</b> Blobs that merge smoothly. <a href="#ex-metaballs">see it</a></div>
+    <div><b>Motion blur.</b> Streaking of fast objects. <a href="#ex-clip-speed-ramp">see it</a></div>
+    <div><b>Noise.</b> Smooth randomness; the base of most organic effects. <a href="#ex-flowfield">see it</a></div>
+    <div><b>Optical flow.</b> Estimating motion between frames to invent new in-between frames. <a href="#ex-clip-speed-ramp">see it</a></div>
+    <div><b>Parallax.</b> Near layers move faster than far layers. <a href="#ex-parallax">see it</a></div>
+    <div><b>Procedural.</b> Made by rules and math, not by hand.</div>
+    <div><b>Ray marching.</b> Stepping a ray through a distance field to find surfaces. <a href="#ex-repeat">see it</a></div>
+    <div><b>Reaction-diffusion.</b> Two simulated chemicals that grow organic patterns. <a href="#ex-reaction">see it</a></div>
+    <div><b>Rigid body.</b> A physics object that does not bend. <a href="#ex-clip-reel-physics">see it</a></div>
+    <div><b>SDF.</b> Signed distance field: a formula for the distance to the nearest surface. <a href="#ex-sdfmorph">see it</a></div>
+    <div><b>Speed ramp.</b> Smoothly changing playback speed inside one shot. <a href="#ex-clip-speed-ramp">see it</a></div>
+    <div><b>Spring.</b> Physics-based easing set by stiffness and damping. <a href="#ex-springtail">see it</a></div>
+    <div><b>Stagger.</b> The same move on many items, offset in time. <a href="#stagger">see it</a></div>
+    <div><b>Stable fluids.</b> A real-time fluid solver. <a href="#ex-fluid">see it</a></div>
+    <div><b>Tone mapping.</b> Turning very bright render values into screen colors (AgX, ACES).</div>
+    <div><b>Trim paths.</b> Animating how much of a line is drawn. <a href="#ex-trimpaths">see it</a></div>
+    <div><b>Truchet tiles.</b> Simple tiles that form endless patterns when rotated. <a href="#ex-p5-truchet">see it</a></div>
+    <div><b>Vertex shader.</b> GPU program that places points and corners. <a href="#ex-liveparticles">see it</a></div>
+    <div><b>Vignette.</b> Darkened edges of the frame. <a href="#post">see it</a></div>
+    <div><b>Volumetrics.</b> Rendering smoke, fog and fire as light passing through a volume. <a href="#ex-clip-smoke-fire">see it</a></div>
+    <div><b>Voronoi.</b> Cells around random points. <a href="#ex-voronoi">see it</a></div>
+  </div>
+</section>
+
+<section class="sec" id="reel">
+  <h2><span class="n">24</span>How the reel was made</h2>
+  <p class="lead">The source is in <code>source/reel</code>. Times are from the actual run on this PC.</p>
+  <table>
+    <tr><th>Time</th><th>Scene</th><th>Technique</th><th>Tool</th><th>Card</th></tr>
+    <tr><td>0-6 s</td><td>Intro</td><td>Kinetic typography</td><td>Canvas 2D in <code>reel.html</code></td><td><a href="#ex-clip-reel-kinetic">open</a></td></tr>
+    <tr><td>6-14 s</td><td>CLAUDE particles</td><td>GPU particles, 400,000 points</td><td>WebGL2 vertex shader</td><td><a href="#ex-clip-reel-particles">open</a></td></tr>
+    <tr><td>14-22 s</td><td>Liquid blobs</td><td>Ray marching, SDF</td><td>GLSL fragment shader</td><td><a href="#ex-clip-reel-raymarch">open</a></td></tr>
+    <tr><td>22-30 s</td><td>Wall smash</td><td>Rigid-body physics</td><td>Blender 5.2, <code>blender_scene.py</code></td><td><a href="#ex-clip-reel-physics">open</a></td></tr>
+    <tr><td>30-38 s</td><td>Shapes on paper</td><td>Shape layers, trim paths, squash and stretch</td><td>Canvas 2D</td><td><a href="#ex-clip-reel-shapes">open</a></td></tr>
+    <tr><td>38-46 s</td><td>Cube ocean</td><td>Instancing, 14,400 cubes</td><td>WebGL2 instanced draw</td><td><a href="#ex-clip-reel-instancing">open</a></td></tr>
+    <tr><td>46-52 s</td><td>Marble noise</td><td>Domain-warped fBm, glitch</td><td>GLSL fragment shader</td><td><a href="#ex-clip-reel-noise">open</a></td></tr>
+    <tr><td>All</td><td>Transitions and post</td><td>Wipes, bloom, grain, vignette, chromatic aberration</td><td>Compositor shader</td><td><a href="#ex-clip-reel-transitions">open</a></td></tr>
+    <tr><td>All</td><td>Music</td><td>Synthesis, beat sync</td><td>Python + NumPy + SciPy, <code>audio.py</code></td><td><a href="#compare">beat sync</a></td></tr>
+  </table>
+  <div class="grid3" style="margin-top:20px;max-width:1080px">
+    <div class="box"><h3>Blender render</h3><p class="dim">480 frames, physics bake plus Eevee render, about 4 minutes.</p></div>
+    <div class="box"><h3>Web scenes</h3><p class="dim">3,600 frames with 6 headless Chrome pages, about 300 ms per frame, so roughly 17 to 18 minutes for all frames.</p></div>
+    <div class="box"><h3>Music and encode</h3><p class="dim">Soundtrack synthesized in 4 seconds. FFmpeg joined frames and audio into H.264 + AAC.</p></div>
+  </div>
+  <footer>Made by Claude (Opus 5.5) in Claude Code. Works offline: open <code>index.html</code> in Chrome or Edge.</footer>
+</section>
+</main>
+
+<script src="site/learn/guide-core.js"></script>
+<script src="site/learn/live-compare.js"></script>
+<script src="site/catalog/fx-source.js"></script>
+<script src="site/learn/live-scenes.js"></script>
+<script src="site/catalog/core.js"></script>
+<script src="site/catalog/type.js"></script>
+<script src="site/catalog/ui.js"></script>
+<script src="site/catalog/sim.js"></script>
+<script src="site/catalog/gpu.js"></script>
+<script src="site/catalog/audio.js"></script>
+<script src="site/catalog/extra.js"></script>
+<script src="site/catalog/more-type-ui.js"></script>
+<script src="site/catalog/more-sim.js"></script>
+<script src="site/catalog/more-gpu.js"></script>
+<script src="site/catalog/more-audio.js"></script>
+<script src="site/catalog/from-guide.js"></script>
+<!-- LIBS-SCRIPTS-START -->
+<script src="site/vendor/three-demo.js"></script>
+<script src="site/vendor/pixi.min.js"></script>
+<script src="site/vendor/p5.min.js"></script>
+<script src="site/vendor/gsap.min.js"></script>
+<script src="site/vendor/SplitText.min.js"></script>
+<script src="site/vendor/MorphSVGPlugin.min.js"></script>
+<script src="site/vendor/motion.js"></script>
+<script src="site/vendor/anime.umd.min.js"></script>
+<script src="site/vendor/lottie_svg.min.js"></script>
+<script src="site/vendor/d3.min.js"></script>
+<script src="site/vendor/matter.min.js"></script>
+<script src="site/vendor/rough.js"></script>
+<script src="site/catalog/libs.js"></script>
+<!-- LIBS-SCRIPTS-END -->
+<script src="site/catalog/clips.js"></script>
+<script src="site/catalog/engine.js"></script>
+<script src="site/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,342 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>WebGPU: one million particles</title>
+<style>
+  html, body { margin: 0; background: #0b0b10; overflow: hidden; }
+  canvas { display: block; width: 1280px; height: 720px; }
+  #label { position: absolute; left: 44px; bottom: 36px; color: #f4efe6; font-family: Bahnschrift, 'Segoe UI', sans-serif; }
+  #label b { display: block; font-size: 30px; letter-spacing: -0.5px; }
+  #label span { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 13px; letter-spacing: 2px; opacity: 0.55; }
+  #count { position: absolute; right: 44px; top: 34px; color: #f4efe6; opacity: 0.5;
+    font-family: 'Cascadia Mono', Consolas, monospace; font-size: 15px; letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1280" height="720"></canvas>
+<div id="label"><b>WebGPU compute</b><span>1,000,000 PARTICLES / CURL NOISE TO THOMAS ATTRACTOR</span></div>
+<div id="count"></div>
+<script type="module">
+// One million particles. A compute shader moves them through a curl-noise flow field,
+// then pulls them into a spinning torus. Points are drawn additively into a 2x-size
+// half-float buffer with fading trails, then downsampled, glowed and tone mapped.
+// window.renderFrame(f) advances the simulation to frame f (call frames in order).
+const N = 1_000_000, W = 1280, H = 720, SS = 2, FPS = 30, SUBSTEPS = 2;
+
+const COMMON = /* wgsl */`
+struct Particle { pos: vec4f, vel: vec4f };  // pos.w = seed, vel.w = dye 0..1
+struct Sim { t: f32, dt: f32, morph: f32, burst: f32 };
+
+fn pcg(v: u32) -> u32 {
+  let s = v * 747796405u + 2891336453u;
+  let w = ((s >> ((s >> 28u) + 4u)) ^ s) * 277803737u;
+  return (w >> 22u) ^ w;
+}
+fn rnd(i: u32, k: u32) -> f32 { return f32(pcg(i * 4u + k * 1013904223u)) / 4294967295.0; }
+`;
+
+const NOISE = /* wgsl */`
+fn mod289_3(x: vec3f) -> vec3f { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+fn mod289_4(x: vec4f) -> vec4f { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+fn permute(x: vec4f) -> vec4f { return mod289_4(((x * 34.0) + 10.0) * x); }
+fn taylorInvSqrt(r: vec4f) -> vec4f { return 1.79284291400159 - 0.85373472095314 * r; }
+
+// 3D simplex noise (Ashima Arts / Stefan Gustavson, MIT), ported to WGSL.
+fn snoise(v: vec3f) -> f32 {
+  let C = vec2f(1.0 / 6.0, 1.0 / 3.0);
+  let D = vec4f(0.0, 0.5, 1.0, 2.0);
+  var i = floor(v + dot(v, C.yyy));
+  let x0 = v - i + dot(i, C.xxx);
+  let g = step(x0.yzx, x0.xyz);
+  let l = 1.0 - g;
+  let i1 = min(g.xyz, l.zxy);
+  let i2 = max(g.xyz, l.zxy);
+  let x1 = x0 - i1 + C.xxx;
+  let x2 = x0 - i2 + C.yyy;
+  let x3 = x0 - D.yyy;
+  i = mod289_3(i);
+  let p = permute(permute(permute(i.z + vec4f(0.0, i1.z, i2.z, 1.0)) + i.y + vec4f(0.0, i1.y, i2.y, 1.0))
+          + i.x + vec4f(0.0, i1.x, i2.x, 1.0));
+  let ns = 0.142857142857 * D.wyz - D.xzx;
+  let j = p - 49.0 * floor(p * ns.z * ns.z);
+  let x_ = floor(j * ns.z);
+  let y_ = floor(j - 7.0 * x_);
+  let x = x_ * ns.x + ns.yyyy;
+  let y = y_ * ns.x + ns.yyyy;
+  let h = 1.0 - abs(x) - abs(y);
+  let b0 = vec4f(x.xy, y.xy);
+  let b1 = vec4f(x.zw, y.zw);
+  let s0 = floor(b0) * 2.0 + 1.0;
+  let s1 = floor(b1) * 2.0 + 1.0;
+  let sh = -step(h, vec4f(0.0));
+  let a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+  let a1 = b1.xzyw + s1.xzyw * sh.zzww;
+  var p0 = vec3f(a0.xy, h.x);
+  var p1 = vec3f(a0.zw, h.y);
+  var p2 = vec3f(a1.xy, h.z);
+  var p3 = vec3f(a1.zw, h.w);
+  let nrm = taylorInvSqrt(vec4f(dot(p0, p0), dot(p1, p1), dot(p2, p2), dot(p3, p3)));
+  p0 *= nrm.x; p1 *= nrm.y; p2 *= nrm.z; p3 *= nrm.w;
+  var m = max(0.5 - vec4f(dot(x0, x0), dot(x1, x1), dot(x2, x2), dot(x3, x3)), vec4f(0.0));
+  m = m * m;
+  return 105.0 * dot(m * m, vec4f(dot(p0, x0), dot(p1, x1), dot(p2, x2), dot(p3, x3)));
+}
+
+fn potential(p: vec3f) -> vec3f {
+  return vec3f(snoise(p), snoise(p + vec3f(31.4, -12.7, 5.3)), snoise(p + vec3f(-7.1, 19.2, 43.7)));
+}
+
+// Divergence-free flow: curl of a noise vector potential (central differences).
+fn curl(p: vec3f) -> vec3f {
+  let e = 0.02;
+  let dx = potential(p + vec3f(e, 0.0, 0.0)) - potential(p - vec3f(e, 0.0, 0.0));
+  let dy = potential(p + vec3f(0.0, e, 0.0)) - potential(p - vec3f(0.0, e, 0.0));
+  let dz = potential(p + vec3f(0.0, 0.0, e)) - potential(p - vec3f(0.0, 0.0, e));
+  return vec3f(dy.z - dz.y, dz.x - dx.z, dx.y - dy.x) / (2.0 * e);
+}
+`;
+
+const INIT = COMMON + /* wgsl */`
+@group(0) @binding(0) var<storage, read_write> P: array<Particle>;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+  let i = id.x;
+  if (i >= arrayLength(&P)) { return; }
+  let z = rnd(i, 1u) * 2.0 - 1.0;
+  let a = rnd(i, 2u) * 6.2831853;
+  let dir = vec3f(sqrt(1.0 - z * z) * cos(a), z, sqrt(1.0 - z * z) * sin(a));
+  let r = 0.22 * pow(rnd(i, 3u), 0.333);
+  // Dye coordinate 0..1 from the start direction, so colour is advected as bands.
+  let cid = clamp(0.5 + 0.5 * (0.8 * dir.y + 0.45 * dir.x) + (rnd(i, 5u) - 0.5) * 0.08, 0.0, 1.0);
+  P[i].pos = vec4f(dir * r, rnd(i, 4u));
+  P[i].vel = vec4f(dir * (1.2 + 2.6 * rnd(i, 6u)), cid);
+}
+`;
+
+const STEP = COMMON + NOISE + /* wgsl */`
+@group(0) @binding(0) var<storage, read_write> P: array<Particle>;
+@group(0) @binding(1) var<uniform> S: Sim;
+@compute @workgroup_size(256)
+fn main(@builtin(global_invocation_id) id: vec3u) {
+  let i = id.x;
+  if (i >= arrayLength(&P)) { return; }
+  var p = P[i].pos.xyz;
+  var v = P[i].vel.xyz;
+  let seed = P[i].pos.w;
+
+  // Flow: curl noise, a gentle swirl about Y, and a soft wall that keeps the cloud in frame.
+  var flow = curl(p * 0.85 + vec3f(0.0, S.t * 0.12, S.t * 0.07)) * 0.55;
+  flow += vec3f(-p.z, 0.0, p.x) * 0.35;
+  let r = length(p);
+  flow -= p / max(r, 1e-4) * smoothstep(1.4, 2.4, r) * 1.6;
+
+  // Thomas cyclically symmetric attractor: bounded for any start, so every particle lands on it.
+  let SC = 0.3;
+  let B = 0.19;
+  let a = p / SC;
+  let da = vec3f(sin(a.y) - B * a.x, sin(a.z) - B * a.y, sin(a.x) - B * a.z);
+  let toward = da * SC * 6.0;
+
+  let desired = mix(flow, toward, S.morph);
+  let k = mix(0.035, 0.3, S.morph) * (0.7 + 0.6 * seed);
+  v = mix(v, desired, k);
+  p += v * S.dt;
+  P[i].pos = vec4f(p, seed);
+  P[i].vel = vec4f(v, P[i].vel.w);
+}
+`;
+
+const DRAW = COMMON + /* wgsl */`
+@group(0) @binding(0) var<storage, read> P: array<Particle>;
+struct Draw { vp: mat4x4f, params: vec4f };
+@group(0) @binding(1) var<uniform> U: Draw;
+struct VOut { @builtin(position) pos: vec4f, @location(0) col: vec3f };
+@vertex
+fn vs(@builtin(vertex_index) vi: u32) -> VOut {
+  let pt = P[vi];
+  var o: VOut;
+  o.pos = U.vp * vec4f(pt.pos.xyz, 1.0);
+  // Palette ramp: violet #7a5cff, cyan #2bc4e6, amber #ffb020, coral #ff5a36.
+  // Dye early on; during the attractor phase, colour by position so the lattice reads in bands.
+  let band = 0.5 + 0.5 * sin(dot(pt.pos.xyz, vec3f(1.3, 0.9, -1.1)) * 1.4 + U.params.y * 0.6);
+  let d = mix(pt.vel.w, band, U.params.z * 0.85);
+  var c = mix(vec3f(0.48, 0.36, 1.0), vec3f(0.17, 0.77, 0.90), smoothstep(0.0, 0.38, d));
+  c = mix(c, vec3f(1.0, 0.69, 0.13), smoothstep(0.42, 0.68, d));
+  c = mix(c, vec3f(1.0, 0.35, 0.21), smoothstep(0.7, 0.95, d));
+  let speed = length(pt.vel.xyz);
+  c = mix(c, vec3f(1.0, 0.9, 0.75), smoothstep(2.0, 5.0, speed) * 0.5);
+  let fade = clamp(1.6 - o.pos.w * 0.22, 0.25, 1.0);
+  o.col = c * U.params.x * fade;
+  return o;
+}
+@fragment
+fn fs(i: VOut) -> @location(0) vec4f { return vec4f(i.col, 1.0); }
+`;
+
+const FULL = /* wgsl */`
+struct VO { @builtin(position) pos: vec4f, @location(0) uv: vec2f };
+@vertex
+fn vs(@builtin(vertex_index) i: u32) -> VO {
+  let xy = vec2f(f32((i << 1u) & 2u), f32(i & 2u));
+  var o: VO;
+  o.pos = vec4f(xy * 2.0 - 1.0, 0.0, 1.0);
+  o.uv = vec2f(xy.x, 1.0 - xy.y);
+  return o;
+}
+@group(0) @binding(0) var src: texture_2d<f32>;
+@group(0) @binding(1) var smp: sampler;
+@group(0) @binding(2) var<uniform> F: vec4f;   // x = trail decay, z = exposure
+@fragment
+fn fade(i: VO) -> @location(0) vec4f {
+  return vec4f(textureSampleLevel(src, smp, i.uv, 0.0).rgb * F.x, 1.0);
+}
+@fragment
+fn composite(i: VO) -> @location(0) vec4f {
+  let px = 1.0 / vec2f(textureDimensions(src));
+  var c = textureSampleLevel(src, smp, i.uv, 0.0).rgb;    // bilinear = 2x2 box at 2x size
+  var glow = vec3f(0.0);
+  for (var k = 0; k < 12; k++) {
+    let a = f32(k) * 0.5235988;
+    let d = vec2f(cos(a), sin(a));
+    glow += textureSampleLevel(src, smp, i.uv + d * px * 6.0, 0.0).rgb;
+    glow += textureSampleLevel(src, smp, i.uv + d * px * 16.0, 0.0).rgb * 0.6;
+  }
+  c += glow / 12.0 * 0.35;
+  // Tone map on peak channel so hues survive; only very dense cores roll toward white.
+  let L = max(max(c.r, c.g), max(c.b, 1e-4));
+  let Lm = 1.0 - exp(-L * F.z);
+  var m = mix(c / L * Lm, vec3f(Lm), smoothstep(2.5, 9.0, L) * 0.6);
+  let v = 1.0 - 0.35 * dot(i.uv - 0.5, i.uv - 0.5) * 2.2;  // vignette
+  m = m * v + vec3f(0.043, 0.043, 0.063) * (1.0 - m);      // lift blacks to #0b0b10
+  return vec4f(pow(m, vec3f(1.0 / 1.1)), 1.0);
+}
+`;
+
+// Minimal column-major matrix helpers (WebGPU clip z in [0, 1]).
+function perspective(fovy, aspect, near, far) {
+  const f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  return [f / aspect, 0, 0, 0, 0, f, 0, 0, 0, 0, far * nf, -1, 0, 0, far * near * nf, 0];
+}
+function lookAt(e, c, up) {
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+  const norm = (a) => { const l = Math.hypot(...a); return a.map(x => x / l); };
+  const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  const z = norm(sub(e, c)), x = norm(cross(up, z)), y = cross(z, x);
+  return [x[0], y[0], z[0], 0, x[1], y[1], z[1], 0, x[2], y[2], z[2], 0, -dot(x, e), -dot(y, e), -dot(z, e), 1];
+}
+function mul(a, b) {
+  const o = new Array(16).fill(0);
+  for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) for (let k = 0; k < 4; k++) o[c * 4 + r] += a[k * 4 + r] * b[c * 4 + k];
+  return o;
+}
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+
+async function init() {
+  if (!navigator.gpu) throw new Error('WebGPU not available (navigator.gpu missing)');
+  const adapter = await navigator.gpu.requestAdapter({ powerPreference: 'high-performance' });
+  if (!adapter) throw new Error('No WebGPU adapter');
+  const device = await adapter.requestDevice();
+  device.addEventListener('uncapturederror', e => console.error('WebGPU error:', e.error.message));
+  const ctx = document.getElementById('c').getContext('webgpu');
+  const fmt = navigator.gpu.getPreferredCanvasFormat();
+  ctx.configure({ device, format: fmt, alphaMode: 'opaque' });
+
+  const particles = device.createBuffer({ size: N * 32, usage: GPUBufferUsage.STORAGE });
+  const simU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const drawU = device.createBuffer({ size: 80, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  const fadeU = device.createBuffer({ size: 16, usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST });
+  device.queue.writeBuffer(fadeU, 0, new Float32Array([0.78, 0, 1.15, 0]));
+
+  const mod = (code) => device.createShaderModule({ code });
+  const initPipe = device.createComputePipeline({ layout: 'auto', compute: { module: mod(INIT), entryPoint: 'main' } });
+  const stepPipe = device.createComputePipeline({ layout: 'auto', compute: { module: mod(STEP), entryPoint: 'main' } });
+  const HDR = 'rgba16float';
+  const add = { color: { srcFactor: 'one', dstFactor: 'one', operation: 'add' }, alpha: { srcFactor: 'one', dstFactor: 'one', operation: 'add' } };
+  const drawMod = mod(DRAW), fullMod = mod(FULL);
+  const drawPipe = device.createRenderPipeline({
+    layout: 'auto', primitive: { topology: 'point-list' },
+    vertex: { module: drawMod, entryPoint: 'vs' },
+    fragment: { module: drawMod, entryPoint: 'fs', targets: [{ format: HDR, blend: add }] },
+  });
+  const fadePipe = device.createRenderPipeline({
+    layout: 'auto', vertex: { module: fullMod, entryPoint: 'vs' },
+    fragment: { module: fullMod, entryPoint: 'fade', targets: [{ format: HDR }] },
+  });
+  const compPipe = device.createRenderPipeline({
+    layout: 'auto', vertex: { module: fullMod, entryPoint: 'vs' },
+    fragment: { module: fullMod, entryPoint: 'composite', targets: [{ format: fmt }] },
+  });
+
+  const smp = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
+  const accum = [0, 1].map(() => device.createTexture({
+    size: [W * SS, H * SS], format: HDR, usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
+  }));
+  const bg = (pipe, entries) => device.createBindGroup({ layout: pipe.getBindGroupLayout(0), entries: entries.map((resource, binding) => ({ binding, resource })) });
+  const initBG = bg(initPipe, [{ buffer: particles }]);
+  const stepBG = bg(stepPipe, [{ buffer: particles }, { buffer: simU }]);
+  const drawBG = bg(drawPipe, [{ buffer: particles }, { buffer: drawU }]);
+  const fadeBG = accum.map(t => bg(fadePipe, [t.createView(), smp, { buffer: fadeU }]));
+  const compBG = accum.map(t => bg(compPipe, [t.createView(), smp, { buffer: fadeU }]));
+
+  const groups = Math.ceil(N / 256);
+  {
+    const enc = device.createCommandEncoder();
+    const cp = enc.beginComputePass(); cp.setPipeline(initPipe); cp.setBindGroup(0, initBG); cp.dispatchWorkgroups(groups); cp.end();
+    for (const t of accum) {
+      const rp = enc.beginRenderPass({ colorAttachments: [{ view: t.createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }] });
+      rp.end();
+    }
+    device.queue.submit([enc.finish()]);
+    await device.queue.onSubmittedWorkDone();
+  }
+
+  let simStep = 0, frameDone = -1, cur = 0;
+  const dt = 1 / (FPS * SUBSTEPS);
+
+  function encodeFrame(f, enc) {
+    // Simulate up to the end of frame f.
+    while (simStep < (f + 1) * SUBSTEPS) {
+      const t = simStep * dt;
+      device.queue.writeBuffer(simU, 0, new Float32Array([t, dt, smooth(1.3, 3.6, t), 0]));
+      const cp = enc.beginComputePass(); cp.setPipeline(stepPipe); cp.setBindGroup(0, stepBG); cp.dispatchWorkgroups(groups); cp.end();
+      // writeBuffer is ordered against submits, not passes, so submit each step on its own.
+      device.queue.submit([enc.finish()]);
+      enc = device.createCommandEncoder();
+      simStep++;
+    }
+    const t = (f + 1) / FPS;
+    const ang = 0.4 + t * 0.32, dist = 4.3 - smooth(0, 8, t) * 0.8, hgt = 1.1 + Math.sin(t * 0.5) * 0.4;
+    const vp = mul(perspective(50 * Math.PI / 180, W / H, 0.05, 50), lookAt([Math.sin(ang) * dist, hgt, Math.cos(ang) * dist], [0, 0, 0], [0, 1, 0]));
+    device.queue.writeBuffer(drawU, 0, new Float32Array([...vp, 0.075, t, smooth(1.3, 3.6, t), 0]));
+
+    const prev = cur, next = 1 - cur;
+    let rp = enc.beginRenderPass({ colorAttachments: [{ view: accum[next].createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }] });
+    rp.setPipeline(fadePipe); rp.setBindGroup(0, fadeBG[prev]); rp.draw(3);
+    rp.setPipeline(drawPipe); rp.setBindGroup(0, drawBG); rp.draw(N);
+    rp.end();
+    rp = enc.beginRenderPass({ colorAttachments: [{ view: ctx.getCurrentTexture().createView(), loadOp: 'clear', storeOp: 'store', clearValue: [0, 0, 0, 1] }] });
+    rp.setPipeline(compPipe); rp.setBindGroup(0, compBG[next]); rp.draw(3);
+    rp.end();
+    cur = next;
+    return enc;
+  }
+
+  window.renderFrame = async (f) => {
+    if (f <= frameDone) throw new Error(`frames must be rendered in order (asked ${f} after ${frameDone})`);
+    // Frames skipped by the caller still update the trail buffer, so output does not depend on sampling.
+    for (let g = frameDone + 1; g <= f; g++) {
+      const enc = encodeFrame(g, device.createCommandEncoder());
+      device.queue.submit([enc.finish()]);
+    }
+    frameDone = f;
+    document.getElementById('count').textContent = `${N.toLocaleString('en-US')} pts  F${String(f).padStart(3, '0')}`;
+    await device.queue.onSubmittedWorkDone();
+    await new Promise(r => requestAnimationFrame(() => r()));
+  };
+}
+window.ready = init();
+</script>
+</body>
+</html>

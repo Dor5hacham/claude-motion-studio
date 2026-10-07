@@ -1,0 +1,7 @@
+{
+  "name": "motion-studio-scripts",
+  "private": true,
+  "type": "module",
+  "description": "Checks and build helpers for the Motion Studio site",
+  "devDependencies": { "playwright-core": "^1.56.0" }
+}

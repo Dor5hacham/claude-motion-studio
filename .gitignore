@@ -1,0 +1,10 @@
+# temporary work and generated files
+_work/
+node_modules/
+scripts/catalog.json
+# the 494 MB full-quality reel is published as a GitHub Release asset instead
+media/reel/master/
+# reel rebuild outputs
+source/reel/frames/
+source/reel/blender/
+source/reel/test/

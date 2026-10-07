@@ -1,0 +1,764 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+// Motion reel renderer. The page exposes renderFrame(f): it draws frame f (60 fps)
+// of the 60 s reel into the canvas. Every frame is a pure function of time, so
+// frames can be rendered in any order by several pages at once.
+const W = 1920, H = 1080, FPS = 60;
+const cv = document.getElementById('c');
+const gl = cv.getContext('webgl2', { preserveDrawingBuffer: true, antialias: false, premultipliedAlpha: false });
+
+// ---------- math + easing ----------
+const clamp01 = x => Math.min(1, Math.max(0, x));
+const lerp = (a, b, t) => a + (b - a) * t;
+const seg = (t, a, b) => clamp01((t - a) / (b - a));
+const eOutBack = x => { const c = 1.9; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const eOutExpo = x => x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const eInExpo = x => x <= 0 ? 0 : Math.pow(2, 10 * x - 10);
+const eInOutExpo = x => x <= 0 ? 0 : x >= 1 ? 1 : x < .5 ? Math.pow(2, 20 * x - 10) / 2 : (2 - Math.pow(2, -20 * x + 10)) / 2;
+const eInOutCubic = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eOutCubic = x => 1 - Math.pow(1 - x, 3);
+function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+function perspective(fovy, aspect, n, f) {
+  const t = 1 / Math.tan(fovy / 2), nf = 1 / (n - f);
+  return [t / aspect, 0, 0, 0, 0, t, 0, 0, 0, 0, (f + n) * nf, -1, 0, 0, 2 * f * n * nf, 0];
+}
+function lookAt(e, c, u) {
+  let zx = e[0] - c[0], zy = e[1] - c[1], zz = e[2] - c[2]; let l = Math.hypot(zx, zy, zz); zx /= l; zy /= l; zz /= l;
+  let xx = u[1] * zz - u[2] * zy, xy = u[2] * zx - u[0] * zz, xz = u[0] * zy - u[1] * zx; l = Math.hypot(xx, xy, xz); xx /= l; xy /= l; xz /= l;
+  const yx = zy * xz - zz * xy, yy = zz * xx - zx * xz, yz = zx * xy - zy * xx;
+  return [xx, yx, zx, 0, xy, yy, zy, 0, xz, yz, zz, 0, -(xx * e[0] + xy * e[1] + xz * e[2]), -(yx * e[0] + yy * e[1] + yz * e[2]), -(zx * e[0] + zy * e[1] + zz * e[2]), 1];
+}
+function mul4(a, b) {
+  const o = new Array(16);
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; o[i * 4 + j] = s; }
+  return o;
+}
+
+// ---------- GL helpers ----------
+function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) + '\n' + src.split('\n').map((l, i) => (i + 1) + ': ' + l).join('\n')); return s; }
+function prog(vs, fs) {
+  const p = gl.createProgram(); gl.attachShader(p, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(p, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(p);
+  if (!gl.getProgramParameter(p, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u = {}; const n = gl.getProgramParameter(p, gl.ACTIVE_UNIFORMS);
+  for (let i = 0; i < n; i++) { const info = gl.getActiveUniform(p, i); u[info.name.replace('[0]', '')] = gl.getUniformLocation(p, info.name); }
+  return { p, u };
+}
+const FSQ_VS = `#version 300 es
+const vec2 P[3]=vec2[](vec2(-1,-1),vec2(3,-1),vec2(-1,3));
+out vec2 vUv; void main(){vec2 p=P[gl_VertexID]; vUv=p*.5+.5; gl_Position=vec4(p,0,1);}`;
+const emptyVao = gl.createVertexArray();
+function fsq() { gl.bindVertexArray(emptyVao); gl.drawArrays(gl.TRIANGLES, 0, 3); }
+
+function makeTarget() {
+  const ms = gl.createFramebuffer();
+  const crb = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, crb); gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.RGBA8, W, H);
+  const drb = gl.createRenderbuffer(); gl.bindRenderbuffer(gl.RENDERBUFFER, drb); gl.renderbufferStorageMultisample(gl.RENDERBUFFER, 4, gl.DEPTH_COMPONENT24, W, H);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, ms);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.RENDERBUFFER, crb);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, drb);
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex); gl.texStorage2D(gl.TEXTURE_2D, 11, gl.RGBA8, W, H);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  const tf = gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER, tf); gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+  return { ms, tf, tex };
+}
+function begin(t, r = 0, g = 0, b = 0) { gl.bindFramebuffer(gl.FRAMEBUFFER, t.ms); gl.viewport(0, 0, W, H); gl.clearColor(r, g, b, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); }
+function end(t) {
+  gl.bindFramebuffer(gl.READ_FRAMEBUFFER, t.ms); gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, t.tf);
+  gl.blitFramebuffer(0, 0, W, H, 0, 0, W, H, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  gl.bindTexture(gl.TEXTURE_2D, t.tex); gl.generateMipmap(gl.TEXTURE_2D);
+}
+function makeTex() {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+function upload(tex, src) {
+  gl.bindTexture(gl.TEXTURE_2D, tex); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+}
+
+// ---------- shared GLSL ----------
+const GLSL_COMMON = `
+const float PI=3.14159265;
+float hash11(float p){p=fract(p*.1031);p*=p+33.33;p*=p+p;return fract(p);}
+float hash21(vec2 p){vec3 p3=fract(vec3(p.xyx)*.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
+vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+  return mix(mix(hash21(i),hash21(i+vec2(1,0)),f.x),mix(hash21(i+vec2(0,1)),hash21(i+vec2(1,1)),f.x),f.y);}
+`;
+
+// Blit a texture into the current target, with zoom and saturation controls.
+const blitP = prog(FSQ_VS, `#version 300 es
+precision highp float; in vec2 vUv; out vec4 o; uniform sampler2D uTex; uniform float uZoom,uSat;
+void main(){vec2 uv=(vUv-.5)/uZoom+.5; vec3 c=texture(uTex,uv).rgb; float l=dot(c,vec3(.299,.587,.114)); o=vec4(mix(vec3(l),c,uSat),1);}`);
+function blit(tex, zoom = 1, sat = 1) {
+  gl.useProgram(blitP.p); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.uniform1i(blitP.u.uTex, 0); gl.uniform1f(blitP.u.uZoom, zoom); gl.uniform1f(blitP.u.uSat, sat); fsq();
+}
+
+// ---------- 2D canvases ----------
+const s2d = document.createElement('canvas'); s2d.width = W; s2d.height = H; const ctx = s2d.getContext('2d');
+const ov = document.createElement('canvas'); ov.width = W; ov.height = H; const octx = ov.getContext('2d');
+const s2dTex = makeTex(), ovTex = makeTex(), imgTex = makeTex();
+const C = { bg: '#0b0b10', cream: '#f4efe6', coral: '#ff5a36', amber: '#ffb020', cyan: '#2bc4e6', violet: '#7a5cff', navy: '#1d1b3a', paper: '#efe8dc' };
+const F_DISPLAY = 'Bahnschrift', F_MONO = '"Cascadia Mono", Consolas, monospace', F_UI = '"Segoe UI", sans-serif';
+
+// ======================================================================
+// SCENE 1: kinetic typography intro (Canvas 2D)
+// ======================================================================
+function drawIntro(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2;
+  // Dot grid with a ripple that leaves the dot when it lands
+  for (let gx = 0; gx <= 48; gx++) for (let gy = 0; gy <= 27; gy++) {
+    const x = gx * 40, y = gy * 40, d = Math.hypot(x - cx, y - cy);
+    const wave = Math.exp(-Math.pow((d - (t - 0.35) * 1400) / 90, 2));
+    const base = 0.07 * seg(t, 0.4, 1.6) * (1 - seg(t, 4.8, 5.5));
+    const a = base + wave * 0.6;
+    if (a < 0.01) continue;
+    ctx.fillStyle = `rgba(244,239,230,${a})`; ctx.beginPath(); ctx.arc(x, y, 1.6 + wave * 2.5, 0, 7); ctx.fill();
+  }
+  const exit = eInOutExpo(seg(t, 4.9, 5.55));
+  // Dot -> squash -> line -> split into two lines that frame the title
+  const pop = eOutBack(seg(t, 0.15, 0.6));
+  const stretch = eInOutExpo(seg(t, 0.75, 1.35));
+  const open = eOutExpo(seg(t, 1.3, 2.0));
+  const LW = 1340;
+  let lw = lerp(28, LW, stretch) * (1 - exit) + 28 * exit * (1 - seg(t, 5.55, 5.7));
+  const lh = lerp(28, 6, stretch) * pop;
+  const gap = 165 * open * (1 - exit);
+  ctx.fillStyle = C.coral;
+  const rr = (x, y, w, h) => { ctx.beginPath(); ctx.roundRect(x - w / 2, y - h / 2, w, h, Math.min(w, h) / 2); ctx.fill(); };
+  if (t < 5.75) { rr(cx, cy - gap, lw * Math.max(pop, 0.001), lh); if (open > 0) rr(cx, cy + gap, lw, lh); }
+
+  // Title letters rise through a mask between the two lines
+  const words = [['MOTION', C.cream], [' ', C.cream], ['REEL', C.coral]];
+  const track = lerp(0, 18, eOutCubic(seg(t, 1.6, 5.0)));
+  ctx.font = `700 220px ${F_DISPLAY}`; ctx.textBaseline = 'alphabetic';
+  const letters = []; let x = 0;
+  for (const [w, col] of words) for (const ch of w) { const mw = ctx.measureText(ch).width; letters.push({ ch, col, x }); x += mw + track; }
+  const total = x - track, x0 = cx - total / 2;
+  ctx.save(); ctx.beginPath(); ctx.rect(0, cy - gap + 4, W, Math.max(0, gap * 2 - 8)); ctx.clip();
+  letters.forEach((L, i) => {
+    const inn = eOutExpo(seg(t, 1.45 + i * 0.045, 2.25 + i * 0.045));
+    const out = eInExpo(seg(t, 4.75 + i * 0.03, 5.3 + i * 0.03));
+    const dy = (1 - inn) * 260 - out * 300;
+    ctx.fillStyle = L.col; ctx.fillText(L.ch, x0 + L.x, cy + 78 + dy);
+  });
+  ctx.restore();
+  // Label above and typewriter subtitle below
+  const la = eOutCubic(seg(t, 2.2, 2.8)) * (1 - exit);
+  ctx.font = `600 22px ${F_MONO}`; ctx.letterSpacing = '6px'; ctx.textAlign = 'center';
+  ctx.fillStyle = `rgba(244,239,230,${0.75 * la})`; ctx.fillText('CLAUDE  /  OPUS 5.5  /  CODE-ONLY MOTION DESIGN', cx, cy - gap - 34 - (1 - la) * 20);
+  const sub = '60 seconds  ·  7 techniques  ·  every pixel generated with code';
+  const n = Math.floor(seg(t, 2.6, 3.9) * sub.length);
+  const shown = sub.slice(0, n);
+  ctx.font = `400 26px ${F_MONO}`; ctx.letterSpacing = '1px';
+  ctx.fillStyle = `rgba(244,239,230,${0.85 * (1 - exit)})`; ctx.fillText(shown, cx, cy + gap + 58);
+  if (t > 2.5 && t < 4.8 && Math.floor(t * 3) % 2 === 0) {
+    const w = ctx.measureText(sub).width, wsh = ctx.measureText(shown).width;
+    ctx.fillStyle = C.coral; ctx.fillRect(cx - w / 2 + wsh + 4, cy + gap + 36, 14, 28);
+  }
+  ctx.textAlign = 'left'; ctx.letterSpacing = '0px';
+}
+
+// ======================================================================
+// SCENE 2: GPU particles (WebGL2, 400k points, stateless vertex shader)
+// ======================================================================
+const NP = 400000;
+const partP = prog(`#version 300 es
+precision highp float;
+in vec4 aSeed; in vec2 aText;
+uniform float uT; uniform mat4 uVP;
+out vec3 vCol; out float vA;
+${GLSL_COMMON}
+vec3 rotY(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(c*p.x+s*p.z,p.y,-s*p.x+c*p.z);}
+vec3 rotX(vec3 p,float a){float c=cos(a),s=sin(a);return vec3(p.x,c*p.y-s*p.z,s*p.y+c*p.z);}
+vec3 galaxy(vec4 s,float t){
+  float r=.25+pow(s.x,.7)*3.6; float arm=floor(s.y*4.);
+  float th=arm*1.5708+r*1.15+t*(1.1/(.35+r))+(s.z-.5)*(.9-.15*r);
+  vec3 p=vec3(cos(th)*r,(s.w-.5)*.35*exp(-r*.5),sin(th)*r);
+  p+=.12*vec3(sin(p.z*3.1+t*1.3),sin(p.x*2.3+t),cos(p.y*4.+p.x*2.+t*.7));
+  return p;
+}
+vec3 turb(vec4 s,float t){return vec3(sin(s.x*40.+t*3.),cos(s.y*37.+t*2.7),sin(s.z*31.+t*2.2));}
+float ease(float x){x=clamp(x,0.,1.);return x<.5?4.*x*x*x:1.-pow(-2.*x+2.,3.)/2.;}
+void main(){
+  vec4 s=aSeed; float t=uT; float d=s.w*.45;
+  vec3 g=galaxy(s,t);
+  vec3 tx=vec3(aText,(s.z-.5)*.06+sin(aText.x*2.+t*3.)*.04);
+  vec3 dir=normalize(vec3(s.y*2.-1.,s.z*2.-1.,s.x*2.-1.)+1e-4);
+  float z=s.y*2.-1.,a=s.z*6.28318; dir=vec3(sqrt(1.-z*z)*cos(a),z,sqrt(1.-z*z)*sin(a));
+  float rs=1.65+.13*sin(dir.y*7.+t*2.4)*sin(dir.x*6.+t*1.7);
+  vec3 sp=rotX(rotY(dir*rs,t*.6),.3);
+  float u=s.x*6.28318; vec3 kn=vec3((2.+cos(3.*u))*cos(2.*u),(2.+cos(3.*u))*sin(2.*u),sin(3.*u))*.62;
+  kn+=normalize(vec3(s.y-.5,s.z-.5,s.w-.5)+1e-4)*.16*sqrt(s.w);
+  kn=rotX(rotY(kn,t*.8),.5+.2*sin(t));
+  float k1=ease((t-1.3-d*(.4+.6*(aText.x+3.4)/6.8))/1.1);
+  float k2=ease((t-3.7-d)/1.0);
+  float k3=ease((t-5.1-d)/1.0);
+  float k4=clamp((t-6.6-d*.6)/1.3,0.,1.); k4=1.-pow(1.-k4,3.);
+  vec3 p=mix(g,tx,k1);
+  p=mix(p,sp,k2); p=mix(p,kn,k3);
+  vec3 fly=galaxy(s,t)*vec3(2.6,1.,2.6)+dir*2.5;
+  p=mix(p,fly,k4);
+  p+=turb(s,t)*(sin(k1*PI)*.9+sin(k2*PI)*.7+sin(k3*PI)*.6);
+  vec3 cG=mix(vec3(1.,.72,.3),vec3(.5,.36,1.),smoothstep(.1,.9,s.x));
+  cG=mix(cG,vec3(.2,.8,1.),step(.9,s.y)*.8);
+  vec3 cT=mix(vec3(1.,.36,.2),vec3(1.,.72,.2),clamp((aText.x+3.4)/6.8,0.,1.));
+  vec3 cS=mix(vec3(.17,.77,.95),vec3(.5,.36,1.),dir.y*.5+.5);
+  vec3 cK=mix(vec3(1.,.36,.2),vec3(1.,.8,.4),s.y);
+  vec3 col=mix(cG,cT,k1); col=mix(col,cS,k2); col=mix(col,cK,k3); col=mix(col,cG,k4);
+  vec4 cp=uVP*vec4(p,1.);
+  gl_Position=cp;
+  gl_PointSize=clamp(13./cp.w,1.2,5.);
+  vCol=col*(.9+.4*s.z); vA=.34*(1.-k4*.45)*mix(1.,.5,k1*(1.-k2));
+}`, `#version 300 es
+precision highp float; in vec3 vCol; in float vA; out vec4 o;
+void main(){vec2 q=gl_PointCoord-.5; float a=smoothstep(.5,.1,length(q))*vA; o=vec4(vCol*a,1.);}`);
+let partVao;
+function initParticles() {
+  // Sample target points from the word rendered into a 2D canvas
+  const tc = document.createElement('canvas'); tc.width = 1700; tc.height = 420; const t2 = tc.getContext('2d');
+  t2.fillStyle = '#fff'; t2.font = `700 330px ${F_DISPLAY}`; t2.textAlign = 'center'; t2.textBaseline = 'middle'; t2.fillText('CLAUDE', 850, 220);
+  const px = t2.getImageData(0, 0, 1700, 420).data; const filled = [];
+  for (let y = 0; y < 420; y += 2) for (let x = 0; x < 1700; x += 2) if (px[(y * 1700 + x) * 4 + 3] > 128) filled.push(x, y);
+  const rnd = mulberry(42);
+  const seed = new Float32Array(NP * 4), txt = new Float32Array(NP * 2);
+  const nf = filled.length / 2;
+  for (let i = 0; i < NP; i++) {
+    for (let k = 0; k < 4; k++) seed[i * 4 + k] = rnd();
+    const j = Math.floor(rnd() * nf);
+    txt[i * 2] = (filled[j * 2] + rnd() * 2 - 850) / 1700 * 6.8;
+    txt[i * 2 + 1] = -(filled[j * 2 + 1] + rnd() * 2 - 220) / 1700 * 6.8;
+  }
+  partVao = gl.createVertexArray(); gl.bindVertexArray(partVao);
+  const b1 = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b1); gl.bufferData(gl.ARRAY_BUFFER, seed, gl.STATIC_DRAW);
+  let loc = gl.getAttribLocation(partP.p, 'aSeed'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 0, 0);
+  const b2 = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b2); gl.bufferData(gl.ARRAY_BUFFER, txt, gl.STATIC_DRAW);
+  loc = gl.getAttribLocation(partP.p, 'aText'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  gl.bindVertexArray(null);
+}
+const bgP = prog(FSQ_VS, `#version 300 es
+precision highp float; in vec2 vUv; out vec4 o; uniform vec3 uA,uB; uniform float uT;
+void main(){float d=length((vUv-vec2(.5,.45))*vec2(1.78,1.)); o=vec4(mix(uA,uB,smoothstep(0.,1.1,d)),1);}`);
+function bgGrad(a, b) { gl.useProgram(bgP.p); gl.uniform3fv(bgP.u.uA, a); gl.uniform3fv(bgP.u.uB, b); fsq(); }
+function drawParticles(t) {
+  bgGrad([0.05, 0.04, 0.09], [0.008, 0.008, 0.015]);
+  const el = lerp(1.05, 0.06, eInOutCubic(seg(t, 0.2, 2.4))) + 0.25 * eInOutCubic(seg(t, 3.6, 5.2)) - 0.1 * seg(t, 5.2, 8);
+  const az = 0.45 - 0.45 * eInOutCubic(seg(t, 0, 2.4)) + 0.12 * Math.sin(t * 0.5) + 0.6 * eInOutCubic(seg(t, 6.4, 8.5));
+  const R = lerp(9.0, 7.2, eInOutCubic(seg(t, 0, 2.4))) + 1.2 * seg(t, 6.6, 8.3);
+  const eye = [Math.sin(az) * Math.cos(el) * R, Math.sin(el) * R, Math.cos(az) * Math.cos(el) * R];
+  const vp = mul4(perspective(0.8, W / H, 0.1, 100), lookAt(eye, [0, 0, 0], [0, 1, 0]));
+  gl.useProgram(partP.p); gl.uniform1f(partP.u.uT, t); gl.uniformMatrix4fv(partP.u.uVP, false, vp);
+  gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE);
+  gl.bindVertexArray(partVao); gl.drawArrays(gl.POINTS, 0, NP); gl.disable(gl.BLEND);
+}
+
+// ======================================================================
+// SCENE 3: ray-marched signed distance fields (fragment shader only)
+// ======================================================================
+const sdfP = prog(FSQ_VS, `#version 300 es
+precision highp float; in vec2 vUv; out vec4 o; uniform float uT;
+${GLSL_COMMON}
+float smin(float a,float b,float k){float h=clamp(.5+.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}
+float spread(){return smoothstep(.2,2.2,uT)*(1.-smoothstep(5.8,7.6,uT));}
+float blobs(vec3 p){
+  float sp=spread(); float d=1e9;
+  for(int i=0;i<7;i++){float fi=float(i);
+    vec3 c=vec3(sin(uT*.8+fi*2.4)*1.55,sin(uT*1.1+fi*1.7)*.55+.15,cos(uT*.7+fi*2.9)*1.25)*sp;
+    d=smin(d,length(p-c)-(.42+.1*sin(fi*3.+uT*1.5))*(1.-.3*sp)-.28*(1.-sp),.6);}
+  vec3 q=p-vec3(0,.15,0); float tor=length(vec2(length(q.xz)-1.7*sp,q.y))-.13*sp;
+  return smin(d,tor,.45);
+}
+vec2 map(vec3 p){float f=p.y+1.05; float b=blobs(p); return b<f?vec2(b,1):vec2(f,0);}
+vec2 march(vec3 ro,vec3 rd){float t=.01;for(int i=0;i<160;i++){vec2 h=map(ro+rd*t);if(h.x<.0006*t)return vec2(t,h.y);t+=h.x*.9;if(t>40.)break;}return vec2(-1);}
+vec3 nrm(vec3 p){vec2 e=vec2(.0008,0);return normalize(vec3(map(p+e.xyy).x-map(p-e.xyy).x,map(p+e.yxy).x-map(p-e.yxy).x,map(p+e.yyx).x-map(p-e.yyx).x));}
+float shadow(vec3 ro,vec3 rd){float r=1.,t=.03;for(int i=0;i<64;i++){float h=map(ro+rd*t).x;r=min(r,10.*h/t);t+=clamp(h,.02,.3);if(r<.001||t>12.)break;}return clamp(r,0.,1.);}
+float ao(vec3 p,vec3 n){float o=0.,s=1.;for(int i=0;i<5;i++){float h=.02+.12*float(i);o+=(h-map(p+n*h).x)*s;s*=.8;}return clamp(1.-2.2*o,0.,1.);}
+vec3 sky(vec3 rd){return mix(vec3(.02,.018,.035),vec3(.09,.06,.14),smoothstep(-.1,.6,rd.y));}
+vec3 shade(vec3 p,vec3 rd,float m,out vec3 n){
+  n=nrm(p); vec3 L=normalize(vec3(-.5,.9,-.4));
+  float dif=clamp(dot(n,L),0.,1.)*shadow(p+n*.002,L); float oc=ao(p,n);
+  float fr=pow(1.-clamp(dot(n,-rd),0.,1.),3.);
+  vec3 col;
+  if(m>.5){
+    vec3 film=pal(fr*1.4+n.y*.35+uT*.08,vec3(.55),vec3(.45),vec3(1.),vec3(0.,.33,.67));
+    vec3 base=mix(vec3(1.,.36,.2),film,.75);
+    float spec=pow(clamp(dot(reflect(rd,n),L),0.,1.),60.);
+    col=base*(.12+.9*dif)*oc+spec*1.4*dif+fr*.35*film;
+    col+=vec3(.2,.75,1.)*pow(clamp(dot(n,normalize(vec3(.8,.2,.9))),0.,1.),3.)*.35;
+  } else {
+    vec2 g=abs(fract(p.xz*.5)-.5); float line=smoothstep(.485,.5,max(g.x,g.y));
+    col=vec3(.025,.022,.035)*(.4+.6*dif)*oc+line*vec3(.25,.18,.45)*.25*exp(-length(p.xz)*.15);
+  }
+  return col;
+}
+void main(){
+  vec2 uv=(vUv-.5)*vec2(1.7778,1.);
+  float a=.6+uT*.32; float h=1.0+.5*sin(uT*.4);
+  vec3 ro=vec3(sin(a)*5.6,h,cos(a)*5.6), ta=vec3(0,0,0);
+  vec3 ww=normalize(ta-ro),uu=normalize(cross(ww,vec3(0,1,0))),vv=cross(uu,ww);
+  vec3 rd=normalize(uv.x*uu+uv.y*vv+1.6*ww);
+  vec3 col=sky(rd);
+  vec2 hit=march(ro,rd);
+  if(hit.x>0.){
+    vec3 p=ro+rd*hit.x,n; col=shade(p,rd,hit.y,n);
+    vec3 rr=reflect(rd,n); float k=hit.y>.5?.35:.55;
+    vec2 h2=march(p+n*.003,rr);
+    vec3 rc=sky(rr); if(h2.x>0.){vec3 n2; rc=shade(p+n*.003+rr*h2.x,rr,h2.y,n2);}
+    float fr=pow(1.-clamp(dot(n,-rd),0.,1.),hit.y>.5?3.:2.);
+    col+=rc*k*(hit.y>.5?fr+.15:.35+.65*fr);
+    col=mix(col,sky(rd),1.-exp(-.004*hit.x*hit.x));
+  }
+  col=pow(col,vec3(.4545));
+  o=vec4(col,1);
+}`);
+function drawSDF(t) { gl.useProgram(sdfP.p); gl.uniform1f(sdfP.u.uT, t); fsq(); }
+
+// ======================================================================
+// SCENE 4: Blender rigid-body render (image sequence from Blender 5.2)
+// ======================================================================
+const imgCache = new Map();
+function loadImg(url) {
+  if (imgCache.has(url)) return imgCache.get(url);
+  const p = new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = url; });
+  imgCache.set(url, p); if (imgCache.size > 8) imgCache.delete(imgCache.keys().next().value);
+  return p;
+}
+async function drawBlender(t) {
+  const f = Math.min(480, Math.max(1, Math.round(t * FPS) + 1));
+  const im = await loadImg(`blender/f_${String(f).padStart(4, '0')}.png`);
+  upload(imgTex, im); blit(imgTex, 1 + 0.035 * t / 8, 1.25);
+}
+
+// ======================================================================
+// SCENE 5: shape-layer choreography (Canvas 2D vectors)
+// ======================================================================
+function drawShapes(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.fillStyle = C.paper; ctx.fillRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2;
+  const outro = eInExpo(seg(t, 6.9, 7.75));
+  ctx.translate(cx, cy); ctx.scale(1 - outro * 0.96, 1 - outro * 0.96); ctx.rotate(outro * 1.2);
+  const cols = [C.coral, C.navy, C.amber, C.cyan, C.violet];
+  const NX = 11, NY = 6, cell = 150, N = NX * NY;
+  const ringK = eInOutExpo(seg(t, 3.3, 4.4));
+  let idx = 0;
+  for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++, idx++) {
+    const gx = (i - (NX - 1) / 2) * cell, gy = (j - (NY - 1) / 2) * cell;
+    const d = Math.hypot(i - (NX - 1) / 2, j - (NY - 1) / 2);
+    const appear = eOutBack(seg(t, 0.05 + d * 0.06, 0.6 + d * 0.06));
+    const morph = clamp01(Math.sin((t - 1.0) * 2.6 - d * 0.55) * 0.9 + 0.5) * seg(t, 0.9, 1.3);
+    const rot = eInOutCubic(seg(t, 1.1 + d * 0.07, 1.8 + d * 0.07)) * Math.PI / 2 + eInOutCubic(seg(t, 2.3 + d * 0.05, 3.0 + d * 0.05)) * Math.PI / 4;
+    const ang = idx / N * Math.PI * 2 + t * 0.7;
+    const rk = clamp01(ringK * 1.15 - (idx / N) * 0.15);
+    const x = lerp(gx, Math.cos(ang) * 340, rk), y = lerp(gy, Math.sin(ang) * 340, rk);
+    const size = lerp(96, 30, rk) * appear * (1 + 0.12 * Math.sin(t * 6 + idx) * seg(t, 4.4, 5));
+    if (size <= 0.5) continue;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot + rk * ang);
+    ctx.fillStyle = cols[(i + j * 2) % cols.length];
+    const kind = (i * 7 + j * 3) % 4;
+    if (kind === 3 && rk < 0.5) {
+      // Ring outline with an animated trim
+      ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = 12; ctx.lineCap = 'round';
+      const tr = seg(t, 0.4 + d * 0.06, 1.2 + d * 0.06);
+      ctx.beginPath(); ctx.arc(0, 0, Math.max(0, size / 2 - 6), -Math.PI / 2 + t * 2, -Math.PI / 2 + t * 2 + tr * Math.PI * 1.999); ctx.stroke();
+    } else {
+      const rad = (size / 2) * (kind === 1 ? 1 - morph : morph);
+      ctx.beginPath(); ctx.roundRect(-size / 2, -size / 2, size, size, Math.max(0, rad)); ctx.fill();
+    }
+    ctx.restore();
+  }
+  // Sunburst rays drawn on with trim paths
+  const RN = 48;
+  for (let k = 0; k < RN; k++) {
+    const a = k / RN * Math.PI * 2 + t * 0.15;
+    const s0 = eOutExpo(seg(t, 4.3 + k * 0.012, 5.0 + k * 0.012)), s1 = eOutExpo(seg(t, 5.6 + k * 0.012, 6.4 + k * 0.012));
+    if (s0 <= s1) continue;
+    const r0 = 395, len = 150 + 60 * (k % 3);
+    ctx.strokeStyle = k % 2 ? C.navy : C.coral; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(Math.cos(a) * (r0 + len * s1), Math.sin(a) * (r0 + len * s1)); ctx.lineTo(Math.cos(a) * (r0 + len * s0), Math.sin(a) * (r0 + len * s0)); ctx.stroke();
+  }
+  // Bouncing ball with squash and stretch, inside the ring
+  const bin = eOutBack(seg(t, 4.5, 4.9)), bout = 1 - seg(t, 6.6, 6.9);
+  if (bin > 0 && bout > 0) {
+    const floorY = 150, R = 52;
+    ctx.strokeStyle = C.navy; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    const fw = 230 * bin * bout;
+    ctx.beginPath(); ctx.moveTo(-fw, floorY); ctx.lineTo(fw, floorY); ctx.stroke();
+    const u = ((t - 4.6) / 0.52 % 1 + 1) % 1;
+    const hgt = 4 * u * (1 - u) * 260, speed = Math.abs(1 - 2 * u);
+    const contact = Math.exp(-Math.min(u, 1 - u) * 55);
+    const sy = lerp(1 + 0.28 * speed, 0.6, contact), sx = 1 / sy;
+    ctx.fillStyle = C.coral; ctx.beginPath();
+    ctx.ellipse(0, floorY - R * sy - hgt, R * sx * bin * bout, R * sy * bin * bout, 0, 0, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(29,27,58,0.18)'; ctx.beginPath(); ctx.ellipse(0, floorY + 14, R * (1.2 - hgt / 400) * bin * bout, 7, 0, 0, 7); ctx.fill();
+  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+// ======================================================================
+// SCENE 6: instanced geometry (one draw call, 14,400 cubes)
+// ======================================================================
+const GN = 120;
+const cubeP = prog(`#version 300 es
+precision highp float;
+in vec3 aPos; in vec3 aN; uniform mat4 uVP; uniform float uT;
+out vec3 vN; out vec3 vCol; out float vDepth; out vec3 vW;
+${GLSL_COMMON}
+void main(){
+  int id=gl_InstanceID; float ix=float(id%${GN}),iz=float(id/${GN});
+  vec2 xz=(vec2(ix,iz)-${((GN - 1) / 2).toFixed(1)})*.24;
+  float dc=length(xz);
+  float rise=smoothstep(dc*.22-.2,dc*.22+.6,uT);
+  vec2 s1=vec2(sin(uT*.6)*5.,cos(uT*.45)*4.), s2=vec2(-6.,sin(uT*.3)*6.), s3=vec2(cos(uT*.5)*7.,-5.);
+  float h=0.;
+  h+=sin(length(xz-s1)*2.2-uT*4.)*exp(-length(xz-s1)*.18);
+  h+=sin(length(xz-s2)*1.7-uT*3.2)*exp(-length(xz-s2)*.15)*.8;
+  h+=sin(length(xz-s3)*2.6-uT*4.6)*exp(-length(xz-s3)*.2)*.7;
+  h+=(noise(xz*.35+uT*.2)-.5)*1.2;
+  h*=.75;
+  float y=mix(-6.,h,rise);
+  float sy=1.+max(h,0.)*2.2;
+  vec3 p=aPos*vec3(.2,.2*sy,.2)+vec3(xz.x,y+.1*sy-.1,xz.y);
+  vW=p; vN=aN;
+  float k=clamp(h*.45+.5,0.,1.);
+  vec3 c=mix(vec3(.11,.1,.25),vec3(.48,.36,1.),smoothstep(.0,.45,k));
+  c=mix(c,vec3(1.,.36,.2),smoothstep(.45,.75,k)); c=mix(c,vec3(1.,.75,.3),smoothstep(.75,1.,k));
+  vCol=c*(1.+.6*smoothstep(.85,1.,k));
+  vec4 cp=uVP*vec4(p,1.); vDepth=cp.w; gl_Position=cp;
+}`, `#version 300 es
+precision highp float; in vec3 vN; in vec3 vCol; in float vDepth; in vec3 vW; out vec4 o; uniform vec3 uFog;
+void main(){
+  vec3 L=normalize(vec3(-.4,.85,-.3));
+  float dif=max(dot(vN,L),0.); float rim=max(dot(vN,normalize(vec3(.7,.2,.7))),0.);
+  vec3 c=vCol*(.18+.85*dif)+vec3(.2,.75,1.)*rim*.25;
+  c*=mix(.55,1.,step(.5,vN.y));
+  c=mix(c,uFog,1.-exp(-vDepth*vDepth*.0012));
+  o=vec4(pow(c,vec3(.95)),1);
+}`);
+let cubeVao;
+function initCubes() {
+  const P = [], faces = [[1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1]];
+  for (const n of faces) {
+    const a = n.findIndex(v => v !== 0), b = (a + 1) % 3, c = (a + 2) % 3;
+    const q = [[-1, -1], [1, -1], [1, 1], [-1, -1], [1, 1], [-1, 1]];
+    const flip = n[a] < 0;
+    for (const [u, v] of (flip ? q.slice().reverse() : q)) { const p = [0, 0, 0]; p[a] = n[a]; p[b] = u; p[c] = v; P.push(p[0] * .5, p[1] * .5, p[2] * .5, n[0], n[1], n[2]); }
+  }
+  cubeVao = gl.createVertexArray(); gl.bindVertexArray(cubeVao);
+  const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(P), gl.STATIC_DRAW);
+  let l = gl.getAttribLocation(cubeP.p, 'aPos'); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 3, gl.FLOAT, false, 24, 0);
+  l = gl.getAttribLocation(cubeP.p, 'aN'); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, 3, gl.FLOAT, false, 24, 12);
+  gl.bindVertexArray(null);
+}
+function drawCubes(t) {
+  const fog = [0.03, 0.025, 0.06];
+  bgGrad([0.07, 0.05, 0.12], fog);
+  const k = eInOutCubic(seg(t, 0, 4.5));
+  const a = lerp(0.2, 2.3, k) + t * 0.06;
+  const R = lerp(2.0, 15.5, k), hh = lerp(19, 5.2, k) - 0.8 * seg(t, 4.5, 8);
+  const eye = [Math.sin(a) * R, hh, Math.cos(a) * R];
+  const vp = mul4(perspective(0.85, W / H, 0.1, 200), lookAt(eye, [0, -0.6, 0], [0, 1, 0]));
+  gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE);
+  gl.useProgram(cubeP.p); gl.uniformMatrix4fv(cubeP.u.uVP, false, vp); gl.uniform1f(cubeP.u.uT, t); gl.uniform3fv(cubeP.u.uFog, fog);
+  gl.bindVertexArray(cubeVao); gl.drawArraysInstanced(gl.TRIANGLES, 0, 36, GN * GN);
+  gl.disable(gl.DEPTH_TEST); gl.disable(gl.CULL_FACE);
+}
+
+// ======================================================================
+// SCENE 7: domain-warped fractal noise (procedural shader)
+// ======================================================================
+const noiseP = prog(FSQ_VS, `#version 300 es
+precision highp float; in vec2 vUv; out vec4 o; uniform float uT;
+${GLSL_COMMON}
+float fbm(vec2 p){float v=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);for(int i=0;i<6;i++){v+=a*noise(p);p=m*p;a*=.5;}return v;}
+float field(vec2 p,out vec2 q,out vec2 r){
+  q=vec2(fbm(p+vec2(0,uT*.12)),fbm(p+vec2(5.2,1.3)-uT*.05));
+  r=vec2(fbm(p+3.5*q+vec2(1.7,9.2)+uT*.18),fbm(p+3.5*q+vec2(8.3,2.8)+uT*.13));
+  return fbm(p+3.8*r);
+}
+void main(){
+  vec2 p=(vUv-.5)*vec2(1.7778,1.)*2.4*(1.-.08*uT/6.)+vec2(0,uT*.05);
+  vec2 q,r; float f=field(p,q,r);
+  vec2 e=vec2(.004,0); vec2 q2,r2; float fx=field(p+e,q2,r2), fy=field(p+e.yx,q2,r2);
+  vec3 n=normalize(vec3((f-fx)/e.x,(f-fy)/e.x,6.));
+  vec3 col=pal(f*1.3+length(q)*.4+uT*.04,vec3(.5,.42,.5),vec3(.5,.42,.45),vec3(1.,1.,1.),vec3(.02,.15,.32));
+  col=mix(col,vec3(.08,.05,.18),clamp(length(r)*1.1-.4,0.,1.)*.6);
+  col*=.55+.9*f*f;
+  float spec=pow(max(dot(n,normalize(vec3(.4,.5,1.))),0.),18.);
+  col+=spec*.35+vec3(1.,.4,.2)*pow(f,5.)*.6;
+  o=vec4(col,1);
+}`);
+function drawNoise(t) { gl.useProgram(noiseP.p); gl.uniform1f(noiseP.u.uT, t); fsq(); }
+
+// ======================================================================
+// SCENE 8: end card "how this was made" (Canvas 2D)
+// ======================================================================
+const HOW = [
+  ['01', 'Everything is code', 'No stock footage, no templates, no AI video model. Each frame is computed.'],
+  ['02', 'Custom WebGL2 renderer', 'GLSL shaders, rendered frame by frame in headless Chrome on the GPU (Radeon RX 9070 XT).'],
+  ['03', 'Real 3D engine for physics', 'Blender 5.2, built by a Python script: Bullet rigid bodies, Eevee renderer.'],
+  ['04', 'Synthesized soundtrack', 'Kick, bass, pads and risers made from sine waves and noise in Python + NumPy.'],
+  ['05', 'Assembled with FFmpeg', '3,600 frames  ·  1920 × 1080  ·  60 fps  ·  H.264 + AAC'],
+];
+function drawEnd(t) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1;
+  ctx.fillStyle = C.bg; ctx.fillRect(0, 0, W, H);
+  const fin = eInOutExpo(seg(t, 5.3, 6.0));
+  ctx.globalAlpha = 1 - fin;
+  // Title
+  const title = 'HOW THIS WAS MADE';
+  ctx.font = `700 92px ${F_DISPLAY}`; ctx.letterSpacing = '4px';
+  let x = 140;
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 120, W, 110); ctx.clip();
+  for (let i = 0; i < title.length; i++) {
+    const k = eOutExpo(seg(t, 0.25 + i * 0.025, 0.95 + i * 0.025));
+    ctx.fillStyle = i < 3 ? C.coral : C.cream; ctx.fillText(title[i], x, 205 + (1 - k) * 110);
+    x += ctx.measureText(title[i]).width + 4;
+  }
+  ctx.restore(); ctx.letterSpacing = '0px';
+  const ul = eInOutExpo(seg(t, 0.5, 1.3));
+  ctx.fillStyle = C.coral; ctx.fillRect(140, 240, 900 * ul, 4);
+  // Rows
+  HOW.forEach(([n, h, d], i) => {
+    const k = eOutExpo(seg(t, 0.9 + i * 0.22, 1.7 + i * 0.22));
+    const y = 330 + i * 128;
+    ctx.globalAlpha = k * (1 - fin);
+    ctx.font = `600 24px ${F_MONO}`; ctx.fillStyle = [C.coral, C.amber, C.cyan, C.violet, C.cream][i];
+    ctx.fillText(n, 140 + (1 - k) * -60, y);
+    ctx.font = `600 38px ${F_UI}`; ctx.fillStyle = C.cream; ctx.fillText(h, 210 + (1 - k) * 80, y + 2);
+    ctx.font = `400 22px ${F_UI}`; ctx.fillStyle = 'rgba(244,239,230,0.62)'; ctx.fillText(d, 210 + (1 - k) * 120, y + 44);
+  });
+  ctx.globalAlpha = 1 - fin;
+  // Pipeline diagram on the right, drawn on with connectors
+  const boxes = [
+    ['GLSL + Canvas 2D', 1440, 330, C.amber], ['Blender 5.2 script', 1745, 330, C.cyan],
+    ['Headless Chrome (GPU)', 1440, 500, C.amber], ['Eevee frames', 1745, 500, C.cyan],
+    ['Compositor shader', 1592, 670, C.coral], ['FFmpeg + NumPy audio', 1592, 840, C.violet],
+  ];
+  const links = [[0, 2], [1, 3], [2, 4], [3, 4], [4, 5]];
+  links.forEach(([a, b], i) => {
+    const k = eInOutCubic(seg(t, 1.9 + i * 0.18, 2.5 + i * 0.18));
+    if (k <= 0) return;
+    const A = boxes[a], B = boxes[b];
+    const x1 = A[1], y1 = A[2] + 34, x2 = B[1], y2 = B[2] - 34;
+    ctx.strokeStyle = 'rgba(244,239,230,0.45)'; ctx.lineWidth = 2; ctx.setLineDash([6, 6]); ctx.lineDashOffset = -t * 30;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(lerp(x1, x2, k), lerp(y1, y2, k)); ctx.stroke(); ctx.setLineDash([]);
+  });
+  boxes.forEach(([label, bx, by, col], i) => {
+    const k = eOutBack(seg(t, 1.5 + i * 0.15, 2.0 + i * 0.15));
+    if (k <= 0) return;
+    ctx.save(); ctx.translate(bx, by); ctx.scale(k, k);
+    ctx.fillStyle = 'rgba(244,239,230,0.06)'; ctx.strokeStyle = col; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(-140, -34, 280, 68, 12); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = col; ctx.beginPath(); ctx.arc(-118, 0, 6, 0, 7); ctx.fill();
+    ctx.font = `600 21px ${F_UI}`; ctx.fillStyle = C.cream; ctx.textAlign = 'center'; ctx.fillText(label, 8, 8); ctx.textAlign = 'left';
+    ctx.restore();
+  });
+  // Sign-off
+  ctx.globalAlpha = 1;
+  const so = eOutExpo(seg(t, 6.05, 6.8)) * (1 - seg(t, 7.3, 7.9));
+  if (so > 0) {
+    ctx.textAlign = 'center';
+    ctx.font = `700 120px ${F_DISPLAY}`; ctx.fillStyle = `rgba(244,239,230,${so})`;
+    ctx.fillText('Made by Claude', W / 2, H / 2 + 30 + (1 - so) * 40);
+    ctx.font = `500 26px ${F_MONO}`; ctx.letterSpacing = '6px'; ctx.fillStyle = `rgba(255,90,54,${so})`;
+    ctx.fillText('OPUS 5.5  ·  CLAUDE CODE  ·  2026', W / 2, H / 2 + 100);
+    ctx.letterSpacing = '0px'; ctx.textAlign = 'left';
+    ctx.fillStyle = C.coral; const lw = 300 * so; ctx.fillRect(W / 2 - lw / 2, H / 2 - 110, lw, 5);
+  }
+}
+
+// ======================================================================
+// Timeline, captions, HUD
+// ======================================================================
+const SCENES = [
+  { s: 0, e: 6, kind: '2d', draw: drawIntro, bloom: 0.8 },
+  { s: 6, e: 14, kind: 'gl', draw: drawParticles, bloom: 1.3, cap: ['02', 'GPU PARTICLES', 'WebGL2  ·  GLSL vertex shader', '400,000 particles with no stored state: each position is a pure function of time.  Flow field  →  text  →  sphere  →  torus knot.'] },
+  { s: 14, e: 22, kind: 'gl', draw: drawSDF, bloom: 0.6, cap: ['03', 'RAY-MARCHED 3D', 'GLSL fragment shader  ·  no meshes', 'Signed distance fields with smooth-min blending, soft shadows, ambient occlusion, reflections and thin-film iridescence.'] },
+  { s: 22, e: 30, kind: 'gl', draw: drawBlender, bloom: 0.45, cap: ['04', 'RIGID-BODY PHYSICS', 'Blender 5.2  ·  Bullet  ·  Eevee', '432 cubes and a chrome ball. A Python script builds the scene and bakes the simulation. Ray-traced reflections, motion blur, depth of field.'] },
+  { s: 30, e: 38, kind: '2d', draw: drawShapes, bloom: 0.0, cap: ['05', 'SHAPE-LAYER ANIMATION', 'Canvas 2D vectors', 'After Effects-style choreography in code: staggered timing, shape morphs, trim paths, squash and stretch.'] },
+  { s: 38, e: 46, kind: 'gl', draw: drawCubes, bloom: 0.9, cap: ['06', 'INSTANCED GEOMETRY', 'WebGL2 instancing  ·  1 draw call', '14,400 cubes. Three moving ripple sources interfere in the vertex shader to drive height and color.'] },
+  { s: 46, e: 52, kind: 'gl', draw: drawNoise, bloom: 0.25, cap: ['07', 'PROCEDURAL SHADER', 'GLSL fragment shader', 'Domain-warped fractal noise (fBm) lit by its own gradient, cosine color palettes, RGB-split glitch in post.'] },
+  { s: 52, e: 60, kind: '2d', draw: drawEnd, bloom: 0.5 },
+];
+SCENES[0].cap = ['01', 'KINETIC TYPOGRAPHY', 'Canvas 2D  ·  hand-written easing', 'Masked reveals, staggered letters, overshoot springs, a typewriter, letter tracking.'];
+const TRANS = [
+  { at: 6, type: 0, d: 0.8 }, { at: 14, type: 1, d: 0.7 }, { at: 22, type: 3, d: 0.36 }, { at: 30, type: 2, d: 0.9 },
+  { at: 38, type: 4, d: 0.8 }, { at: 46, type: 3, d: 0.36 }, { at: 52, type: 1, d: 0.7 },
+];
+
+function drawCaption(t, sc) {
+  const c = sc.cap; if (!c) return;
+  const lt = t - sc.s, dur = sc.e - sc.s;
+  const inStart = sc.s === 0 ? 2.3 : 0.55;
+  const a = seg(lt, inStart, inStart + 0.6), z = seg(lt, dur - 0.75, dur - 0.3);
+  if (a <= 0 || z >= 1) return;
+  const ka = eOutExpo(a), kz = eInExpo(z);
+  const x = 80, y = H - 205;
+  octx.save();
+  octx.font = `400 22px ${F_UI}`; const descW = octx.measureText(c[3]).width;
+  octx.font = `700 34px ${F_DISPLAY}`; octx.letterSpacing = '3px'; const titleW = octx.measureText(c[1]).width; octx.letterSpacing = '0px';
+  octx.font = `600 17px ${F_MONO}`; const chipW = octx.measureText('MADE WITH: ' + c[2]).width + 26;
+  const dw = Math.max(descW + 110, 92 + titleW + 20 + chipW + 34);
+  const pw = (dw) * ka * (1 - kz);
+  // panel
+  octx.fillStyle = 'rgba(8,8,14,0.62)'; octx.beginPath(); octx.roundRect(x, y, pw, 132, 10); octx.fill();
+  octx.fillStyle = C.coral; octx.fillRect(x, y, 5, 132 * ka * (1 - kz));
+  octx.beginPath(); octx.rect(x, y, pw, 132); octx.clip();
+  const ta = eOutExpo(seg(lt, inStart + 0.15, inStart + 0.8)) * (1 - kz);
+  octx.globalAlpha = ta;
+  octx.font = `600 20px ${F_MONO}`; octx.fillStyle = C.coral; octx.fillText(c[0], x + 28, y + 46);
+  octx.font = `700 34px ${F_DISPLAY}`; octx.letterSpacing = '3px'; octx.fillStyle = C.cream;
+  octx.fillText(c[1], x + 72 - (1 - ta) * 30, y + 48);
+  const tw = octx.measureText(c[1]).width; octx.letterSpacing = '0px';
+  // "made with" chip
+  const ca = eOutBack(seg(lt, inStart + 0.35, inStart + 0.8)) * (1 - kz);
+  octx.font = `600 17px ${F_MONO}`; const chip = 'MADE WITH: ' + c[2]; const cw = octx.measureText(chip).width + 26;
+  octx.globalAlpha = clamp01(ca);
+  octx.strokeStyle = C.amber; octx.lineWidth = 1.5; octx.beginPath(); octx.roundRect(x + 92 + tw, y + 22, cw * clamp01(ca), 34, 17); octx.stroke();
+  octx.fillStyle = C.amber; if (ca > 0.6) octx.fillText(chip, x + 105 + tw, y + 45);
+  const da = eOutExpo(seg(lt, inStart + 0.3, inStart + 1.0)) * (1 - kz);
+  octx.globalAlpha = da; octx.font = `400 22px ${F_UI}`; octx.fillStyle = 'rgba(244,239,230,0.82)';
+  octx.fillText(c[3], x + 72, y + 98 + (1 - da) * 16);
+  octx.restore();
+}
+function drawHUD(t, si) {
+  const a = seg(t, 5.2, 6.2) * (1 - seg(t, 51.7, 52.3));
+  if (a <= 0) return;
+  octx.save(); octx.globalAlpha = a * 0.85;
+  octx.font = `600 18px ${F_MONO}`; octx.letterSpacing = '5px'; octx.fillStyle = C.cream;
+  octx.fillText('CLAUDE / MOTION REEL', 80, 72);
+  octx.textAlign = 'right';
+  octx.fillText(`${String(si + 1).padStart(2, '0')} / 08`, W - 80, 72);
+  const sec = Math.floor(t), fr = Math.floor((t - sec) * FPS + 1e-6);
+  octx.letterSpacing = '2px'; octx.fillStyle = 'rgba(244,239,230,0.7)';
+  octx.fillText(`00:00:${String(sec).padStart(2, '0')}:${String(fr).padStart(2, '0')}`, W - 80, H - 60);
+  octx.restore();
+  octx.globalAlpha = a; octx.fillStyle = 'rgba(244,239,230,0.12)'; octx.fillRect(0, H - 4, W, 4);
+  octx.fillStyle = C.coral; octx.fillRect(0, H - 4, W * t / 60, 4); octx.globalAlpha = 1;
+}
+// Noise scene: words slam in on the beat
+function drawSlam(t) {
+  const lt = t - 46; if (lt < 0 || lt > 6) return;
+  const words = [['ANYTHING', 0.5], ['THAT', 1.0], ['MOVES.', 1.5]];
+  const out = eInExpo(seg(lt, 4.6, 5.2));
+  octx.save(); octx.textAlign = 'center'; octx.font = `700 170px ${F_DISPLAY}`; octx.letterSpacing = '6px';
+  words.forEach(([w, at], i) => {
+    const k = seg(lt, at, at + 0.12); if (k <= 0) return;
+    const sc = lerp(1.6, 1, eOutExpo(k)) * (1 + 0.03 * Math.exp(-(lt - at) * 8));
+    octx.save(); octx.translate(W / 2, 330 + i * 190 - out * 900 * (i + 1) / 3); octx.scale(sc, sc);
+    octx.globalAlpha = k;
+    octx.shadowColor = 'rgba(5,3,12,0.75)'; octx.shadowBlur = 40; octx.shadowOffsetY = 8;
+    octx.fillStyle = i === 2 ? C.coral : C.cream; octx.fillText(w, 0, 60);
+    octx.restore();
+  });
+  octx.restore();
+}
+
+// ---------- compositor ----------
+const compP = prog(FSQ_VS, `#version 300 es
+precision highp float; in vec2 vUv; out vec4 o;
+uniform sampler2D uA,uB,uOv; uniform float uP,uFrame,uGlitch,uCA,uFade,uBloomA,uBloomB; uniform int uType,uHasB;
+${GLSL_COMMON}
+float sdMask(vec2 uv){
+  float p=uP; vec2 a=vec2(uv.x*1.7778,uv.y); float r=length(a-vec2(.8889,.5));
+  if(uType==0) return r-p*1.1;
+  if(uType==1) return (uv.x*1.7778+(1.-uv.y))/2.7778-(p*1.3-.15);
+  if(uType==2){float bar=floor(uv.x*10.);float lp=clamp((p-bar*.04)/.6,0.,1.);return (1.-uv.y)-lp*1.02;}
+  if(uType==4) return (1.-p)*1.1-r;
+  return .5-p;
+}
+vec3 bloom(sampler2D s,vec2 uv){vec3 b=textureLod(s,uv,3.).rgb*.45+textureLod(s,uv,5.).rgb*.35+textureLod(s,uv,6.5).rgb*.3;return max(b-.45,0.)*1.4;}
+vec3 sceneAt(vec2 uv,float m,float ca){
+  vec2 off=(uv-.5)*ca;
+  vec3 a=vec3(texture(uA,uv+off).r,texture(uA,uv).g,texture(uA,uv-off).b)+bloom(uA,uv)*uBloomA;
+  if(uHasB==0) return a;
+  vec3 b=vec3(texture(uB,uv+off).r,texture(uB,uv).g,texture(uB,uv-off).b)+bloom(uB,uv)*uBloomB;
+  return mix(a,b,m);
+}
+void main(){
+  vec2 uv=vUv;
+  if(uGlitch>0.){
+    float row=floor(uv.y*36.); float h=hash21(vec2(row,floor(uFrame/2.)));
+    if(h<uGlitch*.7) uv.x+=(hash21(vec2(row,uFrame))-.5)*.18*uGlitch;
+    float blk=hash21(floor(uv*vec2(8.,14.))+floor(uFrame/3.));
+    if(blk<uGlitch*.12) uv=fract(uv+vec2(.1,0));
+  }
+  float sd=sdMask(uv); float m=uHasB==1?smoothstep(.0015,-.0015,sd):0.;
+  float ca=uCA+uGlitch*.014;
+  vec3 col=sceneAt(uv,m,ca);
+  if(uHasB==1&&uP>0.&&uP<1.&&uType!=3) col+=vec3(1.,.36,.2)*exp(-abs(sd)*160.)*1.2;
+  vec4 ov=texture(uOv,uv);
+  col=mix(col,ov.rgb,ov.a);
+  float v=smoothstep(1.25,.3,length((vUv-.5)*vec2(1.5,1.)));
+  col*=mix(1.,v,.5);
+  col+=(hash21(vUv*vec2(1920.,1080.)+fract(uFrame*.618)*100.)-.5)*.04;
+  col*=1.-uFade;
+  o=vec4(col,1);
+}`);
+
+const tA = makeTarget(), tB = makeTarget();
+async function renderScene(sc, t, target) {
+  const lt = t - sc.s;
+  begin(target);
+  if (sc.kind === '2d') { sc.draw(lt); upload(s2dTex, s2d); begin(target); blit(s2dTex); }
+  else await sc.draw(lt);
+  end(target);
+}
+
+async function renderFrame(f) {
+  const t = f / FPS;
+  let A = null, B = null, tr = null, p = 0;
+  for (const x of TRANS) if (Math.abs(t - x.at) < x.d / 2) { tr = x; p = (t - (x.at - x.d / 2)) / x.d; }
+  let si = SCENES.findIndex(s => t >= s.s && t < s.e); if (si < 0) si = SCENES.length - 1;
+  if (tr) { A = SCENES.find(s => s.e === tr.at); B = SCENES.find(s => s.s === tr.at); }
+  else A = SCENES[si];
+  await renderScene(A, t, tA);
+  if (B) await renderScene(B, t, tB);
+  // overlay
+  octx.setTransform(1, 0, 0, 1, 0, 0); octx.clearRect(0, 0, W, H); octx.globalAlpha = 1;
+  drawHUD(t, si);
+  drawSlam(t);
+  for (const sc of SCENES) if (t >= sc.s - 0.5 && t < sc.e + 0.5) drawCaption(t, sc);
+  upload(ovTex, ov);
+  // glitch drivers: hard cuts and the word slams
+  let glitch = 0;
+  for (const x of TRANS) if (x.type === 3) glitch = Math.max(glitch, Math.exp(-Math.abs(t - x.at) * 9));
+  for (const at of [46.5, 47.0, 47.5]) if (t >= at) glitch = Math.max(glitch, 0.7 * Math.exp(-(t - at) * 14));
+  if (t > 50.6 && t < 51.3) glitch = Math.max(glitch, 0.5 * Math.sin((t - 50.6) / 0.7 * Math.PI));
+  if (glitch < 0.002) glitch = 0;
+  const ca = 0.0015 +(tr && tr.type !== 3 ? Math.sin(p * Math.PI) * 0.006 : 0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null); gl.viewport(0, 0, W, H);
+  gl.useProgram(compP.p);
+  [[tA.tex, 'uA'], [tB.tex, 'uB'], [ovTex, 'uOv']].forEach(([tx, n], i) => { gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, tx); gl.uniform1i(compP.u[n], i); });
+  gl.uniform1f(compP.u.uP, tr ? (tr.type === 3 ? p : eInOutCubic(clamp01(p))) : 0);
+  gl.uniform1i(compP.u.uType, tr ? tr.type : 0); gl.uniform1i(compP.u.uHasB, B ? 1 : 0);
+  gl.uniform1f(compP.u.uFrame, f); gl.uniform1f(compP.u.uBloomA, A.bloom); gl.uniform1f(compP.u.uBloomB, B ? B.bloom : 0); gl.uniform1f(compP.u.uGlitch, glitch); gl.uniform1f(compP.u.uCA, ca);
+  gl.uniform1f(compP.u.uFade, Math.max(1 - seg(t, 0, 0.15), seg(t, 59.4, 59.95)));
+  fsq();
+  gl.finish();
+  return true;
+}
+
+window.ready = document.fonts.load(`700 100px ${F_DISPLAY}`).then(() => Promise.all([
+  document.fonts.load(`400 20px ${F_MONO}`), document.fonts.load(`400 20px ${F_UI}`)
+])).then(() => { initParticles(); initCubes(); return true; });
+window.renderFrame = renderFrame;
+</script>
+</body>
+</html>

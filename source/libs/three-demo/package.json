@@ -1,0 +1,12 @@
+{
+  "name": "three-demo",
+  "private": true,
+  "description": "Source of site/vendor/three-demo.js (the three-configurator card).",
+  "scripts": {
+    "build": "esbuild three-entry.js --bundle --format=iife --minify --legal-comments=none --outfile=../../../site/vendor/three-demo.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "three": "0.186.1"
+  }
+}

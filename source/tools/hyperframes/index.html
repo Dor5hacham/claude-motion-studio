@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1280, height=720" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      /* OS-bundled Windows fonts, resolved locally by the render browser */
+      @font-face { font-family: "Bahnschrift"; src: local("Bahnschrift"); font-weight: 300 700; font-stretch: 75% 100%; }
+      @font-face { font-family: "Segoe UI"; src: local("Segoe UI"); font-weight: 400; }
+      @font-face { font-family: "Segoe UI"; src: local("Segoe UI Semibold"); font-weight: 600; }
+      @font-face { font-family: "Segoe UI"; src: local("Segoe UI Bold"); font-weight: 700; }
+      @font-face { font-family: "Cascadia Mono"; src: local("Cascadia Mono"); font-weight: 200 700; }
+      :root {
+        --ink: #0b0b10;
+        --coral: #ff5a36;
+        --amber: #ffb020;
+        --cyan: #2bc4e6;
+        --violet: #7a5cff;
+        --cream: #f4efe6;
+        --panel: #13131b;
+        --line: rgba(244, 239, 230, 0.09);
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1280px;
+        height: 720px;
+        overflow: hidden;
+        background: var(--ink);
+        color: var(--cream);
+        font-family: "Segoe UI", system-ui, sans-serif;
+      }
+      #root { position: relative; width: 1280px; height: 720px; overflow: hidden; }
+
+      /* Persistent backdrop */
+      .bg-grid {
+        position: absolute; inset: -80px;
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px);
+        background-size: 64px 64px;
+        mask-image: radial-gradient(ellipse at center, #000 30%, transparent 75%);
+      }
+      .blob { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.55; }
+      .blob.a { width: 520px; height: 520px; left: -120px; top: -160px; background: var(--violet); }
+      .blob.b { width: 460px; height: 460px; right: -140px; bottom: -180px; background: var(--coral); opacity: 0.4; }
+      .vignette {
+        position: absolute; inset: 0; pointer-events: none;
+        background: radial-gradient(ellipse at center, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
+      }
+
+      /* Timed scenes share a full-frame box */
+      .clip.scene { position: absolute; inset: 0; }
+
+      /* Scene 1: kinetic headline */
+      #s-head { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      .kicker {
+        font-family: "Cascadia Mono", monospace; font-size: 18px; letter-spacing: 0.42em;
+        color: var(--amber); margin-bottom: 26px; clip-path: inset(0 100% 0 0);
+      }
+      .headline {
+        display: flex; gap: 30px;
+        font-family: "Bahnschrift", sans-serif; font-weight: 700; font-stretch: condensed;
+        font-size: 148px; line-height: 1; letter-spacing: -0.01em; text-transform: uppercase;
+      }
+      .word { overflow: hidden; padding: 0 4px 10px; }
+      .word > span { display: inline-block; }
+      .word.hot > span { color: var(--coral); }
+      .underline {
+        width: 560px; height: 8px; margin-top: 18px; border-radius: 4px;
+        background: linear-gradient(90deg, var(--coral), var(--amber));
+        transform-origin: left center; transform: scaleX(0);
+      }
+
+      /* Scene 2: UI mockup */
+      #s-ui { perspective: 1400px; }
+      .window {
+        position: absolute; left: 190px; top: 56px; width: 900px; height: 520px;
+        background: linear-gradient(180deg, #171722, #101017);
+        border: 1px solid rgba(244, 239, 230, 0.12); border-radius: 18px;
+        box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(122, 92, 255, 0.15);
+        overflow: hidden; transform-origin: 50% 80%;
+      }
+      .titlebar {
+        height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      .dot { width: 12px; height: 12px; border-radius: 50%; }
+      .url {
+        margin-left: 18px; padding: 5px 14px; border-radius: 8px; background: rgba(244, 239, 230, 0.06);
+        font-family: "Cascadia Mono", monospace; font-size: 13px; color: rgba(244, 239, 230, 0.6);
+      }
+      .deploy-btn {
+        margin-left: auto; padding: 7px 18px; border-radius: 9px; font-weight: 600; font-size: 14px;
+        background: #ff7352; color: #0b0b10; box-shadow: 0 6px 24px rgba(255, 90, 54, 0.45);
+      }
+      .body { display: flex; height: calc(100% - 44px); }
+      .sidebar { width: 180px; padding: 22px 14px; border-right: 1px solid var(--line); }
+      .nav {
+        display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px;
+        font-size: 14px; color: rgba(244, 239, 230, 0.6); margin-bottom: 4px;
+      }
+      .nav i { width: 14px; height: 14px; border-radius: 4px; background: rgba(244, 239, 230, 0.25); }
+      .nav.active { background: rgba(122, 92, 255, 0.18); color: var(--cream); }
+      .nav.active i { background: var(--violet); }
+      .main { flex: 1; padding: 22px 26px; display: grid; grid-template-columns: 1fr 230px; gap: 20px; }
+      .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 239, 230, 0.5); }
+      .stat { display: flex; align-items: flex-end; gap: 14px; margin-top: 6px; }
+      .odo {
+        display: flex; font-family: "Bahnschrift", sans-serif; font-weight: 700; font-size: 64px;
+        line-height: 72px; height: 72px; overflow: hidden;
+      }
+      .odo .col { display: flex; flex-direction: column; text-align: center; font-variant-numeric: tabular-nums; }
+      .odo .sep { width: 18px; }
+      .delta {
+        margin-bottom: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 15px;
+        background: rgba(255, 176, 32, 0.15); color: var(--amber);
+      }
+      .chart {
+        margin-top: 18px; height: 250px; border-radius: 14px; border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.02); position: relative; overflow: hidden;
+      }
+      .chart svg { position: absolute; inset: 0; }
+      .bars { position: absolute; left: 24px; right: 24px; bottom: 18px; height: 120px; display: flex; gap: 14px; align-items: flex-end; }
+      .bar { flex: 1; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, rgba(122, 92, 255, 0.85), rgba(122, 92, 255, 0.15)); transform-origin: bottom; }
+      .side { display: flex; flex-direction: column; gap: 12px; padding-top: 2px; }
+      .svc {
+        padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025);
+        display: flex; align-items: center; justify-content: space-between; font-size: 15px;
+      }
+      .svc .name { font-family: "Cascadia Mono", monospace; font-size: 14px; }
+      .pill { position: relative; width: 78px; height: 24px; }
+      .pill span {
+        position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
+      }
+      .pill .build { background: rgba(255, 176, 32, 0.16); color: var(--amber); }
+      .pill .live { background: rgba(43, 196, 230, 0.18); color: var(--cyan); opacity: 0; }
+      .cursor { position: absolute; left: 0; top: 0; width: 28px; height: 28px; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6)); }
+      .ripple {
+        position: absolute; left: 0; top: 0; width: 60px; height: 60px; margin: -30px 0 0 -30px; border-radius: 50%;
+        border: 2px solid var(--coral); opacity: 0;
+      }
+      .toast {
+        position: absolute; right: 120px; bottom: 112px; display: flex; align-items: center; gap: 14px;
+        padding: 14px 20px 14px 14px; border-radius: 14px; background: #1c1c27;
+        border: 1px solid rgba(255, 90, 54, 0.4); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+        font-size: 16px;
+      }
+      .toast .check {
+        width: 34px; height: 34px; border-radius: 10px; background: var(--coral);
+        display: flex; align-items: center; justify-content: center;
+      }
+      .toast b { color: var(--amber); }
+
+      /* Scene 3: logo lockup */
+      #s-logo { display: flex; align-items: center; justify-content: center; flex-direction: column; }
+      .lockup { display: flex; align-items: center; gap: 26px; }
+      .mark { width: 120px; height: 120px; }
+      .wordmark {
+        display: flex; font-family: "Bahnschrift", sans-serif; font-weight: 700; font-size: 120px;
+        letter-spacing: -0.02em; overflow: hidden; padding-bottom: 8px;
+      }
+      .wordmark span { display: inline-block; }
+      .wordmark .ver { color: var(--coral); margin-left: 18px; }
+      .tagline {
+        margin-top: 18px; font-family: "Cascadia Mono", monospace; font-size: 20px; letter-spacing: 0.3em;
+        color: rgba(244, 239, 230, 0.75);
+      }
+      .tagline em { font-style: normal; color: var(--amber); }
+      .bursts { position: absolute; inset: 0; }
+
+      /* Caption track (subtitles) */
+      .cap {
+        position: absolute; left: 50%; bottom: 40px; transform: translateX(-50%);
+        padding: 10px 22px; border-radius: 12px; white-space: nowrap;
+        background: rgba(11, 11, 16, 0.72); border: 1px solid rgba(244, 239, 230, 0.1);
+        font-size: 26px; font-weight: 600; letter-spacing: 0.01em;
+      }
+      .cap .w { color: rgba(244, 239, 230, 0.38); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1280" data-height="720" data-fps="30">
+      <div class="bg-grid" id="grid"></div>
+      <div class="blob a" id="blobA" data-layout-allow-overflow></div>
+      <div class="blob b" id="blobB" data-layout-allow-overflow></div>
+
+      <!-- Scene 1: kinetic headline -->
+      <section id="s-head" class="clip scene" data-start="0" data-duration="2.4" data-track-index="1">
+        <div class="kicker" id="kicker">INTRODUCING PULSE 2.0</div>
+        <div class="headline">
+          <div class="word"><span>Ship</span></div>
+          <div class="word"><span>every</span></div>
+          <div class="word hot"><span>idea.</span></div>
+        </div>
+        <div class="underline" id="underline"></div>
+      </section>
+
+      <!-- Scene 2: animated UI mockup -->
+      <section id="s-ui" class="clip scene" data-start="2.1" data-duration="3.8" data-track-index="2">
+        <div class="window" id="win">
+          <div class="titlebar">
+            <div class="dot" style="background: #ff5a36"></div>
+            <div class="dot" style="background: #ffb020"></div>
+            <div class="dot" style="background: #2bc4e6"></div>
+            <div class="url">pulse.app/deploys</div>
+            <div class="deploy-btn" id="btn">Deploy</div>
+          </div>
+          <div class="body">
+            <div class="sidebar">
+              <div class="nav active"><i></i>Deploys</div>
+              <div class="nav"><i></i>Services</div>
+              <div class="nav"><i></i>Metrics</div>
+              <div class="nav"><i></i>Logs</div>
+              <div class="nav"><i></i>Settings</div>
+            </div>
+            <div class="main">
+              <div>
+                <div class="label">Deploys this week</div>
+                <div class="stat">
+                  <div class="odo" id="odo" data-layout-allow-overflow data-layout-allow-occlusion></div>
+                  <div class="delta" id="delta">+38%</div>
+                </div>
+                <div class="chart">
+                  <svg width="414" height="250" viewBox="0 0 414 250">
+                    <defs>
+                      <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#2bc4e6" stop-opacity="0.35" />
+                        <stop offset="1" stop-color="#2bc4e6" stop-opacity="0" />
+                      </linearGradient>
+                      <clipPath id="reveal"><rect id="revealRect" x="0" y="0" width="0" height="250" /></clipPath>
+                    </defs>
+                    <path clip-path="url(#reveal)" fill="url(#fill)" d="M0 150 C40 140 60 100 100 108 S160 150 200 110 S270 50 310 64 S380 30 414 22 L414 250 L0 250 Z" />
+                    <path id="line" fill="none" stroke="#2bc4e6" stroke-width="3.5" stroke-linecap="round" d="M0 150 C40 140 60 100 100 108 S160 150 200 110 S270 50 310 64 S380 30 414 22" />
+                    <circle id="tip" cx="407" cy="24" r="6" fill="#2bc4e6" opacity="0" />
+                  </svg>
+                  <div class="bars">
+                    <div class="bar" style="height: 40%"></div>
+                    <div class="bar" style="height: 62%"></div>
+                    <div class="bar" style="height: 48%"></div>
+                    <div class="bar" style="height: 75%"></div>
+                    <div class="bar" style="height: 58%"></div>
+                    <div class="bar" style="height: 88%"></div>
+                    <div class="bar" style="height: 100%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="side" data-layout-allow-overlap>
+                <div class="label">Services</div>
+                <div class="svc"><span class="name">api</span><div class="pill"><span class="build" data-layout-allow-overlap>BUILD</span><span class="live" data-layout-allow-overlap>LIVE</span></div></div>
+                <div class="svc"><span class="name">web</span><div class="pill"><span class="build" data-layout-allow-overlap>BUILD</span><span class="live" data-layout-allow-overlap>LIVE</span></div></div>
+                <div class="svc"><span class="name">worker</span><div class="pill"><span class="build" data-layout-allow-overlap>BUILD</span><span class="live" data-layout-allow-overlap>LIVE</span></div></div>
+                <div class="svc"><span class="name">edge</span><div class="pill"><span class="build" data-layout-allow-overlap>BUILD</span><span class="live" data-layout-allow-overlap>LIVE</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ripple" id="ripple"></div>
+        <svg class="cursor" id="cursor" viewBox="0 0 24 24"><path d="M3 2 L20 12 L12 13.5 L8.5 21 Z" fill="#f4efe6" stroke="#0b0b10" stroke-width="1.5" stroke-linejoin="round" /></svg>
+        <div class="toast" id="toast">
+          <div class="check"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M4 12.5 L10 18 L20 6" fill="none" stroke="#0b0b10" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" /></svg></div>
+          <div>Deployed to production in <b>4.2s</b></div>
+        </div>
+      </section>
+
+      <!-- Scene 3: logo lockup -->
+      <section id="s-logo" class="clip scene" data-start="5.8" data-duration="2.2" data-track-index="3">
+        <svg class="bursts" width="1280" height="720" viewBox="0 0 1280 720">
+          <circle class="burst" cx="640" cy="330" r="0" fill="none" stroke="#ff5a36" stroke-width="3" />
+          <circle class="burst" cx="640" cy="330" r="0" fill="none" stroke="#ffb020" stroke-width="2" />
+          <circle class="burst" cx="640" cy="330" r="0" fill="none" stroke="#2bc4e6" stroke-width="1.5" />
+        </svg>
+        <div class="lockup">
+          <svg class="mark" id="mark" viewBox="0 0 120 120">
+            <circle id="ring" cx="60" cy="60" r="52" fill="none" stroke="#ff5a36" stroke-width="8" stroke-linecap="round" transform="rotate(-90 60 60)" />
+            <path id="wave" d="M22 62 L42 62 L50 40 L62 86 L72 52 L78 62 L98 62" fill="none" stroke="#ffb020" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <div class="wordmark" id="wordmark">
+            <span>P</span><span>u</span><span>l</span><span>s</span><span>e</span><span class="ver">2.0</span>
+          </div>
+        </div>
+        <div class="tagline" id="tagline">AVAILABLE TODAY <em>/</em> PULSE.APP</div>
+      </section>
+
+      <!-- Caption track: each line is a timed clip -->
+      <div id="cap1" class="clip cap" data-start="0.35" data-duration="1.95" data-track-index="4"><span class="w">Meet</span> <span class="w">Pulse</span> <span class="w">2.0.</span></div>
+      <div id="cap2" class="clip cap" data-start="2.4" data-duration="1.6" data-track-index="4"><span class="w">Every</span> <span class="w">deploy,</span> <span class="w">live</span> <span class="w">on</span> <span class="w">one</span> <span class="w">screen.</span></div>
+      <div id="cap3" class="clip cap" data-start="4.05" data-duration="1.7" data-track-index="4"><span class="w">One</span> <span class="w">click.</span> <span class="w">Production</span> <span class="w">in</span> <span class="w">seconds.</span></div>
+      <div id="cap4" class="clip cap" data-start="5.95" data-duration="1.9" data-track-index="4"><span class="w">Available</span> <span class="w">today.</span></div>
+
+      <div class="vignette"></div>
+    </div>
+
+    <script>
+      // Build the odometer: one 0-9 digit strip per column, target value 12,480.
+      const target = "12,480";
+      const odo = document.getElementById("odo");
+      const cols = [];
+      for (const ch of target) {
+        if (ch === ",") {
+          const s = document.createElement("div");
+          s.className = "sep";
+          s.textContent = ",";
+          odo.appendChild(s);
+          continue;
+        }
+        const col = document.createElement("div");
+        col.className = "col";
+        for (let d = 0; d <= 9; d++) {
+          const n = document.createElement("div");
+          n.textContent = String(d);
+          // Off-mask digits are hidden on purpose; tell the layout checker.
+          n.setAttribute("data-layout-allow-occlusion", "");
+          n.setAttribute("data-layout-allow-overflow", "");
+          col.appendChild(n);
+        }
+        col.dataset.digit = ch;
+        col.setAttribute("data-layout-allow-overflow", "");
+        odo.appendChild(col);
+        cols.push(col);
+      }
+
+      const E = "expo.out";
+      const tl = gsap.timeline({ paused: true });
+
+      // Backdrop drift across the whole piece
+      tl.fromTo("#grid", { x: 0, y: 0 }, { x: -64, y: -32, duration: 8, ease: "none" }, 0);
+      tl.fromTo("#blobA", { x: 0, y: 0 }, { x: 220, y: 120, duration: 8, ease: "sine.inOut" }, 0);
+      tl.fromTo("#blobB", { x: 0, y: 0 }, { x: -260, y: -80, duration: 8, ease: "sine.inOut" }, 0);
+
+      // Scene 1: kicker types on, words slam up through masks, underline sweeps
+      tl.fromTo("#kicker", { clipPath: "inset(0 46% 0 0)" }, { clipPath: "inset(0 0% 0 0)", duration: 0.45, ease: "steps(10)" }, 0.1);
+      tl.from(".word > span", { yPercent: 115, rotation: 6, duration: 0.7, stagger: 0.12, ease: E }, 0.25);
+      tl.to("#underline", { scaleX: 1, duration: 0.6, ease: "power4.inOut" }, 0.85);
+      tl.to(".headline", { scale: 1.04, duration: 1.2, ease: "none" }, 0.9);
+      tl.to(".word > span", { yPercent: -120, duration: 0.32, stagger: 0.04, ease: "power3.in" }, 1.85);
+      tl.to(["#kicker", "#underline"], { opacity: 0, y: -20, duration: 0.25, ease: "power2.in" }, 1.85);
+      tl.to("#underline", { scaleX: 0, transformOrigin: "right center", duration: 0.3, ease: "power3.in" }, 1.85);
+
+      // Scene 2: window rises with a 3D tilt, then contents build
+      tl.fromTo("#win", { y: 160, rotationX: 28, scale: 0.9, opacity: 0 }, { y: 0, rotationX: 0, scale: 1, opacity: 1, duration: 0.9, ease: E }, 2.22);
+      tl.from(".nav", { x: -24, opacity: 0, duration: 0.4, stagger: 0.05, ease: "power3.out" }, 2.45);
+      cols.forEach((col, i) => {
+        const d = Number(col.dataset.digit);
+        tl.fromTo(col, { y: 0 }, { y: -72 * d, duration: 1.0 + i * 0.12, ease: "power3.out" }, 2.55);
+      });
+      tl.from("#delta", { scale: 0, opacity: 0, duration: 0.4, ease: "back.out(2.5)" }, 3.5);
+      tl.fromTo(".bar", { scaleY: 0 }, { scaleY: 1, duration: 0.6, stagger: 0.06, ease: E }, 2.6);
+      tl.fromTo("#line", { strokeDasharray: 520, strokeDashoffset: 520 }, { strokeDashoffset: 0, duration: 1.1, ease: "power2.inOut" }, 2.75);
+      tl.to("#revealRect", { attr: { width: 414 }, duration: 1.1, ease: "power2.inOut" }, 2.75);
+      tl.fromTo("#tip", { opacity: 0, scale: 0, transformOrigin: "50% 50%" }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(3)" }, 3.8);
+      tl.from(".svc", { x: 30, opacity: 0, duration: 0.45, stagger: 0.07, ease: "power3.out" }, 2.6);
+
+      // Cursor glides to Deploy, clicks, services flip to LIVE, toast slides in
+      tl.fromTo("#cursor", { x: 640, y: 520, opacity: 0 }, { x: 980, y: 82, opacity: 1, duration: 0.9, ease: "power3.inOut" }, 3.45);
+      tl.to("#btn", { scale: 0.9, duration: 0.08, ease: "power1.in" }, 4.35);
+      tl.to("#btn", { scale: 1, duration: 0.2, ease: "back.out(3)" }, 4.43);
+      tl.fromTo("#ripple", { x: 980, y: 82, scale: 0.2, opacity: 1 }, { scale: 1.6, opacity: 0, duration: 0.5, ease: "power2.out", immediateRender: false }, 4.35);
+      tl.to(".pill .build", { opacity: 0, duration: 0.2, stagger: 0.12 }, 4.5);
+      tl.to(".pill .live", { opacity: 1, duration: 0.2, stagger: 0.12 }, 4.5);
+      tl.fromTo("#toast", { y: 40, opacity: 0, scale: 0.94 }, { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: E }, 4.65);
+      tl.to("#cursor", { x: 1010, y: 140, opacity: 0, duration: 0.5, ease: "power2.in" }, 4.9);
+
+      // Scene 2 exit: everything pushes back and fades
+      tl.to(["#win", "#toast"], { scale: 0.88, opacity: 0, y: -40, duration: 0.4, ease: "power2.in" }, 5.42);
+
+      // Scene 3: ring draws, pulse wave traces, wordmark rises, bursts expand
+      tl.fromTo("#ring", { strokeDasharray: 327, strokeDashoffset: 327 }, { strokeDashoffset: 0, duration: 0.8, ease: "power3.inOut" }, 5.85);
+      tl.fromTo("#wave", { strokeDasharray: 140, strokeDashoffset: 140 }, { strokeDashoffset: 0, duration: 0.7, ease: "power2.inOut" }, 6.05);
+      tl.from("#mark", { scale: 0.6, rotation: -40, duration: 0.8, ease: E }, 5.85);
+      tl.from("#wordmark span", { yPercent: 110, duration: 0.6, stagger: 0.05, ease: E }, 6);
+      tl.fromTo("#tagline", { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.7, ease: E }, 6.4);
+      tl.fromTo(".burst", { attr: { r: 20 }, opacity: 0.9 }, { attr: { r: 760 }, opacity: 0, duration: 1.4, stagger: 0.12, ease: "power2.out", immediateRender: false }, 6);
+
+      tl.fromTo(".lockup", { scale: 0.97 }, { scale: 1.03, duration: 2.2, ease: "none" }, 5.8);
+
+      // Captions: fade each line in, then light words up karaoke-style
+      const caps = [
+        ["#cap1", 0.35, 0.45],
+        ["#cap2", 2.4, 0.22],
+        ["#cap3", 4.05, 0.22],
+        ["#cap4", 5.95, 0.35],
+      ];
+      caps.forEach(([sel, start, step]) => {
+        tl.from(sel, { y: 14, opacity: 0, duration: 0.25, ease: "power2.out" }, start);
+        document.querySelectorAll(sel + " .w").forEach((w, i) => {
+          tl.to(w, { color: "#ffb020", duration: 0.08 }, start + 0.1 + i * step);
+          tl.to(w, { color: "#f4efe6", duration: 0.2 }, start + 0.1 + (i + 1) * step);
+        });
+      });
+
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
