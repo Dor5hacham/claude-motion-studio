@@ -1,7 +1,10 @@
-# Builds a 3D text logo reveal in Eevee: the word "MOTION" in Bahnschrift, extruded, converted
-# to mesh and beveled with a Bevel modifier (no spikes on sharp corners), one object per letter. Letters rise out of a glossy floor with a staggered
-# overshoot (BACK easing), a light strip sweeps across the metallic bevels, and the
-# camera pushes in. Coral glossy faces, cream-gold metallic bevels.
+# Builds a 3D text logo reveal in Eevee: the word "MOTION" in Segoe UI Bold, extruded, converted
+# to mesh and beveled with a Bevel modifier (no spikes on sharp corners), one object per letter.
+# Letters rise out of a glossy floor with a staggered overshoot (BACK easing); the first letter
+# is already breaking the floor on frame 1. A light strip sweeps across the metallic bevels and
+# the camera pushes in. Coral glossy faces, cream-gold metallic bevels. Floor and back wall are one
+# curved cyc whose violet glow fades out toward the floor, so there is no hard horizon line. The cyan rim light is linked to
+# the letters only, so it leaves no glow on the floor.
 # Usage: blender -b -P 3d-logo.py -- <out_dir> [test_frame]
 import bpy, bmesh, sys, math
 
@@ -102,7 +105,8 @@ nt.links.new(mix.outputs["Shader"], addsh.inputs[0]); nt.links.new(emit.outputs[
 nt.links.new(addsh.outputs["Shader"], out_node.inputs["Surface"])
 
 # ---- Letters ----
-font = bpy.data.fonts.load(r"C:\Windows\Fonts\bahnschrift.ttf")
+# A static bold TTF: Bahnschrift is a variable font and Blender only loads its Regular instance
+font = bpy.data.fonts.load(r"C:\Windows\Fonts\segoeuib.ttf")
 letters = []
 for ch in WORD:
     cu = bpy.data.curves.new("L_" + ch, "FONT")
@@ -141,7 +145,7 @@ for i, (o, w) in enumerate(zip(letters, widths)):
     x += w + GAP
     # Text lies in local XY; rotate 90 deg on X so it stands up facing -Y (camera).
     # Baseline sits slightly above the floor so the extrusion back does not clip it.
-    start = 6 + i * 6
+    start = -9 + i * 6     # first letters start before frame 1, so frame 1 already shows them rising
     land = start + 22
     o.location = (cx, 0.0, -2.2)
     o.rotation_euler = (FINAL_ROT + math.radians(-75), 0, math.radians(-14 + 5 * i))
@@ -170,38 +174,60 @@ for o in letters:
         kp.easing = "EASE_OUT"
         kp.back = 2.2
 
-# ---- Floor: dark glossy, hides letters before they rise ----
-fm = bpy.data.materials.new("Floor"); fm.use_nodes = True
-fp = fm.node_tree.nodes["Principled BSDF"]
+# ---- Floor and backdrop: one seamless cyc (floor curving up into a back wall) ----
+# Dark glossy everywhere, so there is no seam; the wall carries a soft violet glow that fades
+# out toward the floor. The floor part hides the letters before they rise.
+cbm = bmesh.new()
+CW, CD, CH = 80.0, 13.0, 26.0
+cv = [cbm.verts.new(v) for v in [(-CW / 2, -40, 0), (CW / 2, -40, 0), (CW / 2, CD, 0), (-CW / 2, CD, 0),
+                                  (CW / 2, CD, CH), (-CW / 2, CD, CH)]]
+cbm.faces.new([cv[0], cv[1], cv[2], cv[3]])
+cbm.faces.new([cv[3], cv[2], cv[4], cv[5]])
+cyc_me = bpy.data.meshes.new("Cyc")
+cbm.to_mesh(cyc_me); cbm.free()
+for poly in cyc_me.polygons:
+    poly.use_smooth = True
+cyc = bpy.data.objects.new("Cyc", cyc_me); sc.collection.objects.link(cyc)
+cbv = cyc.modifiers.new("Bevel", "BEVEL"); cbv.width = 6.0; cbv.segments = 32; cbv.limit_method = "ANGLE"
+fm = bpy.data.materials.new("Cyc"); fm.use_nodes = True
+fnt = fm.node_tree
+fp = fnt.nodes["Principled BSDF"]
 fp.inputs["Base Color"].default_value = (0.008, 0.008, 0.011, 1)
 fp.inputs["Roughness"].default_value = 0.2
 if "Specular IOR Level" in fp.inputs:
     fp.inputs["Specular IOR Level"].default_value = 0.5
-bpy.ops.mesh.primitive_plane_add(size=80, location=(0, 0, 0))
-bpy.context.object.data.materials.append(fm)
-
-# ---- Backdrop: soft violet glow far behind the word ----
-bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 14, 4), rotation=(math.radians(90), 0, 0))
-bd = bpy.context.object
-bd.scale = (60, 24, 1)
-bm_mat = bpy.data.materials.new("Backdrop"); bm_mat.use_nodes = True
-bnt = bm_mat.node_tree
-bnt.nodes.remove(bnt.nodes["Principled BSDF"])
-btc = bnt.nodes.new("ShaderNodeTexCoord")
-# Ellipse centered behind the word (object Y -0.13 is world Z ~0.8)
-bmap = bnt.nodes.new("ShaderNodeMapping"); bmap.inputs["Location"].default_value = (0, 1.2, 0)
-bmap.inputs["Scale"].default_value = (3.2, 9.0, 1)
-bnt.links.new(btc.outputs["Object"], bmap.inputs["Vector"])
-bgr = bnt.nodes.new("ShaderNodeTexGradient"); bgr.gradient_type = "SPHERICAL"
-bnt.links.new(bmap.outputs["Vector"], bgr.inputs["Vector"])
-bem = bnt.nodes.new("ShaderNodeEmission"); bem.inputs["Color"].default_value = (0.28, 0.16, 0.85, 1)
-bpw = bnt.nodes.new("ShaderNodeMath"); bpw.operation = "POWER"; bpw.inputs[1].default_value = 2.0
-bnt.links.new(bgr.outputs["Fac"], bpw.inputs[0])
-bst = bnt.nodes.new("ShaderNodeMath"); bst.operation = "MULTIPLY"; bst.inputs[1].default_value = 0.3
-bnt.links.new(bpw.outputs[0], bst.inputs[0])
-bnt.links.new(bst.outputs[0], bem.inputs["Strength"])
-bnt.links.new(bem.outputs["Emission"], bnt.nodes["Material Output"].inputs["Surface"])
-bd.data.materials.append(bm_mat)
+# Glow: an ellipse on the wall behind the word (world X and Z), faded out along the floor toward the camera
+fgeo = fnt.nodes.new("ShaderNodeNewGeometry")
+fsep = fnt.nodes.new("ShaderNodeSeparateXYZ")
+fnt.links.new(fgeo.outputs["Position"], fsep.inputs["Vector"])
+fxz = fnt.nodes.new("ShaderNodeCombineXYZ")
+fnt.links.new(fsep.outputs["X"], fxz.inputs["X"]); fnt.links.new(fsep.outputs["Z"], fxz.inputs["Y"])
+fmap = fnt.nodes.new("ShaderNodeMapping"); fmap.inputs["Location"].default_value = (0, -0.5, 0)
+fmap.inputs["Scale"].default_value = (1 / 20.0, 1 / 6.5, 1)
+fnt.links.new(fxz.outputs["Vector"], fmap.inputs["Vector"])
+fgr = fnt.nodes.new("ShaderNodeTexGradient"); fgr.gradient_type = "SPHERICAL"
+fnt.links.new(fmap.outputs["Vector"], fgr.inputs["Vector"])
+fpw = fnt.nodes.new("ShaderNodeMath"); fpw.operation = "POWER"; fpw.inputs[1].default_value = 1.5
+fnt.links.new(fgr.outputs["Fac"], fpw.inputs[0])
+ffade = fnt.nodes.new("ShaderNodeMapRange"); ffade.interpolation_type = "SMOOTHSTEP"
+ffade.inputs["From Min"].default_value = 0.0; ffade.inputs["From Max"].default_value = CD
+fnt.links.new(fsep.outputs["Y"], ffade.inputs["Value"])
+fmul = fnt.nodes.new("ShaderNodeMath"); fmul.operation = "MULTIPLY"
+fnt.links.new(fpw.outputs[0], fmul.inputs[0]); fnt.links.new(ffade.outputs["Result"], fmul.inputs[1])
+fstr = fnt.nodes.new("ShaderNodeMath"); fstr.operation = "MULTIPLY"; fstr.inputs[1].default_value = 0.2
+fnt.links.new(fmul.outputs[0], fstr.inputs[0])
+fem = fnt.nodes.new("ShaderNodeEmission"); fem.inputs["Color"].default_value = (0.28, 0.16, 0.85, 1)
+fnt.links.new(fstr.outputs[0], fem.inputs["Strength"])
+fadd = fnt.nodes.new("ShaderNodeAddShader")
+fnt.links.new(fp.outputs["BSDF"], fadd.inputs[0]); fnt.links.new(fem.outputs["Emission"], fadd.inputs[1])
+fnt.links.new(fadd.outputs["Shader"], fnt.nodes["Material Output"].inputs["Surface"])
+cyc.data.materials.append(fm)
+# Sphere reflection probe: floor reflection rays that leave the screen fall back to this capture of
+# the glowing wall instead of the black world, so the reflection has no visible edge
+probe_d = bpy.data.lightprobes.new("Room", "SPHERE")
+probe_d.influence_distance = 40.0
+probe = bpy.data.objects.new("Room", probe_d); sc.collection.objects.link(probe)
+probe.location = (0, -2.0, 1.5)
 
 # ---- Lights ----
 def area(name, loc, rot, color, power, size, size_y=None):
@@ -218,6 +244,11 @@ rim = area("Rim", (6, 5, 8), (0, 0, 0), (0.3, 0.8, 1.0), 900, 2)
 back = area("Back", (0, 7, 6), (-55, 0, 0), (0.55, 0.38, 1.0), 700, 8)
 # Back light only adds violet edge light; keep its big rectangle out of the glossy floor
 back.data.specular_factor = 0.0
+# Rim light reaches the letters only (light linking); its floor reflection was a cyan corner glow
+rim_rx = bpy.data.collections.new("RimReceivers")
+for o in letters:
+    rim_rx.objects.link(o)
+rim.light_linking.receiver_collection = rim_rx
 
 # Light sweep: a tall narrow strip that slides left to right in front of the letters
 sweep = area("Sweep", (-7, -3.0, 1.6), (90, 0, 0), (1.0, 0.95, 0.88), 0, 0.35, 2.0)

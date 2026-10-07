@@ -1,7 +1,7 @@
 # Builds a hand-drawn Grease Pencil (v3) animation in a flat orthographic view on cream paper.
-# A navy pen line loops in from the left, its tail chasing the head, and wraps into a circle;
-# then a coral hatched sun, navy waves, coral rays, an underline swoosh and sparkles draw
-# themselves on with Build modifiers. A Noise modifier with a frame step gives the "boiling"
+# A navy pen line loops in from the left (already entering on frame 1), its tail chasing the
+# head, and wraps into a circle; then a coral hatched sun, navy waves, coral rays, an underline
+# swoosh and sparkles draw themselves on with Build modifiers. A Noise modifier with a frame step gives the "boiling"
 # line wobble of traditional 2D animation. Strokes are generated in Python with pressure taper
 # and hand jitter. Rendered with Eevee, Standard view transform so the paper stays cream.
 # Usage: blender -b -P grease-pencil.py -- <out_dir> [test_frame]
@@ -208,7 +208,7 @@ pts = jitter(pre + post[1:], 0.03)
 cs = len(pre)
 radii = pressure(len(pts), 0.065, 0.03, 0.06)
 lead_ob, lead_layer = gp_object("PenLine", NAVY_INK, 0.0)
-HEAD = (1, 50)       # head travels over these frames
+HEAD = (-20, 50)     # head travels over these frames; it starts before frame 1, so frame 1 shows the line entering
 TAIL = (16, 62)      # tail catches up to the circle start
 for f in range(1, TAIL[1] + 1):
     h = int(ease((f - HEAD[0]) / (HEAD[1] - HEAD[0])) ** 0.85 * (len(pts) - 1))

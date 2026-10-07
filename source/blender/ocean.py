@@ -3,6 +3,11 @@
 # A coral-and-cream navigation buoy with a blinking amber lamp rides the swell: for every frame
 # the script reads the evaluated ocean mesh under the buoy and keyframes its height and tilt
 # (smoothed for a little inertia). Distance haze in the water shader hides the patch edges.
+# Foam is built in the water shader: wave crests (height mask broken up by streaky noise) plus an
+# animated ring of churned water and outward ripples around the buoy (buoy-space coordinates).
+# Reflections come from the sky only (no screen-space tracing, which smeared straight-edged bands
+# and dark streaks across the waves), so the buoy has no mirror image in the water. The buoy casts
+# no shadow on the water either: the low sun made it a long straight-edged wedge.
 # Usage: blender -b -P ocean.py -- <out_dir> [test_frame]
 import bpy, sys, math, time
 from mathutils import Vector
@@ -25,6 +30,11 @@ ee.taa_render_samples = 48
 for attr, val in [("use_raytracing", True), ("use_shadows", True), ("use_gtao", True)]:
     if hasattr(ee, attr):
         setattr(ee, attr, val)
+if hasattr(ee, "ray_tracing_options"):
+    ee.ray_tracing_options.resolution_scale = "1"
+# No screen-space tracing: on this wavy surface it smeared straight-edged bands and dark streaks
+# (rays hitting the buoy or wave backs). Reflections come from the sky instead.
+ee.ray_tracing_method = "PROBE"
 if hasattr(sc.render, "use_motion_blur"):
     sc.render.use_motion_blur = True
     sc.render.motion_blur_shutter = 0.4
@@ -109,6 +119,8 @@ bpy.ops.object.shade_smooth()
 
 # Water shader: deep violet-navy body, teal-lit crests, cream foam, mirror-like sunset reflection,
 # blended into the horizon haze with camera distance.
+# Buoy root empty, created here because the water shader reads buoy-space coordinates
+root = bpy.data.objects.new("BuoyRoot", None); sc.collection.objects.link(root)
 wm = bpy.data.materials.new("Water"); wm.use_nodes = True
 nt = wm.node_tree
 bsdf = nt.nodes["Principled BSDF"]
@@ -124,26 +136,68 @@ body = nt.nodes.new("ShaderNodeValToRGB")
 body.color_ramp.elements[0].color = (0.006, 0.008, 0.03, 1)
 body.color_ramp.elements[1].color = (0.03, 0.22, 0.28, 1)
 nt.links.new(hmap.outputs["Result"], body.inputs["Fac"])
+def mrange(src, lo, hi, smooth=True, out_lo=0.0, out_hi=1.0):
+    m = nt.nodes.new("ShaderNodeMapRange")
+    if smooth:
+        m.interpolation_type = "SMOOTHSTEP"
+    m.inputs["From Min"].default_value = lo; m.inputs["From Max"].default_value = hi
+    m.inputs["To Min"].default_value = out_lo; m.inputs["To Max"].default_value = out_hi
+    nt.links.new(src, m.inputs["Value"])
+    return m.outputs["Result"]
+def math_op(op, a, b=None, clamp=False):
+    m = nt.nodes.new("ShaderNodeMath"); m.operation = op; m.use_clamp = clamp
+    for i, v in enumerate((a, b)):
+        if v is None:
+            continue
+        if isinstance(v, (int, float)):
+            m.inputs[i].default_value = v
+        else:
+            nt.links.new(v, m.inputs[i])
+    return m.outputs[0]
+def anim_value(name, keys):
+    v = nt.nodes.new("ShaderNodeValue"); v.name = name
+    for f, w in keys:
+        v.outputs[0].default_value = w
+        v.outputs[0].keyframe_insert("default_value", frame=f)
+    return v.outputs[0]
+wtc = nt.nodes.new("ShaderNodeTexCoord")
+FOAM_T = anim_value("FOAM_T", [(1, 0.0), (FRAMES, 1.5)])
+# Crest foam: the unbaked foam attribute barely varies, so foam comes from wave height, broken
+# into streaks by noise stretched along the wind and drifting over time.
 attr = nt.nodes.new("ShaderNodeAttribute"); attr.attribute_name = "foam"
-fmap = nt.nodes.new("ShaderNodeMapRange"); fmap.interpolation_type = "SMOOTHSTEP"
-# Unbaked, the modifier's foam attribute only varies by a few hundredths around
-# foam_coverage^2, so it is contrast-stretched here and combined with a crest-height mask.
-fmap.inputs["From Min"].default_value = 0.317; fmap.inputs["From Max"].default_value = 0.327
-nt.links.new(attr.outputs["Fac"], fmap.inputs["Value"])
-crest = nt.nodes.new("ShaderNodeMapRange"); crest.interpolation_type = "SMOOTHSTEP"
-crest.inputs["From Min"].default_value = 0.05; crest.inputs["From Max"].default_value = 0.45
-nt.links.new(gsep.outputs["Z"], crest.inputs["Value"])
-fmax = nt.nodes.new("ShaderNodeMath"); fmax.operation = "MAXIMUM"
-nt.links.new(fmap.outputs["Result"], fmax.inputs[0]); nt.links.new(crest.outputs["Result"], fmax.inputs[1])
-fnoise = nt.nodes.new("ShaderNodeTexNoise"); fnoise.inputs["Scale"].default_value = 3.5; fnoise.inputs["Detail"].default_value = 6
-fmul = nt.nodes.new("ShaderNodeMath"); fmul.operation = "MULTIPLY"; fmul.use_clamp = True
-nt.links.new(fmax.outputs[0], fmul.inputs[0])
-fn2 = nt.nodes.new("ShaderNodeMapRange"); fn2.inputs["From Min"].default_value = 0.35; fn2.inputs["From Max"].default_value = 0.6
-nt.links.new(fnoise.outputs["Fac"], fn2.inputs["Value"]); nt.links.new(fn2.outputs["Result"], fmul.inputs[1])
+foam_attr = mrange(attr.outputs["Fac"], 0.317, 0.327)
+crest = mrange(gsep.outputs["Z"], 0.12, 0.5)
+smap = nt.nodes.new("ShaderNodeMapping"); smap.inputs["Scale"].default_value = (0.6, 2.2, 1.0)
+smap.inputs["Rotation"].default_value = (0, 0, math.radians(-20))
+nt.links.new(wtc.outputs["Object"], smap.inputs["Vector"])
+fnoise = nt.nodes.new("ShaderNodeTexNoise"); fnoise.noise_dimensions = "4D"
+fnoise.inputs["Scale"].default_value = 2.2; fnoise.inputs["Detail"].default_value = 8; fnoise.inputs["Roughness"].default_value = 0.65
+nt.links.new(smap.outputs["Vector"], fnoise.inputs["Vector"]); nt.links.new(FOAM_T, fnoise.inputs["W"])
+streak = mrange(fnoise.outputs["Fac"], 0.47, 0.6)
+crest_foam = math_op("MULTIPLY", math_op("MAXIMUM", crest, foam_attr), streak, clamp=True)
+# Buoy foam: churned water at the hull plus rings that ripple outward, in buoy space
+btc = nt.nodes.new("ShaderNodeTexCoord"); btc.object = root
+bsep = nt.nodes.new("ShaderNodeSeparateXYZ"); nt.links.new(btc.outputs["Object"], bsep.inputs["Vector"])
+bxy = nt.nodes.new("ShaderNodeCombineXYZ")
+nt.links.new(bsep.outputs["X"], bxy.inputs["X"]); nt.links.new(bsep.outputs["Y"], bxy.inputs["Y"])
+blen = nt.nodes.new("ShaderNodeVectorMath"); blen.operation = "LENGTH"
+nt.links.new(bxy.outputs["Vector"], blen.inputs[0])
+d = blen.outputs["Value"]
+RING_T = anim_value("RING_T", [(1, 0.0), (FRAMES, 45.0)])
+hull = mrange(d, 0.72, 1.15, out_lo=1.0, out_hi=0.0)
+spread = mrange(d, 0.8, 3.2, out_lo=1.0, out_hi=0.0)
+wave_ph = math_op("SUBTRACT", math_op("MULTIPLY", d, 6.5), RING_T)
+rings = mrange(math_op("SINE", wave_ph), -0.2, 1.0)
+rnoise = nt.nodes.new("ShaderNodeTexNoise"); rnoise.noise_dimensions = "4D"
+rnoise.inputs["Scale"].default_value = 5.0; rnoise.inputs["Detail"].default_value = 6
+nt.links.new(btc.outputs["Object"], rnoise.inputs["Vector"]); nt.links.new(FOAM_T, rnoise.inputs["W"])
+rbreak = mrange(rnoise.outputs["Fac"], 0.38, 0.6)
+ring_foam = math_op("MULTIPLY", math_op("MAXIMUM", hull, math_op("MULTIPLY", spread, rings)), rbreak, clamp=True)
+foam_total = math_op("MAXIMUM", crest_foam, ring_foam)
 fcol = nt.nodes.new("ShaderNodeMix"); fcol.data_type = "RGBA"
-nt.links.new(fmul.outputs[0], fcol.inputs["Factor"])
+nt.links.new(foam_total, fcol.inputs["Factor"])
 nt.links.new(body.outputs["Color"], fcol.inputs["A"])
-fcol.inputs["B"].default_value = (0.95, 0.80, 0.68, 1)
+fcol.inputs["B"].default_value = (1.0, 0.93, 0.86, 1)
 nt.links.new(fcol.outputs["Result"], bsdf.inputs["Base Color"])
 # small wind ripples on top of the FFT waves: breaks the reflection into a sun glitter path
 rip = nt.nodes.new("ShaderNodeTexNoise"); rip.inputs["Scale"].default_value = 2.5; rip.inputs["Detail"].default_value = 8
@@ -159,7 +213,7 @@ bump = nt.nodes.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0
 nt.links.new(rip.outputs["Fac"], bump.inputs["Height"])
 nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
 frough = nt.nodes.new("ShaderNodeMapRange"); frough.inputs["To Min"].default_value = 0.06; frough.inputs["To Max"].default_value = 0.7
-nt.links.new(fmul.outputs[0], frough.inputs["Value"]); nt.links.new(frough.outputs["Result"], bsdf.inputs["Roughness"])
+nt.links.new(foam_total, frough.inputs["Value"]); nt.links.new(frough.outputs["Result"], bsdf.inputs["Roughness"])
 # haze by distance
 cam_data = nt.nodes.new("ShaderNodeCameraData")
 haze = nt.nodes.new("ShaderNodeMapRange"); haze.interpolation_type = "SMOOTHSTEP"
@@ -168,9 +222,31 @@ nt.links.new(cam_data.outputs["View Distance"], haze.inputs["Value"])
 fog_em = nt.nodes.new("ShaderNodeEmission"); fog_em.inputs["Color"].default_value = (*FOG, 1); fog_em.inputs["Strength"].default_value = 1.0
 mixs = nt.nodes.new("ShaderNodeMixShader")
 nt.links.new(haze.outputs["Result"], mixs.inputs["Fac"])
-nt.links.new(bsdf.outputs["BSDF"], mixs.inputs[1]); nt.links.new(fog_em.outputs[0], mixs.inputs[2])
+# Foam is its own shader (rough cream with a faint warm glow), mixed over the water: as a base
+# color it disappeared under the glossy sunset reflection
+foam_b = nt.nodes.new("ShaderNodeBsdfPrincipled")
+foam_b.inputs["Base Color"].default_value = (1.0, 0.93, 0.86, 1)
+foam_b.inputs["Roughness"].default_value = 0.9
+if "Specular IOR Level" in foam_b.inputs:
+    foam_b.inputs["Specular IOR Level"].default_value = 0.2
+foam_b.inputs["Emission Color"].default_value = (1.0, 0.78, 0.68, 1)
+foam_b.inputs["Emission Strength"].default_value = 0.35
+foam_mix = nt.nodes.new("ShaderNodeMixShader")
+nt.links.new(foam_total, foam_mix.inputs["Fac"])
+nt.links.new(bsdf.outputs["BSDF"], foam_mix.inputs[1]); nt.links.new(foam_b.outputs["BSDF"], foam_mix.inputs[2])
+nt.links.new(foam_mix.outputs[0], mixs.inputs[1]); nt.links.new(fog_em.outputs[0], mixs.inputs[2])
 nt.links.new(mixs.outputs[0], nt.nodes["Material Output"].inputs["Surface"])
 sea.data.materials.append(wm)
+# Linear keys: ripples and foam drift at a constant speed for the whole clip
+wact = nt.animation_data.action
+wfcs = list(getattr(wact, "fcurves", []) or [])
+for layer in getattr(wact, "layers", []):
+    for strip in layer.strips:
+        for bag in strip.channelbags:
+            wfcs.extend(bag.fcurves)
+for fc in wfcs:
+    for kp in fc.keyframe_points:
+        kp.interpolation = "LINEAR"
 
 # Far sea: a flat plane slightly below, so the horizon never shows the ocean patch edge
 bpy.ops.mesh.primitive_plane_add(size=4000, location=(0, 0, -1.6))   # below the deepest trough
@@ -192,7 +268,6 @@ cream_m, _ = principled("BuoyCream", (0.9, 0.84, 0.74, 1), 0.4)
 dark_m, _ = principled("BuoyMetal", (0.05, 0.05, 0.06, 1), 0.35, metal=1.0)
 lamp_m, lamp_p = principled("Lamp", (1.0, 0.6, 0.1, 1), 0.2, emit=(1.0, 0.55, 0.08, 1), strength=0.0)
 
-root = bpy.data.objects.new("BuoyRoot", None); sc.collection.objects.link(root)
 parts = []
 def part(op, mat, loc, scale=(1, 1, 1), **kw):
     op(location=loc, **kw)
@@ -215,6 +290,7 @@ lamp = part(bpy.ops.mesh.primitive_uv_sphere_add, lamp_m, (0, 0, 1.66), radius=0
 # bevel the hard primitives a little
 for o in parts:
     bv = o.modifiers.new("Bevel", "BEVEL"); bv.width = 0.015; bv.segments = 2
+    o.visible_shadow = False   # its long low-sun shadow showed as a straight-edged band on the waves
 ld = bpy.data.lights.new("LampLight", "POINT"); ld.color = (1.0, 0.55, 0.12); ld.shadow_soft_size = 0.1
 ll = bpy.data.objects.new("LampLight", ld); sc.collection.objects.link(ll)
 ll.parent = root; ll.location = (0, 0, 1.66)

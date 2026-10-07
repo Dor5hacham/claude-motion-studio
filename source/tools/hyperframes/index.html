@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=1280, height=720" />
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
     <style>
-      /* OS-bundled Windows fonts, resolved locally by the render browser */
+      /* OS-bundled Windows fonts, resolved locally by the render browser. Every font-family below
+         carries a fallback stack, so the page still renders sensibly where these are missing. */
       @font-face { font-family: "Bahnschrift"; src: local("Bahnschrift"); font-weight: 300 700; font-stretch: 75% 100%; }
       @font-face { font-family: "Segoe UI"; src: local("Segoe UI"); font-weight: 400; }
       @font-face { font-family: "Segoe UI"; src: local("Segoe UI Semibold"); font-weight: 600; }
@@ -55,12 +56,12 @@
       /* Scene 1: kinetic headline */
       #s-head { display: flex; flex-direction: column; align-items: center; justify-content: center; }
       .kicker {
-        font-family: "Cascadia Mono", monospace; font-size: 18px; letter-spacing: 0.42em;
+        font-family: "Cascadia Mono", Consolas, monospace; font-size: 18px; letter-spacing: 0.42em;
         color: var(--amber); margin-bottom: 26px; clip-path: inset(0 100% 0 0);
       }
       .headline {
         display: flex; gap: 30px;
-        font-family: "Bahnschrift", sans-serif; font-weight: 700; font-stretch: condensed;
+        font-family: "Bahnschrift", "Segoe UI", system-ui, sans-serif; font-weight: 700; font-stretch: condensed;
         font-size: 148px; line-height: 1; letter-spacing: -0.01em; text-transform: uppercase;
       }
       .word { overflow: hidden; padding: 0 4px 10px; }
@@ -88,7 +89,7 @@
       .dot { width: 12px; height: 12px; border-radius: 50%; }
       .url {
         margin-left: 18px; padding: 5px 14px; border-radius: 8px; background: rgba(244, 239, 230, 0.06);
-        font-family: "Cascadia Mono", monospace; font-size: 13px; color: rgba(244, 239, 230, 0.6);
+        font-family: "Cascadia Mono", Consolas, monospace; font-size: 13px; color: rgba(244, 239, 230, 0.6);
       }
       .deploy-btn {
         margin-left: auto; padding: 7px 18px; border-radius: 9px; font-weight: 600; font-size: 14px;
@@ -107,7 +108,7 @@
       .label { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 239, 230, 0.5); }
       .stat { display: flex; align-items: flex-end; gap: 14px; margin-top: 6px; }
       .odo {
-        display: flex; font-family: "Bahnschrift", sans-serif; font-weight: 700; font-size: 64px;
+        display: flex; font-family: "Bahnschrift", "Segoe UI", system-ui, sans-serif; font-weight: 700; font-size: 64px;
         line-height: 72px; height: 72px; overflow: hidden;
       }
       .odo .col { display: flex; flex-direction: column; text-align: center; font-variant-numeric: tabular-nums; }
@@ -128,7 +129,7 @@
         padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025);
         display: flex; align-items: center; justify-content: space-between; font-size: 15px;
       }
-      .svc .name { font-family: "Cascadia Mono", monospace; font-size: 14px; }
+      .svc .name { font-family: "Cascadia Mono", Consolas, monospace; font-size: 14px; }
       .pill { position: relative; width: 78px; height: 24px; }
       .pill span {
         position: absolute; inset: 0; border-radius: 12px; display: flex; align-items: center; justify-content: center;
@@ -158,13 +159,13 @@
       .lockup { display: flex; align-items: center; gap: 26px; }
       .mark { width: 120px; height: 120px; }
       .wordmark {
-        display: flex; font-family: "Bahnschrift", sans-serif; font-weight: 700; font-size: 120px;
+        display: flex; font-family: "Bahnschrift", "Segoe UI", system-ui, sans-serif; font-weight: 700; font-size: 120px;
         letter-spacing: -0.02em; overflow: hidden; padding-bottom: 8px;
       }
       .wordmark span { display: inline-block; }
       .wordmark .ver { color: var(--coral); margin-left: 18px; }
       .tagline {
-        margin-top: 18px; font-family: "Cascadia Mono", monospace; font-size: 20px; letter-spacing: 0.3em;
+        margin-top: 18px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 20px; letter-spacing: 0.3em;
         color: rgba(244, 239, 230, 0.75);
       }
       .tagline em { font-style: normal; color: var(--amber); }

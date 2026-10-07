@@ -29,7 +29,7 @@
     params: [{ key: 'dur', label: 'Draw time', min: 0.3, max: 3, step: 0.1, value: 1.1, unit: ' s' }],
     prompt: 'Draw the logo outline on with trim paths over {dur}, ease-in-out, then erase it from the start so the line travels off, coral and cyan strokes.',
     setup(st, L) {
-      const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 640 360'); svg.setAttribute('width', 640); svg.setAttribute('height', 360); st.appendChild(svg);
+      const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 640 360'); svg.setAttribute('width', '640'); svg.setAttribute('height', '360'); st.appendChild(svg);
       const defs = [['M80 280 C 170 70, 270 70, 320 190 S 470 300, 560 90', C.coral, 9], ['M320 190 m -80 0 a 80 80 0 1 0 160 0 a 80 80 0 1 0 -160 0', C.cyan, 6], ['M90 325 L 550 325', C.amber, 5]];
       const els = defs.map(([d, c, w]) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.setAttribute('stroke', c); p.setAttribute('stroke-width', w); p.setAttribute('stroke-linecap', 'round'); svg.appendChild(p); return [p, p.getTotalLength()]; });
       return t => {

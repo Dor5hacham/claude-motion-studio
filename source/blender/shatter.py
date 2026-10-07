@@ -2,6 +2,8 @@
 # pre-fractured into Voronoi cells (bmesh bisect planes, no add-on). The cells are rigid bodies
 # held kinematic until impact, then a force-field pulse and gravity throw them apart. The inner
 # fracture faces glow amber and cool down while the debris settles on a mirror floor. Eevee.
+# The world is near-black to the camera but shows reflections a studio sky with two softbox
+# strips, so the chrome ball and the glossy obsidian have something to reflect.
 # Usage: blender -b -P shatter.py -- <out_dir> [test_frame]
 import bpy, bmesh, sys, random, time
 from mathutils import Vector
@@ -38,7 +40,42 @@ sc.render.filepath = OUT + "/f_"
 world = bpy.data.worlds.new("World")
 sc.world = world
 world.use_nodes = True
-world.node_tree.nodes["Background"].inputs[0].default_value = (0.004, 0.004, 0.008, 1)
+wnt = world.node_tree
+wbg = wnt.nodes["Background"]
+wbg.inputs[0].default_value = (0.004, 0.004, 0.008, 1)
+# Reflection-only studio: dark below the horizon, a soft cool sky above, and two bright
+# softbox strips (one overhead, one camera-right). Camera rays still see the near-black color.
+wtc = wnt.nodes.new("ShaderNodeTexCoord")
+wsep = wnt.nodes.new("ShaderNodeSeparateXYZ")
+wnt.links.new(wtc.outputs["Generated"], wsep.inputs["Vector"])
+wsky = wnt.nodes.new("ShaderNodeValToRGB")
+wsky.color_ramp.elements[0].position = 0.3; wsky.color_ramp.elements[0].color = (0.004, 0.004, 0.008, 1)
+wsky.color_ramp.elements[1].position = 1.0; wsky.color_ramp.elements[1].color = (0.30, 0.32, 0.38, 1)
+wnt.links.new(wsep.outputs["Z"], wsky.inputs["Fac"])
+def strip(axis_out, lo, hi, gain):
+    m = wnt.nodes.new("ShaderNodeMapRange"); m.interpolation_type = "SMOOTHSTEP"
+    m.inputs["From Min"].default_value = lo; m.inputs["From Max"].default_value = hi
+    m.inputs["To Max"].default_value = gain
+    wnt.links.new(wsep.outputs[axis_out], m.inputs["Value"])
+    return m.outputs["Result"]
+def mult(a, b):
+    m = wnt.nodes.new("ShaderNodeMath"); m.operation = "MULTIPLY"
+    wnt.links.new(a, m.inputs[0]); wnt.links.new(b, m.inputs[1])
+    return m.outputs[0]
+top = strip("Z", 0.80, 0.92, 2.5)                       # overhead box
+side = mult(strip("X", 0.55, 0.7, 3.0), strip("Z", 0.05, 0.25, 1.0))   # tall strip camera-right
+wadd = wnt.nodes.new("ShaderNodeMath"); wadd.operation = "ADD"
+wnt.links.new(top, wadd.inputs[0]); wnt.links.new(side, wadd.inputs[1])
+wbox = wnt.nodes.new("ShaderNodeMix"); wbox.data_type = "RGBA"; wbox.blend_type = "ADD"
+wnt.links.new(wadd.outputs[0], wbox.inputs["Factor"])
+wnt.links.new(wsky.outputs["Color"], wbox.inputs["A"]); wbox.inputs["B"].default_value = (1.0, 0.97, 0.92, 1)
+wenv = wnt.nodes.new("ShaderNodeBackground")
+wnt.links.new(wbox.outputs["Result"], wenv.inputs["Color"])
+wlp = wnt.nodes.new("ShaderNodeLightPath")
+wmix = wnt.nodes.new("ShaderNodeMixShader")
+wnt.links.new(wlp.outputs["Is Camera Ray"], wmix.inputs["Fac"])
+wnt.links.new(wenv.outputs[0], wmix.inputs[1]); wnt.links.new(wbg.outputs[0], wmix.inputs[2])
+wnt.links.new(wmix.outputs[0], wnt.nodes["World Output"].inputs["Surface"])
 
 # ---- Materials ----
 def principled(name, color, rough, metal=0.0, coat=0.0):

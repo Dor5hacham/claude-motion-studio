@@ -1,5 +1,8 @@
 # Builds a Mantaflow FLIP liquid shot: a glossy coral stream pours onto a cream sphere,
-# coats it and spills across a dark studio floor. Bakes the fluid, then renders with Eevee.
+# coats it and spills across a dark studio floor. Bakes the fluid, then renders with Eevee
+# and motion blur (Eevee blurs the camera move; the changing fluid mesh itself stays sharp,
+# because Eevee does not read its velocity attribute). The sim pre-rolls PREROLL frames so the stream already hits the sphere on
+# the first rendered frame; frames are written as f_0013.png onward (use ffmpeg -start_number).
 # The fluid cache goes to <out_dir>/cache and is rebaked on every run.
 # Usage: blender -b -P liquid.py -- <out_dir> [test_frame[,test_frame...]]
 import bpy, sys, os, math, time
@@ -9,12 +12,14 @@ OUT = os.path.abspath(argv[0])
 TEST = [int(x) for x in argv[1].split(",")] if len(argv) > 1 else None
 CACHE = os.path.join(OUT, "cache")
 FPS, FRAMES = 30, 150
-RES = 128
+PREROLL = 12                  # sim frames before the first rendered frame (stream lands on frame 1)
+F0, F1 = 1 + PREROLL, FRAMES + PREROLL
+RES = 144
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
 sc.render.fps = FPS
-sc.frame_start, sc.frame_end = 1, FRAMES
+sc.frame_start, sc.frame_end = F0, F1
 sc.render.resolution_x, sc.render.resolution_y = 1280, 720
 engines = [e.identifier for e in sc.render.bl_rna.properties["engine"].enum_items]
 sc.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in engines else "BLENDER_EEVEE_NEXT"
@@ -25,6 +30,8 @@ for attr, val in [("use_raytracing", True), ("use_shadows", True), ("use_gtao", 
         setattr(ee, attr, val)
 if hasattr(ee, "ray_tracing_options"):
     ee.ray_tracing_options.resolution_scale = "1"
+sc.render.use_motion_blur = True
+sc.render.motion_blur_shutter = 0.5
 try:
     sc.view_settings.view_transform = "Khronos PBR Neutral"
 except TypeError:
@@ -59,7 +66,9 @@ if "Subsurface Weight" in lp.inputs:
     lp.inputs["Subsurface Scale"].default_value = 0.08
 if "Coat Roughness" in lp.inputs:
     lp.inputs["Coat Roughness"].default_value = 0.02
-floor_mat, _ = principled("Floor", (0.008, 0.008, 0.011, 1), 0.22)
+floor_mat, flp = principled("Floor", (0.008, 0.008, 0.011, 1), 0.3)
+if "Specular IOR Level" in flp.inputs:
+    flp.inputs["Specular IOR Level"].default_value = 0.35
 cream_mat, _ = principled("Cream", (0.93, 0.88, 0.80, 1), 0.22, coat=0.5)
 
 # Floor plane (render only); sits just under the domain's bottom wall layer
@@ -91,13 +100,14 @@ fs.use_initial_velocity = True
 fs.velocity_coord = (0.0, 0.0, -3.0)
 fs.subframes = 1
 fs.use_inflow = True
+STOP = 100 + PREROLL
 fs.keyframe_insert("use_inflow", frame=1)
-fs.keyframe_insert("use_inflow", frame=104)
+fs.keyframe_insert("use_inflow", frame=STOP)
 fs.use_inflow = False
-fs.keyframe_insert("use_inflow", frame=105)
+fs.keyframe_insert("use_inflow", frame=STOP + 1)
 nozzle.keyframe_insert("location", frame=1)
 nozzle.location = (0.12, -0.05, 2.75)
-nozzle.keyframe_insert("location", frame=104)
+nozzle.keyframe_insert("location", frame=STOP)
 
 # Domain: 5 x 5 x 3.1 m box. Sides and top are open so spilled liquid leaves the frame.
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 1.5))
@@ -114,7 +124,10 @@ ds.resolution_max = RES
 ds.simulation_method = "FLIP"
 ds.use_mesh = True
 ds.mesh_scale = 2
-ds.mesh_smoothen_pos = 2
+# Larger particle and mesh radii keep the thin spill sheet in one piece instead of blobs
+ds.particle_radius = 1.25
+ds.mesh_particle_radius = 2.6
+ds.mesh_smoothen_pos = 3
 ds.mesh_smoothen_neg = 2
 ds.mesh_generator = "IMPROVED"
 ds.use_speed_vectors = True
@@ -128,18 +141,31 @@ ds.cache_directory = CACHE
 ds.cache_type = "ALL"
 ds.cache_data_format = "OPENVDB"
 ds.cache_mesh_format = "BOBJ" if "BOBJ" in [i.identifier for i in ds.bl_rna.properties["cache_mesh_format"].enum_items] else ds.cache_mesh_format
-ds.cache_frame_start, ds.cache_frame_end = 1, FRAMES
+ds.cache_frame_start, ds.cache_frame_end = 1, F1
 dom.location.z = 1.5 - 0.05  # bottom wall voxel layer lines up with the floor
 bpy.ops.object.shade_smooth()
 
-# Lights: warm key, cyan rim, violet back, soft top fill for long highlights on the liquid
-def area(name, loc, rot, color, power, size):
+# Lights: warm key, cyan rim, violet back, soft top fill for long highlights on the liquid.
+# Rim and back sit high, aim at the sphere and are light-linked to the liquid and the sphere,
+# so they only edge-light the liquid instead of painting colored pools on the floor.
+aim = bpy.data.objects.new("LightAim", None); sc.collection.objects.link(aim)
+aim.location = (0, 0, 0.7)
+def area(name, loc, rot, color, power, size, track=False):
     d = bpy.data.lights.new(name, "AREA"); d.color = color; d.energy = power; d.size = size
     o = bpy.data.objects.new(name, d); sc.collection.objects.link(o)
     o.location = loc; o.rotation_euler = [math.radians(a) for a in rot]
+    if track:
+        c = o.constraints.new("TRACK_TO"); c.target = aim
+        c.track_axis = "TRACK_NEGATIVE_Z"; c.up_axis = "UP_Y"
+    return d
 area("Key", (-4, -4.5, 5), (50, 0, -40), (1.0, 0.88, 0.78), 800, 3)
-area("Rim", (4.5, 2.5, 2.6), (65, 0, 120), (0.3, 0.85, 1.0), 380, 2.0)
-area("Back", (0, 6, 4), (-60, 0, 0), (0.6, 0.35, 1.0), 300, 5)
+area("Rim", (4.0, 3.5, 6.5), (0, 0, 0), (0.45, 0.85, 1.0), 650, 1.5, track=True)
+area("Back", (-1.0, 6.5, 7.5), (0, 0, 0), (0.65, 0.45, 1.0), 600, 3, track=True)
+edge_rx = bpy.data.collections.new("EdgeLightReceivers")
+for o in (dom, sphere):
+    edge_rx.objects.link(o)
+for nm in ("Rim", "Back"):
+    bpy.data.objects[nm].light_linking.receiver_collection = edge_rx
 area("Top", (0, 0, 5.5), (0, 0, 0), (1.0, 0.97, 0.93), 200, 6)
 
 # Camera: low three-quarter view, slow orbit and push-in, shallow depth of field
@@ -151,9 +177,9 @@ target = bpy.data.objects.new("Target", None); sc.collection.objects.link(target
 cam_d.dof.focus_object = target
 tc = cam.constraints.new("TRACK_TO"); tc.target = target
 tc.track_axis = "TRACK_NEGATIVE_Z"; tc.up_axis = "UP_Y"
-for f, loc in [(1, (-4.3, -6.7, 1.7)), (FRAMES, (-1.8, -7.1, 1.35))]:
+for f, loc in [(F0, (-4.3, -6.7, 1.7)), (F1, (-1.8, -7.1, 1.35))]:
     cam.location = loc; cam.keyframe_insert("location", frame=f)
-for f, loc in [(1, (0, 0, 1.05)), (FRAMES, (0, 0, 0.8))]:
+for f, loc in [(F0, (0, 0, 1.05)), (F1, (0, 0, 0.8))]:
     target.location = loc; target.keyframe_insert("location", frame=f)
 
 # Bake the fluid cache. A fresh process treats an old cache as unbaked and resets it,

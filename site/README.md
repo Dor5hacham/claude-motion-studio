@@ -7,6 +7,7 @@
 | Path | What it holds |
 |---|---|
 | `site.css` | All styles for the page |
+| `globals.d.ts` | Global declarations for the optional TypeScript check; not loaded by the page |
 | `site.js` | Builds the catalog, the technique index, search, sidebar counts, section highlight |
 | `learn/guide-core.js` | Shared helpers (`addLoop`, `EASES`), easing/stagger/squash/anticipation demos, prompt builder |
 | `learn/live-compare.js` | The with-vs-without comparisons, easing race, frames and fps |
@@ -52,5 +53,13 @@ Options: `kind: 'dom'` gives a 640x360 `<div>` instead of a canvas; `controls: [
 python scripts/build_catalog.py
 cd scripts && npm i && node check_site.mjs
 ```
+
+Optional type check (TypeScript as a linter; `globals.d.ts` declares the shared `window` globals and is never loaded by the page):
+
+```
+npx -y -p typescript tsc --noEmit --allowJs --checkJs --noImplicitAny false --strict false --noUnusedLocals --target es2022 --lib dom,es2022 site/globals.d.ts site/learn/*.js site/catalog/*.js site/site.js
+```
+
+It still lists about 75 known, harmless reports: `getElementById` returns a plain `HTMLElement` (so `.value` or `.getContext` is flagged), and arrays of mixed tuples such as `[[0.25, '250 ms'], ...]` are typed as `string | number`. Look for new kinds of errors and unused variables, not for a zero count.
 
 `check_site.mjs` fails on any unloaded script, unused vendor file, missing file, duplicate id, broken `#link`, video that does not play, card without a section, or console error. Add `--shots <dir>` to save a screenshot of every card.

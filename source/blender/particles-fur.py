@@ -1,8 +1,10 @@
 # Builds a fluffy fur-ball character with a particle hair system: guide hairs plus interpolated
 # children, clumping and roughness, a root-to-tip color gradient (Hair Info node) and hair
 # dynamics so the fur lags, swings and settles. The ball drops in, bounces with squash and
-# stretch (computed per frame from simple physics), then shakes itself like a wet dog; a soft
-# turbulence field keeps the fur alive. Eevee with motion blur, dark studio floor.
+# stretch (computed per frame from simple physics), then shakes itself like a wet dog: during the
+# shake the hair pin and bending stiffness are keyframed down so the fur flings out, then back up
+# so it stands again. The hair collides with the floor (Collision modifier on the floor), and a
+# soft turbulence field keeps the fur alive. Eevee with motion blur, dark studio floor.
 # Usage: blender -b -P particles-fur.py -- <out_dir> [test_frame[,test_frame...]]
 import bpy, sys, math, time
 from mathutils import Vector
@@ -86,7 +88,11 @@ nt.links.new(mulc.outputs["Result"], fb.inputs["Base Color"])
 
 # ---- Floor ----
 bpy.ops.mesh.primitive_plane_add(size=80, location=(0, 0, 0))
-bpy.context.object.data.materials.append(floor_m)
+floor = bpy.context.object
+floor.data.materials.append(floor_m)
+floor.modifiers.new("Collision", "COLLISION")   # hair dynamics collide with it
+floor.collision.thickness_outer = 0.05
+floor.collision.cloth_friction = 2.0
 
 # ---- Fur ball ----
 bpy.ops.mesh.primitive_uv_sphere_add(radius=R, segments=96, ring_count=48, location=(0, 0, 0))
@@ -151,6 +157,18 @@ cs.bending_damping = 0.6
 cs.air_damping = 1.0
 cs.pin_stiffness = 1.6
 cs.effector_weights.gravity = 0.35
+hc = ps.cloth.collision_settings
+hc.use_collision = True
+hc.collision_quality = 6
+hc.distance_min = 0.012
+# Shake window: soften the fur so it flings out, then stiffen it again so it stands back up
+SHAKE = 92
+for f, pin, bend in [(1, 1.6, 3.5), (SHAKE - 2, 1.6, 3.5), (SHAKE + 2, 0.3, 1.0),
+                     (SHAKE + 26, 0.3, 1.0), (SHAKE + 44, 1.6, 3.5)]:
+    cs.pin_stiffness = pin
+    cs.bending_stiffness = bend
+    cs.keyframe_insert("pin_stiffness", frame=f)
+    cs.keyframe_insert("bending_stiffness", frame=f)
 ps.point_cache.frame_start = 1
 ps.point_cache.frame_end = FRAMES
 
@@ -162,7 +180,7 @@ turb.field.size = 0.8
 turb.field.noise = 0.0
 
 # ---- Motion: drop, bounces with squash and stretch, settle, wet-dog shake ----
-REST = R + HAIR * 0.55   # the ball rests on its compressed fur
+REST = R + HAIR * 0.85   # the ball rests on its fur; deeper floor contact made the hair collision explode
 g = 2 * (3.4) / (16 ** 2)           # drop from 3.4 above rest in 16 frames
 z, v = REST + 3.4, 0.0
 squash, squash_v = 0.0, 0.0         # damped spring for squash (positive = flattened)
@@ -193,12 +211,15 @@ for f in range(1, FRAMES + 1):
     keys.append((f, z - REST * (1 - sz), sz, sxy))
 
 for f, zz, sz, sxy in keys:
-    ball.location = (0, 0, zz)
+    # shake: wide, damped yaw swings from frame SHAKE, plus a roll and a small hop; slower and
+    # wider than a jitter, so the fur lags behind at each reversal and flings out at the sides
+    t = f - SHAKE
+    env = math.exp(-t / 15.0) if t >= 0 else 0.0
+    yaw = 1.15 * env * math.sin(t * 0.62)
+    roll = 0.32 * env * math.sin(t * 0.62 + 1.2)
+    hop = 0.12 * env * abs(math.sin(t * 0.62)) if t >= 0 else 0.0
+    ball.location = (0, 0, zz + hop)
     ball.scale = (sxy, sxy, sz)
-    # shake: damped yaw wobble between frames 92 and 135, plus a little roll
-    t = f - 92
-    yaw = 0.8 * math.exp(-t / 11.0) * math.sin(t * 0.95) if t >= 0 else 0.0
-    roll = 0.2 * math.exp(-t / 11.0) * math.sin(t * 0.95 + 1.2) if t >= 0 else 0.0
     ball.rotation_euler = (0, roll, yaw)
     ball.keyframe_insert("location", frame=f)
     ball.keyframe_insert("scale", frame=f)
@@ -241,10 +262,12 @@ print(f"Hair bake done in {time.time() - t0:.1f}s ({ps.point_cache.info})")
 
 t1 = time.time()
 if TEST:
+    # Each test frame is rendered as a one-frame animation: a still render after frame_set
+    # showed the ball without its fur (the hair cache was not applied).
+    sc.render.filepath = OUT + "/test_"
     for tf in TEST:
-        sc.frame_set(tf)
-        sc.render.filepath = OUT + f"/test_{tf:04d}.png"
-        bpy.ops.render.render(write_still=True)
+        sc.frame_start = sc.frame_end = tf
+        bpy.ops.render.render(animation=True)
 else:
     bpy.ops.render.render(animation=True)
 print(f"Render done in {time.time() - t1:.1f}s")

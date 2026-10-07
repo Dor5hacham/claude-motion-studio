@@ -37,7 +37,7 @@ cy = sc.cycles
 cy.device = "GPU" if device_ok else "CPU"
 print("CYCLES RENDER DEVICE:", cy.device, "(HIP)" if device_ok else "(no HIP device)")
 
-cy.samples = 96 if device_ok else 32
+cy.samples = 160 if device_ok else 48
 cy.use_adaptive_sampling = True
 cy.adaptive_threshold = 0.02
 cy.use_denoising = True
@@ -47,7 +47,7 @@ if hasattr(cy, "denoising_use_gpu"):
 cy.max_bounces = 16
 cy.transmission_bounces = 12
 cy.glossy_bounces = 8
-cy.diffuse_bounces = 4
+cy.diffuse_bounces = 1          # less bounce fill: the shadow (and the caustic in it) keeps its contrast
 cy.caustics_reflective = True
 cy.caustics_refractive = True
 cy.blur_glossy = 0.5
@@ -97,7 +97,7 @@ bpy.ops.mesh.primitive_cylinder_add(vertices=128, radius=2.2, depth=0.7, locatio
 ped = bpy.context.object
 pb = ped.modifiers.new("Bevel", "BEVEL"); pb.width = 0.05; pb.segments = 6; pb.limit_method = "ANGLE"
 smooth(ped)
-ped_mat, pp = principled("Stone", (0.56, 0.52, 0.47, 1), 0.38)
+ped_mat, pp = principled("Stone", (0.46, 0.43, 0.39, 1), 0.38)
 ped.data.materials.append(ped_mat)
 TOP = 0.7
 
@@ -118,23 +118,34 @@ bpy.ops.mesh.primitive_torus_add(major_radius=0.72, minor_radius=0.13, major_seg
 ring = bpy.context.object
 smooth(ring)
 metal_mat, mp = principled("BrushedMetal", (0.92, 0.90, 0.88, 1), 0.28, metal=1.0)
-for nm, v in (("Anisotropic", 0.85),):
+for nm, v in (("Anisotropic", 0.95),):
     if nm in mp.inputs:
         mp.inputs[nm].default_value = v
 mnt = metal_mat.node_tree
 tang = mnt.nodes.new("ShaderNodeTangent"); tang.direction_type = "RADIAL"; tang.axis = "Z"
 if "Tangent" in mp.inputs:
     mnt.links.new(tang.outputs["Tangent"], mp.inputs["Tangent"])
-# Fine brushing streaks: stretched noise into roughness
+# Brushing streaks around the ring: noise stretched along the circumference (object Z is the
+# ring axis) drives a wide roughness range, a slight brightness change and fine groove bumps
 tc = mnt.nodes.new("ShaderNodeTexCoord")
-mapn = mnt.nodes.new("ShaderNodeMapping"); mapn.inputs["Scale"].default_value = (1.0, 1.0, 180.0)
+# about 20 streaks across the tube (object Z), each running a long way around the ring (X, Y)
+mapn = mnt.nodes.new("ShaderNodeMapping"); mapn.inputs["Scale"].default_value = (0.15, 0.15, 12.0)
 mnt.links.new(tc.outputs["Object"], mapn.inputs["Vector"])
-nz = mnt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 6.0; nz.inputs["Detail"].default_value = 8.0
+nz = mnt.nodes.new("ShaderNodeTexNoise"); nz.inputs["Scale"].default_value = 6.0; nz.inputs["Detail"].default_value = 10.0
 mnt.links.new(mapn.outputs["Vector"], nz.inputs["Vector"])
-mr = mnt.nodes.new("ShaderNodeMapRange")
-mr.inputs["To Min"].default_value = 0.2; mr.inputs["To Max"].default_value = 0.36
+mr = mnt.nodes.new("ShaderNodeMapRange"); mr.interpolation_type = "SMOOTHSTEP"
+mr.inputs["From Min"].default_value = 0.35; mr.inputs["From Max"].default_value = 0.65
+mr.inputs["To Min"].default_value = 0.1; mr.inputs["To Max"].default_value = 0.42
 mnt.links.new(nz.outputs["Fac"], mr.inputs["Value"])
 mnt.links.new(mr.outputs["Result"], mp.inputs["Roughness"])
+bcol = mnt.nodes.new("ShaderNodeMapRange")
+bcol.inputs["To Min"].default_value = 0.98; bcol.inputs["To Max"].default_value = 0.72
+mnt.links.new(nz.outputs["Fac"], bcol.inputs["Value"])
+mnt.links.new(bcol.outputs["Result"], mp.inputs["Base Color"])
+gbump = mnt.nodes.new("ShaderNodeBump"); gbump.inputs["Strength"].default_value = 0.4
+gbump.inputs["Distance"].default_value = 0.002
+mnt.links.new(nz.outputs["Fac"], gbump.inputs["Height"])
+mnt.links.new(gbump.outputs["Normal"], mp.inputs["Normal"])
 ring.data.materials.append(metal_mat)
 
 # ---- Coral ceramic pill (glossy coated) ----
@@ -173,30 +184,38 @@ def area(name, loc, rot, color, power, size, size_y=None, caustic=False):
     o = bpy.data.objects.new(name, d); sc.collection.objects.link(o)
     o.location = loc; o.rotation_euler = [math.radians(a) for a in rot]
     return o
-area("Key", (-4.5, -3.0, 6.0), (38, 0, -55), (1.0, 0.94, 0.88), 300, 3.0)
+# The key and the two rims skip the pedestal (light linking, set below), so the glass sphere's
+# shadow on the pedestal stays dark and the caustic focused into it reads clearly; the objects and
+# the cyc still get these lights
+key = area("Key", (-4.5, -3.0, 6.0), (38, 0, -55), (1.0, 0.94, 0.88), 220, 3.0)
+key_rx = bpy.data.collections.new("KeyReceivers")
+key_rx.objects.link(ped)
+key_rx.collection_objects[0].light_linking.link_state = "EXCLUDE"
+key.light_linking.receiver_collection = key_rx
 # Small hard back light: the only caustic light, so the glass focuses it onto the pedestal in front
-caus_d = bpy.data.lights.new("Caustic", "POINT"); caus_d.energy = 1800; caus_d.color = (1.0, 0.92, 0.8)
+caus_d = bpy.data.lights.new("Caustic", "POINT"); caus_d.energy = 4500; caus_d.color = (1.0, 0.92, 0.8)
 caus_d.shadow_soft_size = 0.05
 if hasattr(caus_d.cycles, "is_caustics_light"):
     caus_d.cycles.is_caustics_light = True
     print("MNEE caustic light: Caustic")
 caus = bpy.data.objects.new("Caustic", caus_d); sc.collection.objects.link(caus)
 caus.location = (-2.0, 2.1, 4.2)
-area("RimL", (-5.5, 3.5, 2.5), (80, 0, -125), (0.55, 0.85, 1.0), 700, 0.5, 3.0)
-area("RimR", (5.5, 3.0, 2.5), (80, 0, 120), (1.0, 0.55, 0.35), 700, 0.5, 3.0)
-area("Top", (0, 0.5, 7.5), (0, 0, 0), (1.0, 0.98, 0.95), 30, 4.0)
+for rim in (area("RimL", (-5.5, 3.5, 2.5), (80, 0, -125), (0.55, 0.85, 1.0), 700, 0.5, 3.0),
+            area("RimR", (5.5, 3.0, 2.5), (80, 0, 120), (1.0, 0.55, 0.35), 700, 0.5, 3.0)):
+    rim.light_linking.receiver_collection = key_rx
+area("Top", (0, 0.5, 7.5), (0, 0, 0), (1.0, 0.98, 0.95), 10, 4.0)
 # Violet glow on the back wall, hidden behind the pedestal and aimed away from it
 area("Wall", (0, 4.0, 0.25), (90, 0, 0), (0.55, 0.38, 1.0), 500, 4.2, 0.6)
 
-# ---- Camera: 85mm, shallow DOF on the glass sphere, slow push-in ----
+# ---- Camera: 70mm, f/3.5 focused between the glass sphere and the ring, slow push-in ----
 cam_d = bpy.data.cameras.new("Cam"); cam_d.lens = 70
-cam_d.dof.use_dof = True; cam_d.dof.aperture_fstop = 2.0
+cam_d.dof.use_dof = True; cam_d.dof.aperture_fstop = 3.5
 cam = bpy.data.objects.new("Cam", cam_d); sc.collection.objects.link(cam)
 sc.camera = cam
 target = bpy.data.objects.new("Target", None); sc.collection.objects.link(target)
 target.location = (0.05, 0.0, TOP + 0.62)
 focus = bpy.data.objects.new("Focus", None); sc.collection.objects.link(focus)
-focus.location = (-0.55, -0.55, TOP + 0.62)
+focus.location = (0.05, 0.0, TOP + 0.62)   # between sphere and ring, so the brushing stays sharp
 cam_d.dof.focus_object = focus
 tcn = cam.constraints.new("TRACK_TO"); tcn.target = target
 tcn.track_axis = "TRACK_NEGATIVE_Z"; tcn.up_axis = "UP_Y"

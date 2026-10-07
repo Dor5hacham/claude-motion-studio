@@ -3,6 +3,7 @@
 // addLoop(el, fn) runs fn(t) every frame only while el is on screen.
 const clamp01 = x => Math.min(1, Math.max(0, x));
 const lerp = (a, b, t) => a + (b - a) * t;
+/** @type {Record<string, [(x: number) => number, string, string]>} */
 const EASES = {
   'linear': [x => x, 'Constant speed. Looks mechanical. Use it only for things like spinning loaders or scrolling tickers.', 'linear'],
   'ease-in': [x => x * x * x, 'Starts slow, ends fast. Good for exits: things that leave the screen.', 'ease-in (cubic) for the exit'],

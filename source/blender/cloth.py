@@ -1,5 +1,7 @@
-# Builds a cloth-simulation shot: a coral silk sheet falls in light wind and drapes
-# over a glossy violet sphere on a dark studio floor. Bakes the cloth, renders with Eevee.
+# Builds a cloth-simulation shot: a coral silk napkin falls in light wind and drapes over a
+# glossy violet sphere on a dark studio floor. The sheet is small enough to cap the sphere and
+# leave its lower half showing, so the viewer sees what is under it. Bakes the cloth, renders
+# with Eevee.
 # Usage: blender -b -P cloth.py -- <out_dir> [test_frame]
 import bpy, sys, math, os
 
@@ -7,7 +9,8 @@ argv = sys.argv[sys.argv.index("--") + 1:]
 OUT = argv[0]
 TEST = int(argv[1]) if len(argv) > 1 else None
 FPS, FRAMES = 30, 150
-GRID = 80  # cloth grid cuts per side; lower it to bake faster
+GRID = 64  # cloth grid cuts per side; lower it to bake faster
+SHEET = 3.0  # sheet size in m; the sphere's half circumference is about 3.1 m
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.context.preferences.filepaths.temporary_directory = os.path.join(OUT, "tmp")
@@ -53,8 +56,9 @@ floor_mat, fp = principled("Floor", (0.010, 0.010, 0.014, 1), 0.12)
 if "Specular IOR Level" in fp.inputs:
     fp.inputs["Specular IOR Level"].default_value = 0.5
 ball_mat, _ = principled("Ball", (0.20, 0.12, 1.0, 1), 0.18, coat=1.0)
-silk_mat, sp = principled("Silk", (0.95, 0.10, 0.035, 1), 0.36)
-for k, v in [("Sheen Weight", 0.45), ("Sheen Roughness", 0.3), ("Specular IOR Level", 0.5)]:
+silk_mat, sp = principled("Silk", (0.95, 0.10, 0.035, 1), 0.42)
+# Moderate sheen: the flat sheet at the start faces the lights and washed out with more
+for k, v in [("Sheen Weight", 0.25), ("Sheen Roughness", 0.35), ("Specular IOR Level", 0.35)]:
     if k in sp.inputs:
         sp.inputs[k].default_value = v
 if "Sheen Tint" in sp.inputs:
@@ -76,12 +80,12 @@ bpy.ops.object.shade_smooth()
 ball.data.materials.append(ball_mat)
 ball.modifiers.new("Collision", "COLLISION")
 ball.collision.thickness_outer = 0.012
-ball.collision.cloth_friction = 6
+ball.collision.cloth_friction = 14
 
 # Cloth sheet: tilted and turned so it lands off-center and folds unevenly
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=GRID, y_subdivisions=GRID, size=4.4, location=(0.3, -0.2, 2.7))
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=GRID, y_subdivisions=GRID, size=SHEET, location=(0.12, -0.15, 2.6))
 sheet = bpy.context.object
-sheet.rotation_euler = (math.radians(9), math.radians(-6), math.radians(24))
+sheet.rotation_euler = (math.radians(5), math.radians(-4), math.radians(24))
 bpy.ops.object.transform_apply(location=False, rotation=True, scale=False)
 bpy.ops.object.shade_smooth()
 sheet.data.materials.append(silk_mat)
@@ -97,6 +101,7 @@ cs.bending_stiffness = 0.08
 cs.time_scale = 0.75
 cc = cm.collision_settings
 cc.collision_quality = 3
+cc.friction = 12
 cc.distance_min = 0.012
 cc.use_self_collision = True
 cc.self_distance_min = 0.008
@@ -127,8 +132,15 @@ def area(name, loc, color, power, size):
 area("Key", (-4, -5, 6), (1.0, 0.86, 0.76), 1150, 3.5)
 area("Rim", (6, 4, 10), (0.3, 0.85, 1.0), 1800, 3)
 area("Back", (-1, 7, 11), (0.6, 0.35, 1.0), 2400, 5)
+# Light linking: rim and back skip the silk. Their reflection on the flat sheet washed it out
+# to pink-white in the first frames; key and pool light still shape the folds.
+no_silk = bpy.data.collections.new("RimBackReceivers")
+no_silk.objects.link(sheet)
+no_silk.collection_objects[0].light_linking.link_state = "EXCLUDE"
+for nm in ("Rim", "Back"):
+    bpy.data.objects[nm].light_linking.receiver_collection = no_silk
 # Soft overhead spot: a gentle pool of light on the floor around the sphere
-sd = bpy.data.lights.new("Pool", "SPOT"); sd.energy = 1700; sd.spot_size = math.radians(55)
+sd = bpy.data.lights.new("Pool", "SPOT"); sd.energy = 1000; sd.spot_size = math.radians(55)
 sd.spot_blend = 1.0; sd.color = (1.0, 0.9, 0.85); sd.shadow_soft_size = 1.5
 spot = bpy.data.objects.new("Pool", sd); sc.collection.objects.link(spot); spot.location = (0, 0, 9)
 

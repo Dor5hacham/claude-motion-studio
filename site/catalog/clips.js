@@ -116,9 +116,9 @@ window.CLIPS = [
   "aka": "drape, fabric sim, self-collision",
   "tool": "Blender 5.2: cloth modifier, wind force field, Eevee",
   "runs": "ENGINE",
-  "notice": "A coral silk sheet falls in a light wind, drapes over a glossy sphere and pools on a reflective floor. Self-collision keeps the folds from passing through each other.",
+  "notice": "A coral silk napkin falls in a light wind and drapes over a glossy violet sphere on a reflective floor. The sheet is small enough to cap the sphere, so its lower half stays in view, and self-collision keeps the folds from passing through each other.",
   "use": "product reveals, fashion and fabric, unveiling moments",
-  "prompt": "5-second Blender clip: a silky coral cloth falls onto a glossy violet sphere on a dark reflective studio floor, cloth simulation with self-collision and light wind, warm key, cyan rim and violet back light, slow orbit, shallow depth of field, Eevee 1280x720."
+  "prompt": "5-second Blender clip: a silky coral cloth napkin, a little smaller than the sphere, falls onto a glossy violet sphere on a dark reflective studio floor and drapes over its top half so the sphere still shows below, cloth simulation with self-collision and light wind, warm key, cyan rim and violet back light (light-linked so they skip the cloth), slow orbit, shallow depth of field, Eevee 1280x720."
  },
  {
   "id": "softbody",
@@ -128,9 +128,9 @@ window.CLIPS = [
   "aka": "jelly physics, squash and stretch in 3D, pressure cloth",
   "tool": "Blender 5.2: cloth with pressure, Eevee",
   "runs": "ENGINE",
-  "notice": "Four glossy jelly cubes drop one after another and squash and wobble on landing. Made with closed cloth meshes that keep their volume with internal pressure, which looked better than Blender's soft-body solver.",
+  "notice": "Four translucent gummy cubes drop one after another, squash and wobble on landing, and a fifth cream cube drops late, so something is still bouncing near the end. Made with closed cloth meshes that keep their volume with internal pressure; the gummy look is subsurface scattering lit from behind.",
   "use": "playful brands, candy and toys, satisfying loops",
-  "prompt": "4-second Blender clip: four rounded jelly cubes (coral, amber, cyan, violet) drop one after another onto a dark studio floor, squash and wobble on impact, cloth with pressure so they keep their volume, glossy gummy material, slow push-in, Eevee 1280x720."
+  "prompt": "5-second Blender clip: four rounded jelly cubes (coral, amber, cyan, violet) drop one after another onto a dark studio floor, squash and wobble on impact, then a cream cube drops late, cloth with pressure so they keep their volume, translucent gummy material (subsurface scattering in each cube's own color, low back light linked to the cubes), camera drifting until the last frame, Eevee 1280x720."
  },
  {
   "id": "geometry-nodes",
@@ -152,9 +152,9 @@ window.CLIPS = [
   "aka": "path tracing, product render, caustics",
   "tool": "Blender 5.2 Cycles on the GPU (AMD HIP)",
   "runs": "ENGINE",
-  "notice": "A glass sphere, a brushed-metal ring and a glossy coral sphere turn on a stone pedestal under softbox lights. Cycles traces light paths for real refraction and soft shadows; the glass throws a soft caustic.",
+  "notice": "A glass sphere, a brushed-metal ring and a glossy coral sphere turn on a stone pedestal under softbox lights. Cycles traces light paths for real refraction and soft shadows; the glass focuses a bright caustic into its own shadow, and the ring shows fine brushing streaks around its circumference.",
   "use": "product shots, premium ads, packshots",
-  "prompt": "Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights, shadow caustics, 96 samples with denoising, 70 mm lens, slow 75-degree turn, 5 s."
+  "prompt": "Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring with visible circumferential streaks and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights linked so they skip the pedestal, a small caustic light so the glass throws a bright MNEE caustic into its shadow, 160 samples with denoising, 70 mm lens at f/3.5, slow 75-degree turn, 5 s."
  },
  {
   "id": "3d-logo",
@@ -164,9 +164,9 @@ window.CLIPS = [
   "aka": "extruded text, beveled type, light sweep",
   "tool": "Blender 5.2: text objects, bevel modifier, keyframes with BACK easing, Eevee",
   "runs": "ENGINE",
-  "notice": "The letters of MOTION rise out of a reflective floor one after another with overshoot, then a glint sweeps across the chrome-gold bevels while the camera pushes in.",
+  "notice": "The bold letters of MOTION rise out of a reflective floor one after another with overshoot, already moving on the first frame, then a glint sweeps across the chrome-gold bevels while the camera pushes in. The floor curves up into the back wall, so the violet glow has no hard horizon line.",
   "use": "logo stings, channel intros, title cards",
-  "prompt": "Blender Eevee 3D logo reveal of my wordmark: each letter extruded and beveled, coral faces with chrome-gold bevels, letters rise out of a dark reflective floor 6 frames apart with BACK overshoot, glint sweep across the bevels, violet glow behind, slow push-in, 5 s."
+  "prompt": "Blender Eevee 3D logo reveal of my wordmark in a bold font: each letter extruded and beveled, coral faces with chrome-gold bevels, letters rise out of a dark reflective floor 6 frames apart with BACK overshoot and the first one already rising on frame 1, glint sweep across the bevels, seamless curved backdrop with a soft violet glow behind, slow push-in, 5 s."
  },
  {
   "id": "remotion",
@@ -260,7 +260,7 @@ window.CLIPS = [
   "aka": "teal and orange, 3D LUT, wipe comparison",
   "tool": "Python-generated .cube LUT + FFmpeg lut3d",
   "runs": "CPU",
-  "notice": "A wipe line sweeps across the shot: the original on the left, a teal-and-orange film grade on the right. The grade is a 3D lookup table (LUT) that remaps every color.",
+  "notice": "A wipe line sweeps across the Blender wall-smash shot: the original on the left, a teal-and-orange film grade on the right. The coral and amber cubes turn warm orange while the violet ones and the shadows go teal. The grade is a 3D lookup table (LUT) that remaps every color.",
   "use": "film look, brand color consistency, client before/after",
   "prompt": "Grade my clip with a teal-and-orange film look as a 3D LUT (.cube): S-curve, teal shadows, warm highlights, slightly lifted blacks, apply with ffmpeg lut3d; make a before/after version with a moving wipe line labeled BEFORE and AFTER."
  },
@@ -284,9 +284,9 @@ window.CLIPS = [
   "aka": "destruction, Voronoi fracture, rigid-body debris",
   "tool": "Blender 5.2: custom Voronoi fracture (bmesh), rigid bodies, force field, Eevee",
   "runs": "ENGINE",
-  "notice": "A chrome ball hits a black stone slab in slow motion. The slab breaks into 85 pieces with glowing amber cracks inside, and the debris falls onto a mirror floor. The fracture was cut by a Python script, because the Cell Fracture add-on is not installed.",
+  "notice": "A chrome ball hits a black stone slab in slow motion. The slab breaks into 85 pieces with glowing amber cracks inside, and the debris falls onto a mirror floor. A studio sky that only reflections can see gives the chrome ball something to mirror. The fracture was cut by a Python script, because the Cell Fracture add-on is not installed.",
   "use": "dramatic reveals, action intros, product 'break through' moments",
-  "prompt": "Blender 5.2, 5-second slow-motion clip: a chrome ball smashes a black obsidian slab pre-fractured into about 85 Voronoi pieces (denser near the impact), rigid bodies released just before the hit, time scale 0.3, short force-field blast, inner faces glow amber and coral and cool down, debris settles on a dark mirror floor, low three-quarter camera pushing in, Eevee."
+  "prompt": "Blender 5.2, 5-second slow-motion clip: a chrome ball smashes a black obsidian slab pre-fractured into about 85 Voronoi pieces (denser near the impact), rigid bodies released just before the hit, time scale 0.3, short force-field blast, inner faces glow amber and coral and cool down, debris settles on a dark mirror floor, world shader that is near-black to the camera but shows reflections a soft sky with two softbox strips, low three-quarter camera pushing in, Eevee."
  },
  {
   "id": "grease-pencil",
@@ -296,7 +296,7 @@ window.CLIPS = [
   "aka": "hand-drawn line animation, 2D in 3D, boiling lines",
   "tool": "Blender 5.2: Grease Pencil v3 from Python, Build and Noise modifiers",
   "runs": "ENGINE",
-  "notice": "On cream paper a navy pen line loops in and becomes a circle, then a coral sun, waves, rays and sparkles draw themselves. The lines 'boil' every 3 frames, the classic hand-drawn animation look.",
+  "notice": "On cream paper a navy pen line loops in (already entering on the first frame) and becomes a circle, then a coral sun, waves, rays and sparkles draw themselves. The lines 'boil' every 3 frames, the classic hand-drawn animation look.",
   "use": "explainers with a human touch, doodle logos, storyboards",
   "prompt": "Blender 5.2 Grease Pencil v3 from Python, 5-second flat 2D doodle on cream paper in navy and coral ink: a loopy pen line enters from the left with its tail chasing the head and wraps into a circle, then a hatched sun, waves, rays, an underline swoosh and sparkles draw themselves with Build modifiers, Noise modifier step 3 for boiling lines, orthographic camera."
  },
@@ -308,9 +308,9 @@ window.CLIPS = [
   "aka": "ocean modifier, sunset sea, floating object",
   "tool": "Blender 5.2: Ocean modifier, world-shader sky, scripted buoy tracking, Eevee",
   "runs": "ENGINE",
-  "notice": "A coral buoy with a blinking lamp rides the swell at sunset with a glittering sun path. A script reads the wave height under the buoy every frame, so it bobs and tilts with the water. The foam is weaker than planned (the foam bake could not be loaded headless).",
+  "notice": "A coral buoy with a blinking lamp rides the swell at sunset with a glittering sun path. A script reads the wave height under the buoy every frame, so it bobs and tilts with the water. Foam is drawn by the water shader on the crests and in rings that ripple out around the buoy. Reflections come from the sky only, so the buoy has no mirror image in the water.",
   "use": "travel and nature, calm loops, maritime brands",
-  "prompt": "Blender 5.2 Eevee, 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, lighter crests and haze, a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), low drifting camera."
+  "prompt": "Blender 5.2 Eevee, 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, foam on the crests from wave height and streaky noise, an animated foam ring with outward ripples around a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), sky-only reflections, low drifting camera."
  },
  {
   "id": "particles-fur",
@@ -320,9 +320,9 @@ window.CLIPS = [
   "aka": "hair particles, fur, hair dynamics",
   "tool": "Blender 5.2: particle hair with children, hair dynamics, turbulence field, Eevee",
   "runs": "ENGINE",
-  "notice": "A fluffy coral fur ball with glossy eyes drops in, bounces with squash and stretch, then shakes like a wet dog. 3,000 guide hairs with 45 children each, colored violet at the roots to amber at the tips, with baked hair dynamics.",
+  "notice": "A fluffy coral fur ball with glossy eyes drops in, bounces with squash and stretch, then shakes like a wet dog: the fur goes soft for the shake and swings out to the sides, then stands up again. 3,000 guide hairs with 45 children each, colored violet at the roots to amber at the tips, with baked hair dynamics that collide with the floor.",
   "use": "mascots, cute characters, cozy product shots",
-  "prompt": "Blender 5.2 Eevee, 5 seconds: a fluffy coral fur-ball character with two glossy eyes on a dark glossy floor, particle hair with interpolated children, clumping and roughness, violet-to-coral-to-amber root-to-tip gradient, hair dynamics and soft turbulence, drops in, bounces twice with squash and stretch, then shakes like a wet dog, motion blur, cyan and violet rim lights."
+  "prompt": "Blender 5.2 Eevee, 5 seconds: a fluffy coral fur-ball character with two glossy eyes on a dark glossy floor, particle hair with interpolated children, clumping and roughness, violet-to-coral-to-amber root-to-tip gradient, hair dynamics that collide with the floor and soft turbulence, drops in, bounces twice with squash and stretch, then shakes like a wet dog with wide swings while the hair stiffness is keyframed down so the fur flings out, motion blur, cyan and violet rim lights."
  },
  {
   "id": "hyperframes",
@@ -356,9 +356,9 @@ window.CLIPS = [
   "aka": "FLIP fluid, Mantaflow, paint pour",
   "tool": "Blender 5.2: Mantaflow FLIP liquid with inflow, collision sphere, fluid mesh, Eevee",
   "runs": "ENGINE",
-  "notice": "A glossy coral stream pours onto a cream sphere, coats it and spills across the floor, and drips stay behind after the pour stops. The liquid is simulated as particles (FLIP) and turned into a smooth surface mesh every frame.",
+  "notice": "A glossy coral stream is already landing on a cream sphere in the first frame, coats it and spills across the floor in a mostly connected sheet, and drips stay behind after the pour stops. The liquid is simulated as particles (FLIP) and turned into a smooth surface mesh every frame. Some holes and ragged edges remain in the thinnest parts of the spill.",
   "use": "food and drink, paint and cosmetics, satisfying product shots",
-  "prompt": "5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, mesh with smoothing, domain resolution about 128 with open sides, Eevee, warm key with cyan and violet rims, slow orbiting push-in, shallow depth of field."
+  "prompt": "5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, pre-rolled so the stream lands on frame 1, larger particle and mesh radius so thin sheets stay connected, domain resolution about 144 with open sides, Eevee, warm key with cyan and violet rims light-linked to the liquid only, slow orbiting push-in, shallow depth of field."
  },
  {
   "id": "smoke-fire",
@@ -368,8 +368,8 @@ window.CLIPS = [
   "aka": "gas simulation, volumetrics, blackbody flames",
   "tool": "Blender 5.2: Mantaflow gas (fire + smoke), Principled Volume with Blackbody, Eevee volumetrics",
   "runs": "ENGINE",
-  "notice": "Orange flames lick up from a dark metal ring and curl into a thin smoke plume, lighting the floor below. Fire temperature drives its color through a blackbody ramp, the way real flames shift from red to yellow.",
+  "notice": "Orange flames lick up from a dark metal ring and roll up into a light grey smoke plume, lit from behind so it reads against the dark backdrop. Fire temperature drives its color through a blackbody ramp, the way real flames shift from red to yellow.",
   "use": "dramatic intros, energy and heat themes, gaming",
-  "prompt": "5-second Blender ring of fire: a dark metal torus emits Fire+Smoke into a Mantaflow gas domain with a noise texture on the emission and light turbulence, resolution about 128, pre-rolled so it is already burning, Principled Volume with density and Blackbody-colored flame emission, Eevee volumetrics with the Standard view transform, flickering point light for floor glow, slow push-in."
+  "prompt": "5-second Blender ring of fire: a dark metal torus emits Fire+Smoke into a Mantaflow gas domain with a noise texture on the emission and light turbulence, resolution about 128, pre-rolled so it is already burning, Principled Volume with light grey smoke and Blackbody-colored flame emission, volume-only back lights so the smoke glows without colored floor pools, faint backdrop glow, Eevee volumetrics with the Standard view transform, flickering point light for floor glow, slow push-in."
  }
 ];

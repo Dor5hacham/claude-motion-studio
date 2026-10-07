@@ -3,7 +3,7 @@
 // which the loop calls only while the card is on screen. GPU demos share one WebGL2
 // context through EX.G and copy their result into their own 2D canvas.
 (function () {
-  const EX = (window.EX = { cards: [] });
+  const EX = (window.EX = /** @type {any} */ ({ cards: [] }));
   EX.C = { bg: '#0b0b10', cream: '#f4efe6', coral: '#ff5a36', amber: '#ffb020', cyan: '#2bc4e6', violet: '#7a5cff', navy: '#1d1b3a', paper: '#efe8dc', green: '#5fd38d' };
   EX.PAL = [EX.C.coral, EX.C.amber, EX.C.cyan, EX.C.violet, EX.C.cream];
   EX.clamp01 = x => Math.min(1, Math.max(0, x));
@@ -33,7 +33,7 @@
   };
 
   // ---------- shared WebGL2 ----------
-  const G = (EX.G = {});
+  const G = (EX.G = /** @type {any} */ ({}));
   G.canvas = document.createElement('canvas'); G.canvas.width = 960; G.canvas.height = 540;
   G.gl = G.canvas.getContext('webgl2', { preserveDrawingBuffer: true, antialias: false, premultipliedAlpha: false });
   const gl = G.gl;

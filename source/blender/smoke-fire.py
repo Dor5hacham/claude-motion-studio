@@ -1,5 +1,6 @@
 # Builds a Mantaflow gas shot: a ring of fire burns on a dark torus and rolls up into smoke,
-# rendered as volumetrics in Eevee. Bakes the gas sim, then renders.
+# rendered as volumetrics in Eevee. Light grey smoke is lit from behind by a volume-only back
+# light and stands out against a faint backdrop glow. Bakes the gas sim, then renders.
 # The fluid cache goes to <out_dir>/cache and is rebaked on every run. After the bake the scene is
 # saved as <out_dir>/scene.blend, so the baked sim can be opened in the Blender UI.
 # Usage: blender -b -P smoke-fire.py -- <out_dir> [test_frame[,test_frame...]]
@@ -136,7 +137,9 @@ for n in list(nt.nodes):
 outn = nt.nodes.new("ShaderNodeOutputMaterial")
 vol = nt.nodes.new("ShaderNodeVolumePrincipled")
 nt.links.new(vol.outputs[0], outn.inputs["Volume"])
-vol.inputs["Color"].default_value = (0.10, 0.095, 0.10, 1)
+vol.inputs["Color"].default_value = (0.55, 0.53, 0.52, 1)   # light grey: reads on near-black
+if "Anisotropy" in vol.inputs:
+    vol.inputs["Anisotropy"].default_value = 0.35            # forward scattering: back light glows through
 a_den = nt.nodes.new("ShaderNodeAttribute"); a_den.attribute_name = "density"
 a_fl = nt.nodes.new("ShaderNodeAttribute"); a_fl.attribute_name = "flame"
 dmul = nt.nodes.new("ShaderNodeMath"); dmul.operation = "MULTIPLY"; dmul.inputs[1].default_value = 8.0
@@ -162,8 +165,20 @@ def area(name, loc, rot, color, power, size):
     d = bpy.data.lights.new(name, "AREA"); d.color = color; d.energy = power; d.size = size
     o = bpy.data.objects.new(name, d); sc.collection.objects.link(o)
     o.location = loc; o.rotation_euler = [math.radians(a) for a in rot]
-area("Rim", (3.0, 2.5, 3.2), (60, 0, 130), (0.3, 0.85, 1.0), 550, 2.0)
-area("Back", (-2.0, 3.5, 4.0), (-45, 0, -20), (0.6, 0.35, 1.0), 550, 3)
+    return d
+# Rim: a dim cyan edge on the ring. Smoke lights: behind and above the plume, volume only
+# (no diffuse or specular), so they light the smoke without colored pools on the floor.
+rim_d = area("Rim", (3.0, 2.5, 3.2), (60, 0, 130), (0.45, 0.85, 1.0), 260, 2.0)
+rim_d.specular_factor = 0.3
+rim_rx = bpy.data.collections.new("RimReceivers")   # light linking: the rim lights the ring only
+rim_rx.objects.link(ring)
+bpy.data.objects["Rim"].light_linking.receiver_collection = rim_rx
+for nm, loc, rot, col, pw in [("SmokeBack", (0.6, 4.2, 4.6), (-50, 0, 8), (0.85, 0.9, 1.0), 2600),
+                              ("SmokeSide", (-3.2, 1.0, 3.6), (60, 0, -110), (0.75, 0.7, 1.0), 900)]:
+    d = area(nm, loc, rot, col, pw, 3.0)
+    d.diffuse_factor = 0.0
+    d.specular_factor = 0.0
+    d.volume_factor = 1.0
 fd = bpy.data.lights.new("FireGlow", "POINT"); fd.color = (1.0, 0.45, 0.15); fd.energy = 900
 fd.shadow_soft_size = 0.5
 fl = bpy.data.objects.new("FireGlow", fd); sc.collection.objects.link(fl)
@@ -175,6 +190,37 @@ if fcs is None:
            for bag in strip.channelbags for fc in bag.fcurves]
 for fc in fcs:
     nm = fc.modifiers.new("NOISE"); nm.scale = 3.0; nm.strength = 500
+
+# Backdrop: a faint cool-grey glow far behind the fire, so the smoke has something to read against
+bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 9, 3), rotation=(math.radians(90), 0, 0))
+bd = bpy.context.object
+bd.scale = (30, 14, 1)
+bdm = bpy.data.materials.new("Backdrop"); bdm.use_nodes = True
+bnt = bdm.node_tree
+bnt.nodes.remove(bnt.nodes["Principled BSDF"])
+btc = bnt.nodes.new("ShaderNodeTexCoord")
+bmap = bnt.nodes.new("ShaderNodeMapping"); bmap.inputs["Location"].default_value = (0, 0.02, 0)
+bmap.inputs["Scale"].default_value = (2.2, 3.0, 1)
+bnt.links.new(btc.outputs["Object"], bmap.inputs["Vector"])
+bgr = bnt.nodes.new("ShaderNodeTexGradient"); bgr.gradient_type = "SPHERICAL"
+bnt.links.new(bmap.outputs["Vector"], bgr.inputs["Vector"])
+bpw = bnt.nodes.new("ShaderNodeMath"); bpw.operation = "POWER"; bpw.inputs[1].default_value = 1.6
+bnt.links.new(bgr.outputs["Fac"], bpw.inputs[0])
+bst = bnt.nodes.new("ShaderNodeMath"); bst.operation = "MULTIPLY"; bst.inputs[1].default_value = 0.03
+bnt.links.new(bpw.outputs[0], bst.inputs[0])
+# fade to black toward the floor, so the floor line behind the fire does not show
+bgeo = bnt.nodes.new("ShaderNodeNewGeometry")
+bsz = bnt.nodes.new("ShaderNodeSeparateXYZ")
+bnt.links.new(bgeo.outputs["Position"], bsz.inputs["Vector"])
+bfade = bnt.nodes.new("ShaderNodeMapRange"); bfade.interpolation_type = "SMOOTHSTEP"
+bfade.inputs["From Min"].default_value = 0.0; bfade.inputs["From Max"].default_value = 3.0
+bnt.links.new(bsz.outputs["Z"], bfade.inputs["Value"])
+bfm = bnt.nodes.new("ShaderNodeMath"); bfm.operation = "MULTIPLY"
+bnt.links.new(bst.outputs[0], bfm.inputs[0]); bnt.links.new(bfade.outputs["Result"], bfm.inputs[1])
+bem = bnt.nodes.new("ShaderNodeEmission"); bem.inputs["Color"].default_value = (0.55, 0.6, 0.85, 1)
+bnt.links.new(bfm.outputs[0], bem.inputs["Strength"])
+bnt.links.new(bem.outputs["Emission"], bnt.nodes["Material Output"].inputs["Surface"])
+bd.data.materials.append(bdm)
 
 # Camera: slightly low front view, slow push-in with a small drift
 cam_d = bpy.data.cameras.new("Cam"); cam_d.lens = 45

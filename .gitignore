@@ -8,3 +8,5 @@ media/reel/master/
 source/reel/frames/
 source/reel/blender/
 source/reel/test/
+# Python bytecode
+__pycache__/

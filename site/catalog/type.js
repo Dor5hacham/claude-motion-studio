@@ -41,7 +41,6 @@
       const g = cv.getContext('2d'); const A = ' ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:.-';
       const msgs = [['CLAUDE MOTION ', ' GALLERY 2026 ', 'NOW SHOWING   '], ['FLIGHT CL 042 ', 'TO   SHADERS  ', 'GATE 7  ON TIME'], ['SPLIT FLAP   ', 'EVERY TILE    ', 'FLIPS TO A-Z  ']];
       const R = 3, N = 14, tw = 38, th = 58, gx = 4, gy = 10, x0 = (640 - N * (tw + gx)) / 2, y0 = 70;
-      const FL = 0.055;
       function tile(x, y, cur, nxt, f) {
         g.fillStyle = '#1a1a22'; g.fillRect(x, y, tw, th);
         g.font = `700 40px ${DISP}`; g.textAlign = 'center'; g.textBaseline = 'middle';

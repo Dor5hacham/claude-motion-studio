@@ -1,6 +1,8 @@
-# Builds a soft-body jelly shot: four glossy jelly cubes in the reel palette drop one after
-# another onto a dark studio floor and squash and wobble. Bakes the simulation, renders with Eevee.
-# Uses closed cloth meshes with pressure for the jelly (more stable than the Soft Body solver).
+# Builds a soft-body jelly shot: four translucent gummy cubes in the reel palette drop one after
+# another onto a dark studio floor and squash and wobble; a fifth, cream cube drops late (its cloth
+# cache starts at LATE_START), so something is still bouncing near the end. Bakes the simulation,
+# renders with Eevee (subsurface scattering and a back light for the gummy look). Uses closed
+# cloth meshes with pressure for the jelly (more stable than the Soft Body solver).
 # Usage: blender -b -P softbody.py -- <out_dir> [test_frame | start:end:step preview]
 import bpy, bmesh, sys, math, os, time
 
@@ -9,7 +11,8 @@ OUT = argv[0]
 ARG = argv[1] if len(argv) > 1 else ""
 PREVIEW = [int(x) for x in ARG.split(":")] if ":" in ARG else None  # start:end:step, half size
 TEST = int(ARG) if ARG and not PREVIEW else None
-FPS, FRAMES = 30, 120
+FPS, FRAMES = 30, 150
+LATE_START = 66        # frame the cream cube starts to fall
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.context.preferences.filepaths.temporary_directory = os.path.join(OUT, "tmp")
@@ -20,10 +23,12 @@ sc.render.resolution_x, sc.render.resolution_y = 1280, 720
 engines = [e.identifier for e in sc.render.bl_rna.properties["engine"].enum_items]
 sc.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in engines else "BLENDER_EEVEE_NEXT"
 ee = sc.eevee
-ee.taa_render_samples = 64
+ee.taa_render_samples = 128
 for attr, val in [("use_raytracing", True), ("use_shadows", True), ("use_gtao", True)]:
     if hasattr(ee, attr):
         setattr(ee, attr, val)
+if hasattr(ee, "ray_tracing_options"):
+    ee.ray_tracing_options.resolution_scale = "1"   # full-res reflections and refraction: less grain
 if hasattr(sc.render, "use_motion_blur"):
     sc.render.use_motion_blur = True
     sc.render.motion_blur_shutter = 0.5
@@ -52,16 +57,16 @@ def principled(name, color, rough, metal=0.0, coat=0.0):
     return m, p
 
 def jelly(name, color):
-    m, p = principled(name, color, 0.08, coat=1.0)
-    for k, v in [("Subsurface Weight", 1.0), ("Subsurface Scale", 0.25), ("Transmission Weight", 0.35),
-                 ("Coat Roughness", 0.03), ("IOR", 1.4)]:
+    # Gummy: strong subsurface scattering whose radius follows the cube's own color, so light
+    # travels far in that color and the jelly glows saturated instead of milky. A low back light
+    # (Glow, below) shines through the edges. Eevee's raytraced transmission looked dark and
+    # speckled on this near-black set, so it is not used.
+    m, p = principled(name, color, 0.1, coat=1.0)
+    for k, v in [("Subsurface Weight", 1.0), ("Subsurface Scale", 0.35), ("Coat Roughness", 0.03), ("IOR", 1.36)]:
         if k in p.inputs:
             p.inputs[k].default_value = v
     if "Subsurface Radius" in p.inputs:
-        p.inputs["Subsurface Radius"].default_value = (color[0] + 0.2, color[1] + 0.2, color[2] + 0.2)
-    for attr, val in [("surface_render_method", "DITHERED"), ("use_raytrace_refraction", True)]:
-        if hasattr(m, attr):
-            setattr(m, attr, val)
+        p.inputs["Subsurface Radius"].default_value = tuple(max(0.05, c) for c in color[:3])
     return m
 
 floor_mat, fp = principled("Floor", (0.010, 0.010, 0.014, 1), 0.12)
@@ -84,6 +89,7 @@ cubes = [
     ("Amber",  (1.0, 0.45, 0.02, 1), (-0.45, -0.9, 3.4), (-12, 8, -10)),
     ("Cyan",   (0.03, 0.55, 0.85, 1), (0.95, 1.0, 5.4), (14, 10, 30)),
     ("Violet", (0.20, 0.10, 1.0, 1), (2.25, -0.6, 8.0), (-8, -16, 40)),
+    ("Cream",  (0.95, 0.85, 0.70, 1), (0.75, -2.1, 6.0), (20, -14, 12)),   # late drop, see LATE_START
 ]
 for name, color, loc, rot in cubes:
     me = bpy.data.meshes.new(name)
@@ -110,14 +116,14 @@ for name, color, loc, rot in cubes:
     cs.bending_damping = 0.05
     cs.use_pressure = True
     cs.uniform_pressure_force = 0.0
-    cs.pressure_factor = 8.0
+    cs.pressure_factor = 12.0   # high enough that a face pushed in pops back out (no leftover dent)
     cs.time_scale = 0.85
     cc = cm.collision_settings
     cc.collision_quality = 6
     cc.distance_min = 0.02
     cc.impulse_clamp = 1.5
     cc.friction = 8
-    cm.point_cache.frame_start = 1
+    cm.point_cache.frame_start = LATE_START if name == "Cream" else 1   # held above the frame until then
     cm.point_cache.frame_end = sc.frame_end
     ss = o.modifiers.new("Subsurf", "SUBSURF"); ss.levels = 1; ss.render_levels = 2
 
@@ -135,6 +141,12 @@ area("Key", (-6.5, -2.5, 3.8), (1.0, 0.86, 0.76), 1000, 2.5)
 area("Rim", (6, 4, 10), (0.3, 0.85, 1.0), 1600, 3)
 area("Back", (-1, 7, 11), (0.6, 0.35, 1.0), 2200, 5)
 area("Fill", (1, -7, 2), (1.0, 0.9, 0.85), 150, 6)
+# Low back light that shines through the jelly; light-linked to the cubes so the floor stays dark
+area("Glow", (0.4, 5.5, 1.3), (1.0, 0.92, 0.85), 900, 3)
+glow_rx = bpy.data.collections.new("GlowReceivers")
+for name, *_ in cubes:
+    glow_rx.objects.link(bpy.data.objects[name])
+bpy.data.objects["Glow"].light_linking.receiver_collection = glow_rx
 # Soft overhead spot: a gentle pool of light on the floor under the cubes
 sd = bpy.data.lights.new("Pool", "SPOT"); sd.energy = 2500; sd.spot_size = math.radians(55)
 sd.spot_blend = 1.0; sd.color = (1.0, 0.9, 0.85); sd.shadow_soft_size = 1.5
@@ -153,6 +165,17 @@ for f, loc in [(1, (-3.8, -8.6, 4.0)), (FRAMES, (-1.4, -8.4, 3.2))]:
     cam.location = loc; cam.keyframe_insert("location", frame=f)
 for f, loc in [(1, (0.15, 0, 0.9)), (FRAMES, (0.15, 0, 0.45))]:
     target.location = loc; target.keyframe_insert("location", frame=f)
+# Linear camera move: it keeps drifting right up to the last frame instead of easing to a stop
+for ob in (cam, target):
+    act = ob.animation_data.action
+    fcs = list(getattr(act, "fcurves", []) or [])
+    for layer in getattr(act, "layers", []):
+        for strip in layer.strips:
+            for bag in strip.channelbags:
+                fcs.extend(bag.fcurves)
+    for fc in fcs:
+        for kp in fc.keyframe_points:
+            kp.interpolation = "LINEAR"
 
 t0 = time.time()
 print("Baking jelly cubes...")

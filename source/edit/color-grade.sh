@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # color-grade.sh - Color grading before/after with a moving wipe.
 #
-# The ray-marched blob shot from the master reel gets a teal-and-orange film
-# look. A small Python block writes the look as a 33x33x33 3D LUT (.cube):
-# S-curve contrast, cool teal shadows, warm orange highlights, warm hues pushed
-# toward orange and cool hues toward teal, lifted film blacks. ffmpeg applies
-# it with lut3d, then maskedmerge shows the original on the left and the graded
-# image on the right of a vertical line that sweeps across the frame.
+# The Blender wall smash from the master reel (22.3 to 29.3 s: coral, amber and
+# violet cubes over a dark floor, so there are warm highlights and cool shadows to
+# push) gets a teal-and-orange film look. A small Python block writes the look as
+# a 33x33x33 3D LUT (.cube): S-curve contrast, cool teal shadows, warm orange
+# highlights, warm hues pushed toward orange and cool hues toward teal, lifted
+# film blacks. ffmpeg applies it with lut3d, then maskedmerge shows the original
+# on the left and the graded image on the right of a vertical line that sweeps
+# across the frame.
 #
 # Run from this folder (source/edit) in Git Bash:
 #   bash color-grade.sh
@@ -71,7 +73,7 @@ POS="if(lt(t,4.8),0.5+0.36*cos(PI*t/2.4),0.5+0.36*(1-clip(t-4.8,0,1)*clip(t-4.8,
 FONT="C\:/Windows/Fonts/bahnschrift.ttf"
 MONO="C\:/Windows/Fonts/consola.ttf"
 
-ffmpeg -nostdin -v error -y -ss 14.5 -t 7 -i "$SRC" -filter_complex "
+ffmpeg -nostdin -v error -y -ss 22.3 -t 7 -i "$SRC" -filter_complex "
 [0:v]fps=30,crop=1380:776:270:90,scale=1280:720:flags=lanczos,format=gbrp,split=2[orig][g0];
 [g0]lut3d=file='$WORK/teal-orange.cube':interp=tetrahedral[graded];
 color=c=black:s=1280x720:r=30:d=7,format=gbrp[mb];

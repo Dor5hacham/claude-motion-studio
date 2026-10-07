@@ -21,8 +21,10 @@ Clip: `media/tools/hyperframes.mp4` (1280x720, 30 fps, 8 s).
   area reveal, a cursor click with ripple, status pills that cross-fade, SVG ring bursts
   driven by `attr: { r }`.
 - Fonts are the Windows system fonts Bahnschrift, Segoe UI and Cascadia Mono, declared with
-  `@font-face { src: local(...) }` so the linter accepts them. On a machine without these
-  fonts the text falls back to another font.
+  `@font-face { src: local(...) }` so the linter accepts them. Every `font-family` has a
+  fallback stack (Bahnschrift, then Segoe UI, then `system-ui`, `sans-serif`; Cascadia Mono,
+  then Consolas, then `monospace`), so on a machine without these fonts the text still renders
+  in a similar face.
 
 ## Requirements
 
