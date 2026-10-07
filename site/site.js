@@ -7,7 +7,7 @@
 
   // Sidebar counts and the hub total.
   let total = 0;
-  document.querySelectorAll('nav.side a[data-cat]').forEach(a => { const n = EX.cards.filter(c => c.cat === a.dataset.cat).length; total += n; const c = document.createElement('span'); c.className = 'c'; c.textContent = n; a.appendChild(c); });
+  /** @type {NodeListOf<HTMLAnchorElement>} */ (document.querySelectorAll('nav.side a[data-cat]')).forEach(a => { const n = EX.cards.filter(c => c.cat === a.dataset.cat).length; total += n; const c = document.createElement('span'); c.className = 'c'; c.textContent = n; a.appendChild(c); });
   const hub = document.getElementById('hub-count'); if (hub) hub.textContent = `${total} techniques, live or as rendered clips, each with a prompt.`;
 
   // Technique index: learning demos first, then every catalog card.
@@ -21,11 +21,11 @@
   const ih = document.querySelector('#index h2'); if (ih) { const s = document.createElement('span'); s.className = 'count'; s.textContent = tb.children.length + ' entries'; ih.appendChild(s); }
 
   // Search across cards and index rows; hides empty catalog sections.
-  const q = document.getElementById('q'), hint = document.getElementById('qhint');
+  const q = /** @type {HTMLInputElement} */ (document.getElementById('q')), hint = document.getElementById('qhint');
   q.addEventListener('input', () => {
     const s = q.value.trim().toLowerCase(); let shown = 0;
-    document.querySelectorAll('article.ex').forEach(a => { const hit = !s || a.dataset.search.includes(s); a.classList.toggle('hide', !hit); if (hit) shown++; });
-    document.querySelectorAll('section.cat').forEach(sec => { sec.style.display = s && !sec.querySelector('article.ex:not(.hide)') ? 'none' : ''; });
+    /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('article.ex')).forEach(a => { const hit = !s || a.dataset.search.includes(s); a.classList.toggle('hide', !hit); if (hit) shown++; });
+    /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('section.cat')).forEach(sec => { sec.style.display = s && !sec.querySelector('article.ex:not(.hide)') ? 'none' : ''; });
     tb.querySelectorAll('tr').forEach(tr => tr.classList.toggle('hide', !!s && !tr.dataset.search.includes(s)));
     hint.textContent = s ? `${shown} cards match` : '';
     if (s && shown) { const first = document.querySelector('article.ex:not(.hide)'); if (first && first.getBoundingClientRect().top > window.innerHeight) first.scrollIntoView({ block: 'start' }); }
@@ -41,7 +41,7 @@
   document.querySelectorAll('section.sec').forEach(s => secIO.observe(s));
 
   // Prompt anatomy: hovering a part lights it up in the example prompt.
-  const parts = document.querySelectorAll('#anatomy div'), spans = document.querySelectorAll('#annot span');
+  const parts = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('#anatomy div')), spans = /** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('#annot span'));
   parts.forEach(p => {
     p.addEventListener('mouseenter', () => { spans.forEach(s => s.classList.toggle('lit', s.dataset.part === p.dataset.part)); p.classList.add('lit'); });
     p.addEventListener('mouseleave', () => { spans.forEach(s => s.classList.remove('lit')); p.classList.remove('lit'); });

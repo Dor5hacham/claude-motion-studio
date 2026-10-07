@@ -150,8 +150,8 @@ Every technique Claude made for this project. Click a name to open it live in `i
 | ![](media/readme/live-particle-text.gif) | ![](media/readme/live-liquid-type.gif) | ![](media/readme/live-split-flap.gif) |
 | **Soft-body blobs** | **Oscilloscope music** | **Like-button burst** |
 | ![](media/readme/live-soft-blobs.gif) | ![](media/readme/live-oscilloscope.gif) | ![](media/readme/live-like-burst.gif) |
-| **Blender liquid** | **Blender cloth** | **Blender fur** |
-| ![](media/readme/clip-liquid.gif) | ![](media/readme/clip-cloth.gif) | ![](media/readme/clip-fur.gif) |
+| **Blender liquid** | **Blender cloth** | **Unreal Niagara** |
+| ![](media/readme/clip-liquid.gif) | ![](media/readme/clip-cloth.gif) | ![](media/readme/clip-unreal-niagara.gif) |
 | **Blender shatter** | **Cycles photoreal** | **WebGPU, 1M particles** |
 | ![](media/readme/clip-shatter.gif) | ![](media/readme/clip-cycles.gif) | ![](media/readme/clip-webgpu.gif) |
 | **Three.js** | **Remotion** | **HyperFrames** |
@@ -162,7 +162,7 @@ Every technique Claude made for this project. Click a name to open it live in `i
 The full list below is generated from the same registry the page uses (`scripts/build_readme.py`), so it always matches the site.
 
 <!-- CATALOG:START -->
-**111 techniques**: 80 run live in the page (45 with sliders), 31 are rendered clips.
+**112 techniques**: 80 run live in the page (45 with sliders), 32 are rendered clips.
 
 
 ### The reel, scene by scene (9)
@@ -310,23 +310,24 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Hand-drawn diagram](index.html#ex-rough-sketch) | Rough.js (rough.canvas, generator, fillStyle, seed) | CPU | Using Rough.js on a paper-colored canvas, draw a whiteboard diagram "Idea > Prompt > Motion" with boxes, arrows, an ellipse and an ease curve. Reveal each shape with a left-to-right wipe, use roughness 1.4, hachureGap 7, cycle fillStyle through hachure, zigzag, cross-hatch and dots, and change the seed 5 times per second for a boiling line effect. |
 | [Step sequencer](index.html#ex-tone-sequencer) | Tone.js (Transport, Sequence, MembraneSynth, NoiseSynth, PolySynth, FeedbackDelay, Waveform) | CPU | Using Tone.js, build a 16-step sequencer on a canvas: rows for kick (MembraneSynth), snare and hats (NoiseSynth through filters), bass (MonoSynth), chords (PolySynth) and a lead with a FeedbackDelay (feedback 0.32). Tone.Sequence at 112 BPM with swing 0.15. Light each cell when it plays, let me click cells to toggle them, and draw the live Waveform under the grid. |
 
-### 3D engine (Blender) (11)
+### 3D engines (Blender, Unreal) (12)
 
-![3D engine (Blender)](media/readme/poster-engine.jpg)
+![3D engines (Blender, Unreal)](media/readme/poster-engine.jpg)
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
 | [Cloth simulation](index.html#ex-clip-cloth) (clip) | Blender 5.2: cloth modifier, wind force field, Eevee | ENGINE | 5-second Blender clip: a silky coral cloth napkin, a little smaller than the sphere, falls onto a glossy violet sphere on a dark reflective studio floor and drapes over its top half so the sphere still shows below, cloth simulation with self-collision and light wind, warm key, cyan rim and violet back light (light-linked so they skip the cloth), slow orbit, shallow depth of field, Eevee 1280x720. |
 | [Soft-body jelly](index.html#ex-clip-softbody) (clip) | Blender 5.2: cloth with pressure, Eevee | ENGINE | 5-second Blender clip: four rounded jelly cubes (coral, amber, cyan, violet) drop one after another onto a dark studio floor, squash and wobble on impact, then a cream cube drops late, cloth with pressure so they keep their volume, translucent gummy material (subsurface scattering in each cube's own color, low back light linked to the cubes), camera drifting until the last frame, Eevee 1280x720. |
 | [Geometry nodes field](index.html#ex-clip-geometry-nodes) (clip) | Blender 5.2: Geometry Nodes built in Python, Eevee | ENGINE | Blender Geometry Nodes (built in Python): 90x90 grid of beveled columns on a glossy floor, heights from a ripple spreading from the center plus slow 4D noise, violet-cyan-coral-amber gradient, 5 s Eevee, slow 45-degree orbit, shallow depth of field. |
-| [Photoreal product turntable](index.html#ex-clip-cycles-photoreal) (clip) | Blender 5.2 Cycles on the GPU (AMD HIP) | ENGINE | Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring with visible circumferential streaks and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights linked so they skip the pedestal, a small caustic light so the glass throws a bright MNEE caustic into its shadow, 160 samples with denoising, 70 mm lens at f/3.5, slow 75-degree turn, 5 s. |
+| [Photoreal product turntable](index.html#ex-clip-cycles-photoreal) (clip) | Blender 5.2 Cycles on the GPU (AMD HIP) | ENGINE | Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring with visible circumferential streaks and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights linked so they skip the pedestal, two low side softboxes linked to the pedestal only so its sides stay lit, a small caustic light so the glass throws a bright MNEE caustic into its shadow, 160 samples with denoising, 70 mm lens at f/3.5, slow 75-degree turn, 5 s. |
 | [3D logo reveal](index.html#ex-clip-3d-logo) (clip) | Blender 5.2: text objects, bevel modifier, keyframes with BACK easing, Eevee | ENGINE | Blender Eevee 3D logo reveal of my wordmark in a bold font: each letter extruded and beveled, coral faces with chrome-gold bevels, letters rise out of a dark reflective floor 6 frames apart with BACK overshoot and the first one already rising on frame 1, glint sweep across the bevels, seamless curved backdrop with a soft violet glow behind, slow push-in, 5 s. |
 | [Shatter in slow motion](index.html#ex-clip-shatter) (clip) | Blender 5.2: custom Voronoi fracture (bmesh), rigid bodies, force field, Eevee | ENGINE | Blender 5.2, 5-second slow-motion clip: a chrome ball smashes a black obsidian slab pre-fractured into about 85 Voronoi pieces (denser near the impact), rigid bodies released just before the hit, time scale 0.3, short force-field blast, inner faces glow amber and coral and cool down, debris settles on a dark mirror floor, world shader that is near-black to the camera but shows reflections a soft sky with two softbox strips, low three-quarter camera pushing in, Eevee. |
 | [Grease Pencil doodle to logo](index.html#ex-clip-grease-pencil) (clip) | Blender 5.2: Grease Pencil v3 from Python, Build and Noise modifiers | ENGINE | Blender 5.2 Grease Pencil v3 from Python, 5-second flat 2D doodle on cream paper in navy and coral ink: a loopy pen line enters from the left with its tail chasing the head and wraps into a circle, then a hatched sun, waves, rays, an underline swoosh and sparkles draw themselves with Build modifiers, Noise modifier step 3 for boiling lines, orthographic camera. |
-| [Ocean with a floating buoy](index.html#ex-clip-ocean) (clip) | Blender 5.2: Ocean modifier, world-shader sky, scripted buoy tracking, Eevee | ENGINE | Blender 5.2 Eevee, 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, foam on the crests from wave height and streaky noise, an animated foam ring with outward ripples around a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), sky-only reflections, low drifting camera. |
+| [Ocean with a floating buoy](index.html#ex-clip-ocean) (clip) | Blender 5.2: Ocean modifier, world-shader sky, scripted buoy tracking, Cycles on the GPU (AMD HIP) | ENGINE | Blender 5.2 Cycles on my AMD GPU (HIP), 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, foam on the crests from wave height and streaky noise, an animated foam ring with outward ripples around a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), path-traced reflections so the buoy mirrors in the water without screen-space artifacts, 128 samples with denoising, low drifting camera. |
 | [Fur-ball character](index.html#ex-clip-particles-fur) (clip) | Blender 5.2: particle hair with children, hair dynamics, turbulence field, Eevee | ENGINE | Blender 5.2 Eevee, 5 seconds: a fluffy coral fur-ball character with two glossy eyes on a dark glossy floor, particle hair with interpolated children, clumping and roughness, violet-to-coral-to-amber root-to-tip gradient, hair dynamics that collide with the floor and soft turbulence, drops in, bounces twice with squash and stretch, then shakes like a wet dog with wide swings while the hair stiffness is keyframed down so the fur flings out, motion blur, cyan and violet rim lights. |
-| [Liquid pour](index.html#ex-clip-liquid) (clip) | Blender 5.2: Mantaflow FLIP liquid with inflow, collision sphere, fluid mesh, Eevee | ENGINE | 5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, pre-rolled so the stream lands on frame 1, larger particle and mesh radius so thin sheets stay connected, domain resolution about 144 with open sides, Eevee, warm key with cyan and violet rims light-linked to the liquid only, slow orbiting push-in, shallow depth of field. |
+| [Liquid pour](index.html#ex-clip-liquid) (clip) | Blender 5.2: Mantaflow FLIP liquid with inflow, collision sphere, fluid mesh with speed vectors, Cycles on the GPU (AMD HIP) | ENGINE | 5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, pre-rolled so the stream lands on frame 1 and pouring until near the end, 3 particles per cell and a larger mesh radius with extra smoothing so the thin sheets stay whole, domain resolution 160 with open sides, mesh speed vectors (UNI cache) for motion blur, Cycles on my AMD GPU (HIP) with motion blur, warm key with cyan and violet rims light-linked to the liquid only, slow orbiting push-in, shallow depth of field. |
 | [Ring of fire and smoke](index.html#ex-clip-smoke-fire) (clip) | Blender 5.2: Mantaflow gas (fire + smoke), Principled Volume with Blackbody, Eevee volumetrics | ENGINE | 5-second Blender ring of fire: a dark metal torus emits Fire+Smoke into a Mantaflow gas domain with a noise texture on the emission and light turbulence, resolution about 128, pre-rolled so it is already burning, Principled Volume with light grey smoke and Blackbody-colored flame emission, volume-only back lights so the smoke glows without colored floor pools, faint backdrop glow, Eevee volumetrics with the Standard view transform, flickering point light for floor glow, slow push-in. |
+| [Niagara particle vortex](index.html#ex-clip-unreal-niagara) (clip) | Unreal Engine 5.8: Niagara GPU particles, Lumen, Sequencer, Movie Render Queue, built through the Unreal MCP | ENGINE | Open Unreal Engine 5.8 on a blank project with the Unreal MCP plugin enabled and wait until its MCP server is connected. Then, through the MCP tools: build a dark studio level with a glossy near-black floor, a glowing coral emissive core and Lumen lighting; create a Niagara system with two GPU emitters (about 45,000 particles), coral-to-amber sparks spawned on a ring that orbit and spiral into the core plus a wider cyan-to-violet ring, curl noise, vortex and point attraction forces, velocity-aligned sprites stretched by speed into light streaks; add a cine camera in a Level Sequence that orbits down from a top view to a grazing view with look-at tracking on the core; render 5 s at 1280x720, 30 fps with Movie Render Queue (8 temporal samples, warm-up frames) and encode an MP4. |
 
 ### Code-to-video tools (6)
 
@@ -414,11 +415,12 @@ Every tool below made something in the catalog on one Windows 11 PC (Ryzen 9 995
 | Motion Canvas | TypeScript animation with generators | Code explainer |
 | Manim | Python math animation | Fourier series |
 | Blender 5.2 (Eevee, Cycles on AMD HIP) | 3D suite, scripted with Python | Physics, cloth, liquid, fire, fur, ocean, geometry nodes, photoreal |
+| Unreal Engine 5.8 (Niagara, Lumen, Sequencer, Movie Render Queue) | Game engine, driven through its built-in MCP server | Niagara particle vortex |
 | FFmpeg + Python | Video processing | Encoding, speed ramp, datamosh, color grade, split screen |
 | Python + NumPy + SciPy | Audio synthesis | The reel's soundtrack |
 | Headless Chrome + Playwright | Browser driven by code | Rendering web scenes to frames, site checks |
 
-Unreal Engine 5.8 is installed on the same PC; Claude can drive it through its MCP server while the editor is open, but it was not used here.
+Unreal Engine 5.8 was driven through its built-in MCP server (the experimental Unreal MCP plugin): Claude opened the editor, waited until the MCP was connected, built the whole scene with MCP tool calls and rendered it with Movie Render Queue. See `source/unreal/README.md`.
 
 ## Reproduce
 
@@ -426,6 +428,7 @@ Unreal Engine 5.8 is installed on the same PC; Claude can drive it through its M
 |---|---|
 | The reel | `source/reel/README.md`: render the Blender shot, render 3,600 web frames, synthesize audio, encode |
 | Blender clips | `blender -b -P source/blender/<name>.py -- <out_dir>` (each script has a usage line) |
+| Unreal clip | `source/unreal/README.md`: open the project in the editor, wait for the MCP, then `python build_scene.py` and `python render.py` |
 | Tool clips | `source/tools/<tool>/README.md` |
 | Editing tricks | `source/edit/<trick>` scripts, rerunnable from that folder |
 | Site catalog | `python scripts/build_catalog.py` (fails if any clip is missing from the site) |
@@ -441,7 +444,7 @@ README.md             this tutorial and cheat sheet
 media/
   reel/               the reel (web version; the full-quality master is a Release asset)
   clips/              scenes cut from the reel
-  engine/             Blender clips
+  engine/             Blender and Unreal clips
   tools/              Remotion, HyperFrames, Motion Canvas, Manim, Three.js, WebGPU clips
   edit/               FFmpeg editing tricks
   readme/             GIFs and posters used in this README
@@ -452,7 +455,8 @@ site/
   vendor/             third-party libraries (with their licenses)
 source/
   reel/               how the reel was made
-  blender/            Blender scripts for every engine clip
+  blender/            Blender scripts for the Blender clips
+  unreal/             Unreal project, MCP client, build and render scripts
   tools/              projects for the code-to-video tools
   edit/               editing trick scripts
   libs/               source of the bundled Three.js demo

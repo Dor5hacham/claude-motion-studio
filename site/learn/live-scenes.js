@@ -6,7 +6,7 @@
   const PALS = { warm: ['#0b0b10', CORAL, AMBER, CYAN, CREAM], paper: ['#efe8dc', CORAL, NAVY, '#2bb8a0', '#1d1b3a'], neon: ['#07040f', '#ff2bd6', '#00e5ff', '#b6ff3b', '#ffffff'], mono: ['#0e0e0e', '#ffffff', '#9a9a9a', '#ff3b30', '#ffffff'] };
   const seg = (t, a, b) => clamp01((t - a) / (b - a));
   const E = k => EASES[k][0];
-  function mount(id, draw) { const cv = document.getElementById(id); if (!cv) return; const g = cv.getContext('2d'); addLoop(cv, t => { g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; draw(g, t, cv.width, cv.height); }); }
+  function mount(id, draw) { const cv = /** @type {HTMLCanvasElement} */ (document.getElementById(id)); if (!cv) return; const g = cv.getContext('2d'); addLoop(cv, t => { g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; draw(g, t, cv.width, cv.height); }); }
   function buttons(hostId, items, onPick, initial) {
     const host = document.getElementById(hostId); if (!host) return;
     items.forEach(([key, label]) => { const b = document.createElement('button'); b.textContent = label; b.dataset.k = key; if (key === initial) b.classList.add('on'); b.onclick = () => { host.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); onPick(key); }; host.appendChild(b); });
@@ -100,7 +100,7 @@
 
   // =============== Post-FX stack (WebGL on a reel still) ===============
   (function () {
-    const cv = document.getElementById('fx-stack'); if (!cv || !window.FX_SOURCE) return; const gl = cv.getContext('webgl2'); if (!gl) return;
+    const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('fx-stack')); if (!cv || !window.FX_SOURCE) return; const gl = cv.getContext('webgl2'); if (!gl) return;
     const vs = `#version 300 es
 const vec2 P[3]=vec2[](vec2(-1,-1),vec2(3,-1),vec2(-1,3)); out vec2 v; void main(){v=P[gl_VertexID]*.5+.5;gl_Position=vec4(P[gl_VertexID],0,1);}`;
     const fs = `#version 300 es
@@ -119,7 +119,7 @@ void main(){vec2 u=v; vec3 c;
   if(fSplit>.5&&u.x<.5) c=img(u);
   if(fSplit>.5&&abs(u.x-.5)<.0015) c=vec3(1);
   o=vec4(c,1);}`;
-    const P = gl.createProgram(); [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]].forEach(([k, s]) => { const sh = gl.createShader(k); gl.shaderSource(sh, s); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(sh)); gl.attachShader(P, sh); }); gl.linkProgram(P);
+    const P = gl.createProgram(); /** @type {[number, string][]} */ ([[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]).forEach(([k, s]) => { const sh = gl.createShader(k); gl.shaderSource(sh, s); gl.compileShader(sh); if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(sh)); gl.attachShader(P, sh); }); gl.linkProgram(P);
     const tex = gl.createTexture(); let ready = false; const im = new Image(); im.onload = () => { gl.bindTexture(gl.TEXTURE_2D, tex); gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); ready = true; }; im.src = window.FX_SOURCE;
     const FX = [['Bloom', 'subtle bloom on highlights'], ['Grain', 'light film grain'], ['Vig', 'soft vignette'], ['CA', 'slight chromatic aberration'], ['Grade', 'teal-and-orange color grade'], ['DOF', 'tilt-shift depth of field'], ['Letter', '2.39:1 letterbox bars'], ['Scan', 'CRT scanlines']];
     const on = { Bloom: true, Grain: true, Vig: true }; let split = false;
@@ -196,12 +196,12 @@ void main(){vec2 u=v; vec3 c;
   if (pgHost) {
     Object.entries(PG).forEach(([gk, grp]) => {
       const row = document.createElement('div'); row.className = 'pg-row'; row.innerHTML = `<span>${grp.label}</span>`; const btns = document.createElement('div'); btns.className = 'btns';
-      Object.entries(grp.opts).forEach(([ok, [lab]]) => { const b = document.createElement('button'); b.textContent = lab; if (ok === grp.val) b.classList.add('on'); b.onclick = () => { grp.val = ok; pgChanged = gk; btns.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); pgPrompt(); }; btns.appendChild(b); });
+      Object.entries(grp.opts).forEach(([ok, [lab]]) => { const b = document.createElement('button'); b.textContent = /** @type {string} */ (lab); if (ok === grp.val) b.classList.add('on'); b.onclick = () => { grp.val = ok; pgChanged = gk; btns.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); pgPrompt(); }; btns.appendChild(b); });
       row.appendChild(btns); pgHost.appendChild(row);
     });
     const ti = document.getElementById('pg-text'); if (ti) ti.oninput = () => { pgChanged = 'text'; pgPrompt(); };
   }
-  function pgCfg() { const c = { dur: 0.6, ease: 'ease-out', stagger: 0.05, pattern: 'left', entrance: 'mask', camera: 'static', palette: 'warm', loop: 4, text: (document.getElementById('pg-text') || {}).value || 'LAUNCH' }; Object.values(PG).forEach(g => Object.assign(c, g.opts[g.val][2])); c.loop = Math.max(3.4, 0.3 + c.dur + c.stagger * 12 + 1.8 + 0.9); return c; }
+  function pgCfg() { const c = { dur: 0.6, ease: 'ease-out', stagger: 0.05, pattern: 'left', entrance: 'mask', camera: 'static', palette: 'warm', loop: 4, text: /** @type {HTMLInputElement} */ (document.getElementById('pg-text') || {}).value || 'LAUNCH' }; Object.values(PG).forEach(g => Object.assign(c, g.opts[g.val][2])); c.loop = Math.max(3.4, 0.3 + c.dur + c.stagger * 12 + 1.8 + 0.9); return c; }
   function pgPrompt() {
     const out = document.getElementById('pg-prompt'); if (!out) return; const ph = k => PG[k].opts[PG[k].val][1];
     const parts = [['text', `Title "${pgCfg().text.toUpperCase()}"`], ['entrance', ph('entrance')], ['stagger', ph('stagger')], ['feel', ph('feel')], ['ease', 'with ' + ph('ease')], ['camera', ph('camera')], ['palette', ph('palette')], ['fx', ph('fx')]];
@@ -224,7 +224,7 @@ void main(){vec2 u=v; vec3 c;
     g.restore();
     const sub = 'Launching March 3', n = Math.floor(seg(T, 4.0, 5.2) * sub.length); g.font = '400 20px Consolas'; g.textAlign = 'center'; g.fillStyle = `rgba(236,231,222,${1 - exit})`; g.fillText(sub.slice(0, n), cx, cy + gap + 40); g.textAlign = 'left';
     g.fillStyle = `rgba(0,0,0,${fade})`; g.fillRect(0, 0, W, H);
-    const marks = [[0, 'dot pops'], [1.0, 'line + split'], [2.0, '"NOVA" rises'], [4.0, 'hold, tracking, subtitle'], [6.5, 'exit'], [7.4, 'fade']];
+    const marks = /** @type {[number, string][]} */ ([[0, 'dot pops'], [1.0, 'line + split'], [2.0, '"NOVA" rises'], [4.0, 'hold, tracking, subtitle'], [6.5, 'exit'], [7.4, 'fade']]);
     g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(0, H - 40, W, 40); marks.forEach(([m, lab], i) => { const xx = 16 + m / 8 * (W - 32); g.fillStyle = T >= m && (i === marks.length - 1 || T < marks[i + 1][0]) ? AMBER : DIM; g.font = '11px Consolas'; g.fillText(lab, xx, H - 14); g.fillRect(xx, H - 36, 2, 8); });
     g.fillStyle = '#fff'; g.fillRect(16 + Math.min(T, 8) / 8 * (W - 32) - 1, H - 40, 2, 14);
   });

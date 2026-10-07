@@ -1,0 +1,18 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.8",
+	"Category": "",
+	"Description": "Motion Studio: a Niagara and Lumen clip built through the Unreal MCP",
+	"Modules": [],
+	"Plugins": [
+		{ "Name": "ModelContextProtocol", "Enabled": true },
+		{ "Name": "EditorToolset", "Enabled": true },
+		{ "Name": "NiagaraToolsets", "Enabled": true },
+		{ "Name": "AnimationAssistantToolset", "Enabled": true },
+		{ "Name": "Niagara", "Enabled": true },
+		{ "Name": "PythonScriptPlugin", "Enabled": true },
+		{ "Name": "EditorScriptingUtilities", "Enabled": true },
+		{ "Name": "SequencerScripting", "Enabled": true },
+		{ "Name": "MovieRenderPipeline", "Enabled": true }
+	]
+}

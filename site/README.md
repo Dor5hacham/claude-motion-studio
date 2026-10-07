@@ -60,6 +60,6 @@ Optional type check (TypeScript as a linter; `globals.d.ts` declares the shared 
 npx -y -p typescript tsc --noEmit --allowJs --checkJs --noImplicitAny false --strict false --noUnusedLocals --target es2022 --lib dom,es2022 site/globals.d.ts site/learn/*.js site/catalog/*.js site/site.js
 ```
 
-It still lists about 75 known, harmless reports: `getElementById` returns a plain `HTMLElement` (so `.value` or `.getContext` is flagged), and arrays of mixed tuples such as `[[0.25, '250 ms'], ...]` are typed as `string | number`. Look for new kinds of errors and unused variables, not for a zero count.
+It reports zero errors. DOM lookups carry JSDoc casts such as `/** @type {HTMLCanvasElement} */ (document.getElementById('x'))`, and arrays of mixed tuples carry JSDoc types such as `/** @type {[number, string][]} */`. Keep it at zero: treat any new report as a bug or a missing cast.
 
 `check_site.mjs` fails on any unloaded script, unused vendor file, missing file, duplicate id, broken `#link`, video that does not play, card without a section, or console error. Add `--shots <dir>` to save a screenshot of every card.

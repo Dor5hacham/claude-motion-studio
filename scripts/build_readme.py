@@ -12,7 +12,7 @@ CATALOG = ROOT / "scripts" / "catalog.json"
 SECTIONS = [
     ("reel", "The reel, scene by scene"), ("type", "Text in motion"), ("mg", "2D motion graphics"), ("ui", "App and web UI motion"),
     ("sim", "Simulation and generative art"), ("gpu", "GPU shaders"), ("audio", "Sound and motion"),
-    ("libs", "Animation libraries"), ("engine", "3D engine (Blender)"), ("tools", "Code-to-video tools"),
+    ("libs", "Animation libraries"), ("engine", "3D engines (Blender, Unreal)"), ("tools", "Code-to-video tools"),
     ("edit", "Editing and post-production"),
 ]
 

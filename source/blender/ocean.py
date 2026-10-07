@@ -1,13 +1,12 @@
-# Builds a stylized sunset ocean in Eevee: an Ocean modifier surface (FFT waves, choppiness,
-# foam attribute) animated by keyframing its time, under a procedural sunset sky with a low sun.
-# A coral-and-cream navigation buoy with a blinking amber lamp rides the swell: for every frame
-# the script reads the evaluated ocean mesh under the buoy and keyframes its height and tilt
-# (smoothed for a little inertia). Distance haze in the water shader hides the patch edges.
-# Foam is built in the water shader: wave crests (height mask broken up by streaky noise) plus an
-# animated ring of churned water and outward ripples around the buoy (buoy-space coordinates).
-# Reflections come from the sky only (no screen-space tracing, which smeared straight-edged bands
-# and dark streaks across the waves), so the buoy has no mirror image in the water. The buoy casts
-# no shadow on the water either: the low sun made it a long straight-edged wedge.
+# Builds a stylized sunset ocean, path traced in Cycles on the GPU (HIP when available): an Ocean
+# modifier surface (FFT waves, choppiness, foam attribute) animated by keyframing its time, under a
+# procedural sunset sky with a low sun. A coral-and-cream navigation buoy with a blinking amber
+# lamp rides the swell: for every frame the script reads the evaluated ocean mesh under the buoy
+# and keyframes its height and tilt (smoothed for a little inertia). Distance haze in the water
+# shader hides the patch edges. Foam is built in the water shader: wave crests (height mask broken
+# up by streaky noise) plus an animated ring of churned water and outward ripples around the buoy
+# (buoy-space coordinates). Cycles traces the reflections, so the buoy has a real mirror image in
+# the water, broken up by the waves, without the bands and streaks of Eevee's screen-space tracing.
 # Usage: blender -b -P ocean.py -- <out_dir> [test_frame]
 import bpy, sys, math, time
 from mathutils import Vector
@@ -17,27 +16,48 @@ OUT = argv[0]
 TEST = int(argv[1]) if len(argv) > 1 else None
 FPS, FRAMES = 30, 150
 RES = 12                 # ocean grid resolution; higher = finer ripples, slower
+SAMPLES = 128            # Cycles samples per pixel (adaptive), then denoised
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
 sc.render.fps = FPS
 sc.frame_start, sc.frame_end = 1, FRAMES
 sc.render.resolution_x, sc.render.resolution_y = 1280, 720
-engines = [e.identifier for e in sc.render.bl_rna.properties["engine"].enum_items]
-sc.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in engines else "BLENDER_EEVEE_NEXT"
-ee = sc.eevee
-ee.taa_render_samples = 48
-for attr, val in [("use_raytracing", True), ("use_shadows", True), ("use_gtao", True)]:
-    if hasattr(ee, attr):
-        setattr(ee, attr, val)
-if hasattr(ee, "ray_tracing_options"):
-    ee.ray_tracing_options.resolution_scale = "1"
-# No screen-space tracing: on this wavy surface it smeared straight-edged bands and dark streaks
-# (rays hitting the buoy or wave backs). Reflections come from the sky instead.
-ee.ray_tracing_method = "PROBE"
-if hasattr(sc.render, "use_motion_blur"):
-    sc.render.use_motion_blur = True
-    sc.render.motion_blur_shutter = 0.4
+sc.render.engine = "CYCLES"
+# GPU through HIP; skip the CPU's integrated Radeon when a discrete card is present
+prefs = bpy.context.preferences.addons["cycles"].preferences
+device_ok = False
+try:
+    prefs.compute_device_type = "HIP"
+    prefs.get_devices()
+    gpus = [d for d in prefs.devices if d.type != "CPU"]
+    discrete = [d for d in gpus if "(TM) Graphics" not in d.name]
+    for d in prefs.devices:
+        d.use = d in (discrete or gpus)
+        device_ok = device_ok or (d.use and d.type == "HIP")
+except Exception as e:
+    print("HIP setup failed:", e)
+cy = sc.cycles
+cy.device = "GPU" if device_ok else "CPU"
+print("CYCLES RENDER DEVICE:", cy.device, "(HIP)" if device_ok else "(no HIP device)")
+cy.samples = SAMPLES
+cy.use_adaptive_sampling = True
+cy.adaptive_threshold = 0.02
+cy.use_denoising = True
+cy.denoiser = "OPENIMAGEDENOISE"
+if hasattr(cy, "denoising_use_gpu"):
+    cy.denoising_use_gpu = True
+cy.max_bounces = 8
+cy.diffuse_bounces = 2
+cy.glossy_bounces = 4
+cy.transmission_bounces = 4
+cy.caustics_reflective = False      # no sun glints bounced off the water onto the buoy: fireflies
+cy.caustics_refractive = False
+cy.blur_glossy = 1.0
+cy.sample_clamp_indirect = 8.0
+sc.render.use_persistent_data = True
+sc.render.use_motion_blur = True
+sc.render.motion_blur_shutter = 0.4
 vts = [i.identifier for i in sc.view_settings.bl_rna.properties["view_transform"].enum_items]
 sc.view_settings.view_transform = "AgX" if "AgX" in vts else "Standard"
 sc.render.image_settings.file_format = "PNG"
@@ -89,6 +109,9 @@ bgn = wn.nodes.new("ShaderNodeBackground"); bgn.inputs["Strength"].default_value
 wn.links.new(sun_col.outputs["Result"], bgn.inputs["Color"])
 wout = wn.nodes.new("ShaderNodeOutputWorld")
 wn.links.new(bgn.outputs[0], wout.inputs["Surface"])
+# importance map fine enough to find the small sun disk
+world.cycles.sampling_method = "MANUAL"
+world.cycles.sample_map_resolution = 2048
 
 # ---- Ocean ----
 bpy.ops.mesh.primitive_plane_add(size=2, location=(0, 0, 0))
@@ -126,7 +149,7 @@ nt = wm.node_tree
 bsdf = nt.nodes["Principled BSDF"]
 bsdf.inputs["Roughness"].default_value = 0.06
 if "Specular IOR Level" in bsdf.inputs:
-    bsdf.inputs["Specular IOR Level"].default_value = 0.7
+    bsdf.inputs["Specular IOR Level"].default_value = 1.0   # strong Fresnel: the buoy reads in the water
 geo = nt.nodes.new("ShaderNodeNewGeometry")
 gsep = nt.nodes.new("ShaderNodeSeparateXYZ")
 nt.links.new(geo.outputs["Position"], gsep.inputs["Vector"])
@@ -209,7 +232,7 @@ for f, w in [(1, 0.0), (FRAMES, 2.0)]:
     rip_w.outputs[0].default_value = w
     rip_w.outputs[0].keyframe_insert("default_value", frame=f)
 nt.links.new(rip_w.outputs[0], rip.inputs["W"])
-bump = nt.nodes.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.35; bump.inputs["Distance"].default_value = 0.05
+bump = nt.nodes.new("ShaderNodeBump"); bump.inputs["Strength"].default_value = 0.28; bump.inputs["Distance"].default_value = 0.05
 nt.links.new(rip.outputs["Fac"], bump.inputs["Height"])
 nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
 frough = nt.nodes.new("ShaderNodeMapRange"); frough.inputs["To Min"].default_value = 0.06; frough.inputs["To Max"].default_value = 0.7
@@ -290,7 +313,6 @@ lamp = part(bpy.ops.mesh.primitive_uv_sphere_add, lamp_m, (0, 0, 1.66), radius=0
 # bevel the hard primitives a little
 for o in parts:
     bv = o.modifiers.new("Bevel", "BEVEL"); bv.width = 0.015; bv.segments = 2
-    o.visible_shadow = False   # its long low-sun shadow showed as a straight-edged band on the waves
 ld = bpy.data.lights.new("LampLight", "POINT"); ld.color = (1.0, 0.55, 0.12); ld.shadow_soft_size = 0.1
 ll = bpy.data.objects.new("LampLight", ld); sc.collection.objects.link(ll)
 ll.parent = root; ll.location = (0, 0, 1.66)
@@ -338,7 +360,7 @@ sun.rotation_euler = (-SUN_DIR).to_track_quat("-Z", "Y").to_euler()
 fill_d = bpy.data.lights.new("Fill", "SUN"); fill_d.color = (0.45, 0.35, 1.0); fill_d.energy = 0.6
 fill = bpy.data.objects.new("Fill", fill_d); sc.collection.objects.link(fill)
 fill.rotation_euler = (math.radians(50), 0, math.radians(200))
-fill_d.specular_factor = 0.0
+fill.visible_glossy = False   # fill only lights the buoy; no second sun in the water
 
 # ---- Camera: low over the water, slow drift and a slight bob ----
 cam_d = bpy.data.cameras.new("Cam"); cam_d.lens = 42

@@ -152,9 +152,9 @@ window.CLIPS = [
   "aka": "path tracing, product render, caustics",
   "tool": "Blender 5.2 Cycles on the GPU (AMD HIP)",
   "runs": "ENGINE",
-  "notice": "A glass sphere, a brushed-metal ring and a glossy coral sphere turn on a stone pedestal under softbox lights. Cycles traces light paths for real refraction and soft shadows; the glass focuses a bright caustic into its own shadow, and the ring shows fine brushing streaks around its circumference.",
+  "notice": "A glass sphere, a brushed-metal ring and a glossy coral sphere turn on a stone pedestal under softbox lights. Cycles traces light paths for real refraction and soft shadows; the glass focuses a bright caustic into its own shadow, and the ring shows fine brushing streaks around its circumference. Two low softboxes that only reach the pedestal light its curved sides without touching the top.",
   "use": "product shots, premium ads, packshots",
-  "prompt": "Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring with visible circumferential streaks and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights linked so they skip the pedestal, a small caustic light so the glass throws a bright MNEE caustic into its shadow, 160 samples with denoising, 70 mm lens at f/3.5, slow 75-degree turn, 5 s."
+  "prompt": "Photoreal Blender Cycles product turntable on my AMD GPU (HIP): clear glass sphere, brushed anisotropic metal ring with visible circumferential streaks and glossy coral sphere on a cream stone pedestal, dark seamless studio, softbox and strip lights linked so they skip the pedestal, two low side softboxes linked to the pedestal only so its sides stay lit, a small caustic light so the glass throws a bright MNEE caustic into its shadow, 160 samples with denoising, 70 mm lens at f/3.5, slow 75-degree turn, 5 s."
  },
  {
   "id": "3d-logo",
@@ -306,11 +306,11 @@ window.CLIPS = [
   "file": "engine/ocean.mp4",
   "title": "Ocean with a floating buoy",
   "aka": "ocean modifier, sunset sea, floating object",
-  "tool": "Blender 5.2: Ocean modifier, world-shader sky, scripted buoy tracking, Eevee",
+  "tool": "Blender 5.2: Ocean modifier, world-shader sky, scripted buoy tracking, Cycles on the GPU (AMD HIP)",
   "runs": "ENGINE",
-  "notice": "A coral buoy with a blinking lamp rides the swell at sunset with a glittering sun path. A script reads the wave height under the buoy every frame, so it bobs and tilts with the water. Foam is drawn by the water shader on the crests and in rings that ripple out around the buoy. Reflections come from the sky only, so the buoy has no mirror image in the water.",
+  "notice": "A coral buoy with a blinking lamp rides the swell at sunset with a glittering sun path. A script reads the wave height under the buoy every frame, so it bobs and tilts with the water. Foam is drawn by the water shader on the crests and in rings that ripple out around the buoy. Cycles path-traces the reflections, so the buoy's coral hull, cream band and amber lamp show in the water, broken up by the waves.",
   "use": "travel and nature, calm loops, maritime brands",
-  "prompt": "Blender 5.2 Eevee, 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, foam on the crests from wave height and streaky noise, an animated foam ring with outward ripples around a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), sky-only reflections, low drifting camera."
+  "prompt": "Blender 5.2 Cycles on my AMD GPU (HIP), 5-second stylized sunset ocean: Ocean modifier with keyframed time and moderate choppiness, gradient sunset sky with a low sun disk, sun glitter path, foam on the crests from wave height and streaky noise, an animated foam ring with outward ripples around a coral and cream buoy with a blinking lamp that bobs and tilts with the waves (read the ocean surface each frame), path-traced reflections so the buoy mirrors in the water without screen-space artifacts, 128 samples with denoising, low drifting camera."
  },
  {
   "id": "particles-fur",
@@ -354,11 +354,11 @@ window.CLIPS = [
   "file": "engine/liquid.mp4",
   "title": "Liquid pour",
   "aka": "FLIP fluid, Mantaflow, paint pour",
-  "tool": "Blender 5.2: Mantaflow FLIP liquid with inflow, collision sphere, fluid mesh, Eevee",
+  "tool": "Blender 5.2: Mantaflow FLIP liquid with inflow, collision sphere, fluid mesh with speed vectors, Cycles on the GPU (AMD HIP)",
   "runs": "ENGINE",
-  "notice": "A glossy coral stream is already landing on a cream sphere in the first frame, coats it and spills across the floor in a mostly connected sheet, and drips stay behind after the pour stops. The liquid is simulated as particles (FLIP) and turned into a smooth surface mesh every frame. Some holes and ragged edges remain in the thinnest parts of the spill.",
+  "notice": "A glossy coral stream is already landing on a cream sphere in the first frame, coats it in an unbroken layer and spills across the floor, until the last of the stream falls at the end. The liquid is simulated as particles (FLIP), turned into a smooth surface mesh every frame, and path traced with motion blur on the moving liquid itself (from per-vertex speed vectors). The outer edge of the spill still breaks into separate lumps.",
   "use": "food and drink, paint and cosmetics, satisfying product shots",
-  "prompt": "5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, pre-rolled so the stream lands on frame 1, larger particle and mesh radius so thin sheets stay connected, domain resolution about 144 with open sides, Eevee, warm key with cyan and violet rims light-linked to the liquid only, slow orbiting push-in, shallow depth of field."
+  "prompt": "5-second Blender liquid simulation: a thick glossy coral paint stream pours onto a cream sphere on a dark reflective floor, coats it and splashes outward, Mantaflow FLIP with an inflow and the sphere as a collision object, pre-rolled so the stream lands on frame 1 and pouring until near the end, 3 particles per cell and a larger mesh radius with extra smoothing so the thin sheets stay whole, domain resolution 160 with open sides, mesh speed vectors (UNI cache) for motion blur, Cycles on my AMD GPU (HIP) with motion blur, warm key with cyan and violet rims light-linked to the liquid only, slow orbiting push-in, shallow depth of field."
  },
  {
   "id": "smoke-fire",
@@ -371,5 +371,17 @@ window.CLIPS = [
   "notice": "Orange flames lick up from a dark metal ring and roll up into a light grey smoke plume, lit from behind so it reads against the dark backdrop. Fire temperature drives its color through a blackbody ramp, the way real flames shift from red to yellow.",
   "use": "dramatic intros, energy and heat themes, gaming",
   "prompt": "5-second Blender ring of fire: a dark metal torus emits Fire+Smoke into a Mantaflow gas domain with a noise texture on the emission and light turbulence, resolution about 128, pre-rolled so it is already burning, Principled Volume with light grey smoke and Blackbody-colored flame emission, volume-only back lights so the smoke glows without colored floor pools, faint backdrop glow, Eevee volumetrics with the Standard view transform, flickering point light for floor glow, slow push-in."
+ },
+ {
+  "id": "unreal-niagara",
+  "cat": "engine",
+  "file": "engine/unreal-niagara.mp4",
+  "title": "Niagara particle vortex",
+  "aka": "GPU particles, Niagara, real-time cinematic, Lumen",
+  "tool": "Unreal Engine 5.8: Niagara GPU particles, Lumen, Sequencer, Movie Render Queue, built through the Unreal MCP",
+  "runs": "ENGINE",
+  "notice": "About 45,000 GPU particles spiral into a glowing coral core above a glossy black floor while the camera orbits down from a top view to a grazing one. Curl noise, a vortex force and a point attraction move every spark, and each one stretches along its speed into a light streak. The whole scene was built by calling the Unreal editor's MCP tools, then rendered with Movie Render Queue (8 samples per frame, which also gives the motion blur).",
+  "use": "game and tech trailers, music visuals, sci-fi intros, event screens",
+  "prompt": "Open Unreal Engine 5.8 on a blank project with the Unreal MCP plugin enabled and wait until its MCP server is connected. Then, through the MCP tools: build a dark studio level with a glossy near-black floor, a glowing coral emissive core and Lumen lighting; create a Niagara system with two GPU emitters (about 45,000 particles), coral-to-amber sparks spawned on a ring that orbit and spiral into the core plus a wider cyan-to-violet ring, curl noise, vortex and point attraction forces, velocity-aligned sprites stretched by speed into light streaks; add a cine camera in a Level Sequence that orbits down from a top view to a grazing view with look-at tracking on the core; render 5 s at 1280x720, 30 fps with Movie Render Queue (8 temporal samples, warm-up frames) and encode an MP4."
  }
 ];

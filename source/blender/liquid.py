@@ -1,9 +1,12 @@
 # Builds a Mantaflow FLIP liquid shot: a glossy coral stream pours onto a cream sphere,
-# coats it and spills across a dark studio floor. Bakes the fluid, then renders with Eevee
-# and motion blur (Eevee blurs the camera move; the changing fluid mesh itself stays sharp,
-# because Eevee does not read its velocity attribute). The sim pre-rolls PREROLL frames so the stream already hits the sphere on
-# the first rendered frame; frames are written as f_0013.png onward (use ffmpeg -start_number).
-# The fluid cache goes to <out_dir>/cache and is rebaked on every run.
+# coats it and spills across a dark studio floor. Bakes the fluid, then path traces it in Cycles
+# on the GPU (HIP when available) with motion blur: the domain caches mesh speed vectors, which
+# Cycles reads to blur the changing fluid surface itself, not only the camera move. The sim
+# pre-rolls PREROLL frames so the stream already hits the sphere on the first rendered frame;
+# frames are written as f_0013.png onward (use ffmpeg -start_number).
+# The fluid cache goes to <out_dir>/cache and is rebaked on every run (a test run bakes only up
+# to its last test frame). Set LIQUID_MOTION_BLUR=0 to render without motion blur, or
+# LIQUID_COMPARE_BLUR=1 to write every test frame twice (test_N.png with blur, test_N_noblur.png).
 # Usage: blender -b -P liquid.py -- <out_dir> [test_frame[,test_frame...]]
 import bpy, sys, os, math, time
 
@@ -14,23 +17,48 @@ CACHE = os.path.join(OUT, "cache")
 FPS, FRAMES = 30, 150
 PREROLL = 12                  # sim frames before the first rendered frame (stream lands on frame 1)
 F0, F1 = 1 + PREROLL, FRAMES + PREROLL
-RES = 144
+RES = 160                     # domain resolution (longest side, in cells)
+SAMPLES = 128                 # Cycles samples per pixel (adaptive), then denoised
+MOTION_BLUR = os.environ.get("LIQUID_MOTION_BLUR", "1") != "0"
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sc = bpy.context.scene
 sc.render.fps = FPS
 sc.frame_start, sc.frame_end = F0, F1
 sc.render.resolution_x, sc.render.resolution_y = 1280, 720
-engines = [e.identifier for e in sc.render.bl_rna.properties["engine"].enum_items]
-sc.render.engine = "BLENDER_EEVEE" if "BLENDER_EEVEE" in engines else "BLENDER_EEVEE_NEXT"
-ee = sc.eevee
-ee.taa_render_samples = 48
-for attr, val in [("use_raytracing", True), ("use_shadows", True), ("use_gtao", True)]:
-    if hasattr(ee, attr):
-        setattr(ee, attr, val)
-if hasattr(ee, "ray_tracing_options"):
-    ee.ray_tracing_options.resolution_scale = "1"
-sc.render.use_motion_blur = True
+sc.render.engine = "CYCLES"
+# GPU through HIP; skip the CPU's integrated Radeon when a discrete card is present
+prefs = bpy.context.preferences.addons["cycles"].preferences
+device_ok = False
+try:
+    prefs.compute_device_type = "HIP"
+    prefs.get_devices()
+    gpus = [d for d in prefs.devices if d.type != "CPU"]
+    discrete = [d for d in gpus if "(TM) Graphics" not in d.name]
+    for d in prefs.devices:
+        d.use = d in (discrete or gpus)
+        device_ok = device_ok or (d.use and d.type == "HIP")
+except Exception as e:
+    print("HIP setup failed:", e)
+cy = sc.cycles
+cy.device = "GPU" if device_ok else "CPU"
+print("CYCLES RENDER DEVICE:", cy.device, "(HIP)" if device_ok else "(no HIP device)")
+cy.samples = SAMPLES
+cy.use_adaptive_sampling = True
+cy.adaptive_threshold = 0.02
+cy.use_denoising = True
+cy.denoiser = "OPENIMAGEDENOISE"
+if hasattr(cy, "denoising_use_gpu"):
+    cy.denoising_use_gpu = True
+cy.max_bounces = 8
+cy.diffuse_bounces = 2
+cy.glossy_bounces = 4
+cy.caustics_reflective = False
+cy.caustics_refractive = False
+cy.blur_glossy = 1.0
+sc.render.use_persistent_data = True
+# Motion blur reads the fluid mesh's cached velocity attribute (use_speed_vectors below)
+sc.render.use_motion_blur = MOTION_BLUR
 sc.render.motion_blur_shutter = 0.5
 try:
     sc.view_settings.view_transform = "Khronos PBR Neutral"
@@ -87,8 +115,9 @@ em.fluid_type = "EFFECTOR"
 em.effector_settings.effector_type = "COLLISION"
 em.effector_settings.use_plane_init = False
 
-# Inflow nozzle: small cylinder above the sphere, shooting liquid down, drifting slightly
-bpy.ops.mesh.primitive_cylinder_add(radius=0.15, depth=0.16, vertices=32, location=(-0.22, 0.05, 2.75))
+# Inflow nozzle: small cylinder above the sphere, shooting liquid down, drifting slightly.
+# A thicker pour (radius 0.18) feeds a spill sheet several cells thick, so it does not tear.
+bpy.ops.mesh.primitive_cylinder_add(radius=0.18, depth=0.16, vertices=32, location=(-0.22, 0.05, 2.75))
 nozzle = bpy.context.object
 nozzle.hide_render = True
 fm = nozzle.modifiers.new("Fluid", "FLUID")
@@ -100,7 +129,8 @@ fs.use_initial_velocity = True
 fs.velocity_coord = (0.0, 0.0, -3.0)
 fs.subframes = 1
 fs.use_inflow = True
-STOP = 100 + PREROLL
+# The pour runs until frame 140: a coat left to drain for longer thins out and tears open
+STOP = 140 + PREROLL
 fs.keyframe_insert("use_inflow", frame=1)
 fs.keyframe_insert("use_inflow", frame=STOP)
 fs.use_inflow = False
@@ -124,13 +154,16 @@ ds.resolution_max = RES
 ds.simulation_method = "FLIP"
 ds.use_mesh = True
 ds.mesh_scale = 2
-# Larger particle and mesh radii keep the thin spill sheet in one piece instead of blobs
+# More particles per cell and larger particle and mesh radii keep the thin spill sheet in one
+# piece (no holes); extra smoothing rounds off ragged sheet edges
+ds.particle_number = 3
 ds.particle_radius = 1.25
-ds.mesh_particle_radius = 2.6
-ds.mesh_smoothen_pos = 3
+ds.mesh_particle_radius = 2.8
+ds.mesh_smoothen_pos = 4
 ds.mesh_smoothen_neg = 2
+ds.mesh_concave_upper = 4.0
 ds.mesh_generator = "IMPROVED"
-ds.use_speed_vectors = True
+ds.use_speed_vectors = True      # per-vertex velocities: Cycles motion blur on the fluid mesh
 ds.use_adaptive_timesteps = True
 ds.timesteps_max = 6
 ds.surface_tension = 0.0
@@ -139,9 +172,11 @@ for side in ("front", "back", "left", "right", "top"):
 ds.use_collision_border_bottom = True
 ds.cache_directory = CACHE
 ds.cache_type = "ALL"
-ds.cache_data_format = "OPENVDB"
-ds.cache_mesh_format = "BOBJ" if "BOBJ" in [i.identifier for i in ds.bl_rna.properties["cache_mesh_format"].enum_items] else ds.cache_mesh_format
-ds.cache_frame_start, ds.cache_frame_end = 1, F1
+# UNI, not OpenVDB: with OpenVDB data the mesh speed vectors are silently not saved, the mesh's
+# velocity attribute stays zero and Cycles draws no motion blur on the liquid
+ds.cache_data_format = "UNI"
+ds.cache_mesh_format = "BOBJECT"
+ds.cache_frame_start, ds.cache_frame_end = 1, (max(TEST) if TEST else F1)
 dom.location.z = 1.5 - 0.05  # bottom wall voxel layer lines up with the floor
 bpy.ops.object.shade_smooth()
 
@@ -195,10 +230,13 @@ print("Bake result", r, "seconds", round(time.time() - t0, 1))
 
 t0 = time.time()
 if TEST:
+    compare = os.environ.get("LIQUID_COMPARE_BLUR") == "1"
     for f in TEST:
         sc.frame_set(f)
-        sc.render.filepath = OUT + f"/test_{f:04d}.png"
-        bpy.ops.render.render(write_still=True)
+        for blur, suffix in ((MOTION_BLUR, ""), (False, "_noblur")) if compare else ((MOTION_BLUR, ""),):
+            sc.render.use_motion_blur = blur
+            sc.render.filepath = OUT + f"/test_{f:04d}{suffix}.png"
+            bpy.ops.render.render(write_still=True)
 else:
     bpy.ops.render.render(animation=True)
 print("Render seconds", round(time.time() - t0, 1))

@@ -134,7 +134,7 @@
         g.strokeStyle = 'rgba(180,200,255,0.25)'; g.lineWidth = 1; for (const d of rain) { d.y += d.s * dt * 60; d.x -= 2 * dt * 60; if (d.y > H) { d.y = -10; d.x = r() * W + 40; } g.beginPath(); g.moveTo(d.x, d.y); g.lineTo(d.x - 3, d.y + 10); g.stroke(); }
         for (const b of bolts) {
           b.life -= dt * 2.8; if (b.life <= 0) continue;
-          for (const [w, a, col] of [[10, 0.12, '120,170,255'], [4, 0.35, '170,210,255'], [1.6, 1, '255,255,255']]) {
+          for (const [w, a, col] of /** @type {[number, number, string][]} */ ([[10, 0.12, '120,170,255'], [4, 0.35, '170,210,255'], [1.6, 1, '255,255,255']])) {
             g.strokeStyle = `rgba(${col},${a * b.life})`; g.lineWidth = w; g.lineCap = 'round'; g.beginPath();
             for (const [x1, y1, x2, y2, dpt] of b.segs) { if (dpt && w > 2) continue; g.moveTo(x1, y1); g.lineTo(x2, y2); } g.stroke();
           }

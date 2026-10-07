@@ -12,7 +12,7 @@
     const noise = (t, f, type, peak, d) => { const s = ctx.createBufferSource(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); s.buffer = noiseBuf; fl.type = type; fl.frequency.value = f; env(g, t, 0.001, peak, d); s.connect(fl).connect(g).connect(master); s.start(t); s.stop(t + d + 0.05); };
     const bass = (t, f) => { const o = ctx.createOscillator(), fl = ctx.createBiquadFilter(), g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = f; fl.type = 'lowpass'; fl.frequency.setValueAtTime(900, t); fl.frequency.exponentialRampToValueAtTime(180, t + 0.2); fl.Q.value = 6; env(g, t, 0.005, 0.35, 0.2); o.connect(fl).connect(g).connect(master); o.start(t); o.stop(t + 0.3); };
     const stab = (t, fs) => fs.forEach(f => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'triangle'; o.frequency.value = f; env(g, t, 0.01, 0.07, 0.35); o.connect(g).connect(master); o.start(t); o.stop(t + 0.45); });
-    const prog = [[55, [220, 261.6, 329.6]], [43.65, [174.6, 220, 261.6]], [65.4, [196, 261.6, 329.6]], [49, [196, 246.9, 293.7]]];
+    const prog = /** @type {[number, number[]][]} */ ([[55, [220, 261.6, 329.6]], [43.65, [174.6, 220, 261.6]], [65.4, [196, 261.6, 329.6]], [49, [196, 246.9, 293.7]]]);
     const step = 0.125; let next = ctx.currentTime + 0.05, n = 0;
     const timer = setInterval(() => {
       while (next < ctx.currentTime + 0.2) {

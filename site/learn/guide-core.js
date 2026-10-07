@@ -25,7 +25,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- easing playground ----------------
 (() => {
-  const cv = document.getElementById('c-ease'); if (!cv) return; const g = cv.getContext('2d');
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-ease')); if (!cv) return; const g = cv.getContext('2d');
   let cur = 'back-out'; const btns = document.getElementById('ease-btns');
   for (const k of Object.keys(EASES)) { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { cur = k; L.t0 = performance.now(); sync(); }; btns.appendChild(b); }
   function sync() { [...btns.children].forEach(b => b.classList.toggle('on', b.textContent === cur)); document.getElementById('ease-desc').textContent = EASES[cur][1]; document.getElementById('ease-say').textContent = EASES[cur][2]; }
@@ -50,7 +50,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- stagger ----------------
 (() => {
-  const cv = document.getElementById('c-stagger'); if (!cv) return; const g = cv.getContext('2d');
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-stagger')); if (!cv) return; const g = cv.getContext('2d');
   const pats = { 'none (all at once)': () => 0, 'left to right': i => i * 0.05, 'center out': (i, j) => Math.hypot(i - 9.5, j - 3) * 0.06, 'diagonal': (i, j) => (i + j) * 0.035, 'random': (i, j) => ((Math.sin(i * 12.9898 + j * 78.233) * 43758.5453) % 1 + 1) % 1 * 0.8 };
   let cur = 'center out'; const btns = document.getElementById('stg-btns');
   for (const k of Object.keys(pats)) { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { cur = k; L.t0 = performance.now(); sync(); }; btns.appendChild(b); }
@@ -68,7 +68,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- squash and stretch ----------------
 (() => {
-  const cv = document.getElementById('c-squash'); if (!cv) return; const g = cv.getContext('2d'); let on = true;
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-squash')); if (!cv) return; const g = cv.getContext('2d'); let on = true;
   const b = document.getElementById('sq-toggle'); b.onclick = () => { on = !on; b.classList.toggle('on', on); b.textContent = 'Squash and stretch: ' + (on ? 'ON' : 'OFF'); };
   addLoop(cv, t => {
     g.fillStyle = '#08080c'; g.fillRect(0, 0, 480, 300);
@@ -82,7 +82,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- anticipation + overshoot ----------------
 (() => {
-  const cv = document.getElementById('c-antic'); if (!cv) return; const g = cv.getContext('2d'); let on = true;
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-antic')); if (!cv) return; const g = cv.getContext('2d'); let on = true;
   const b = document.getElementById('an-toggle'); b.onclick = () => { on = !on; b.classList.toggle('on', on); b.textContent = 'Anticipation + overshoot: ' + (on ? 'ON' : 'OFF'); };
   const inOutBack = x => { const c = 1.70158 * 1.525; return x < .5 ? (Math.pow(2 * x, 2) * ((c + 1) * 2 * x - c)) / 2 : (Math.pow(2 * x - 2, 2) * ((c + 1) * (x * 2 - 2) + c) + 2) / 2; };
   addLoop(cv, t => {
@@ -97,7 +97,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- prompt builder ----------------
 (() => {
-  const $ = id => document.getElementById(id); if (!$('b-out')) return;
+  const $ = id => /** @type {HTMLInputElement} */ (document.getElementById(id)); if (!$('b-out')) return;
   const MOOD = {
     premium: 'premium and calm: long ease-in-out moves (1 to 1.5 s), generous holds, soft depth of field',
     energetic: 'energetic: ease-out-expo, short 200 to 300 ms moves, hard cuts on the beat, camera shake on impacts',
@@ -108,7 +108,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
   };
   function build() {
     const len = Math.max(3, Number($('b-len').value) || 20);
-    const tech = [...document.querySelectorAll('#b-tech input:checked')].map(i => i.value), post = [...document.querySelectorAll('#b-post input:checked')].map(i => i.value);
+    const tech = [.../** @type {NodeListOf<HTMLInputElement>} */ (document.querySelectorAll('#b-tech input:checked'))].map(i => i.value), post = [.../** @type {NodeListOf<HTMLInputElement>} */ (document.querySelectorAll('#b-post input:checked'))].map(i => i.value);
     const segLen = len / Math.max(1, tech.length + 1), tl = []; let t = 0;
     const word = $('b-text').value.split('/')[0].trim();
     tl.push(`${t.toFixed(1)}-${(t + segLen).toFixed(1)} s  opening: ${tech.includes('kinetic typography') ? 'kinetic type reveal of "' + word + '"' : 'establishing shot'}`); t += segLen;
@@ -130,7 +130,7 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 })();
 
 // copy buttons on example prompts
-document.querySelectorAll('pre .copy').forEach(b => b.onclick = () => {
+/** @type {NodeListOf<HTMLElement>} */ (document.querySelectorAll('pre .copy')).forEach(b => b.onclick = () => {
   const txt = b.parentElement.textContent.replace(/^Copy/, '').replace(/^Copied/, '');
   navigator.clipboard.writeText(txt.trim()); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1200);
 });

@@ -204,6 +204,19 @@ for rim in (area("RimL", (-5.5, 3.5, 2.5), (80, 0, -125), (0.55, 0.85, 1.0), 700
             area("RimR", (5.5, 3.0, 2.5), (80, 0, 120), (1.0, 0.55, 0.35), 700, 0.5, 3.0)):
     rim.light_linking.receiver_collection = key_rx
 area("Top", (0, 0.5, 7.5), (0, 0, 0), (1.0, 0.98, 0.95), 10, 4.0)
+# Side lights for the pedestal only (light linking): low, flat softboxes whose whole emitter sits
+# below the pedestal top, so they shape the curved sides but cannot reach the top surface where
+# the shadow and the caustic are. A warm fill from the front left, a cool rim from the right.
+ped_rx = bpy.data.collections.new("PedestalOnly")
+ped_rx.objects.link(ped)
+side_aim = bpy.data.objects.new("SideAim", None); sc.collection.objects.link(side_aim)
+side_aim.location = (0, 0, 0.32)
+for nm, loc, col, pw, sx in (("SideFill", (-4.5, -6.0, 0.32), (1.0, 0.9, 0.8), 130, 4.0),
+                             ("SideRim", (6.0, -1.2, 0.32), (0.55, 0.85, 1.0), 170, 2.0)):
+    s = area(nm, loc, (0, 0, 0), col, pw, sx, 0.5)
+    c = s.constraints.new("TRACK_TO"); c.target = side_aim
+    c.track_axis = "TRACK_NEGATIVE_Z"; c.up_axis = "UP_Y"
+    s.light_linking.receiver_collection = ped_rx
 # Violet glow on the back wall, hidden behind the pedestal and aimed away from it
 area("Wall", (0, 4.0, 0.25), (90, 0, 0), (0.55, 0.38, 1.0), 500, 4.2, 0.6)
 

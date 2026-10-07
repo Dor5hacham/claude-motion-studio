@@ -7,7 +7,7 @@
 
   // Mounts a canvas loop; draw(g, t, W, H) runs only while visible.
   function live(id, draw) {
-    const cv = document.getElementById(id); if (!cv) return null;
+    const cv = /** @type {HTMLCanvasElement} */ (document.getElementById(id)); if (!cv) return null;
     const g = cv.getContext('2d');
     return addLoop(cv, t => { g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.fillStyle = '#08080c'; g.fillRect(0, 0, cv.width, cv.height); draw(g, t, cv.width, cv.height); });
   }
@@ -23,7 +23,7 @@
 
   // ---- Timing ----
   live('cmp-timing', (g, t) => {
-    const lanes = [[0.25, '250 ms', 'snappy, energetic', CORAL], [0.6, '600 ms', 'normal', AMBER], [1.5, '1.5 s', 'calm or heavy', CYAN]];
+    const lanes = /** @type {[number, string, string, string][]} */ ([[0.25, '250 ms', 'snappy, energetic', CORAL], [0.6, '600 ms', 'normal', AMBER], [1.5, '1.5 s', 'calm or heavy', CYAN]]);
     lanes.forEach(([d, lab, feel, col], i) => {
       const y = 62 + i * 66, cyc = t % 4.2, go = eo(seg(cyc, 0.4, 0.4 + d)) - eo(seg(cyc, 2.4, 2.4 + d));
       g.strokeStyle = '#1e1e2a'; g.lineWidth = 2; g.beginPath(); g.moveTo(200, y); g.lineTo(900, y); g.stroke();
@@ -145,7 +145,7 @@
     [0, 1].forEach(side => {
       const ox = side * W / 2; g.save(); g.beginPath(); g.rect(ox, 34, W / 2, H - 34); g.clip();
       const sky = g.createLinearGradient(0, 34, 0, H); sky.addColorStop(0, '#22163a'); sky.addColorStop(1, '#ff8a5a'); g.fillStyle = sky; g.fillRect(ox, 34, W / 2, H);
-      [[0.15, 150, 50, '#5a3a6a'], [0.45, 185, 32, '#3a2448'], [1.2, 215, 22, '#1a0f22']].forEach(([sp, base, amp, col]) => {
+      /** @type {[number, number, number, string][]} */ ([[0.15, 150, 50, '#5a3a6a'], [0.45, 185, 32, '#3a2448'], [1.2, 215, 22, '#1a0f22']]).forEach(([sp, base, amp, col]) => {
         const s = side ? sp : 0.45, cam = t * 60 * s; g.fillStyle = col; g.beginPath(); g.moveTo(ox, H);
         for (let x = 0; x <= W / 2; x += 6) { const wx = (x + cam) * 0.02; g.lineTo(ox + x, base - Math.abs(Math.sin(wx) * amp + Math.sin(wx * 2.3) * amp * 0.4)); }
         g.lineTo(ox + W / 2, H); g.fill();
@@ -179,7 +179,7 @@
       ball(g, x + 35, y + 58 - hgt, 9, AMBER, u < 0.06 || u > 0.94 ? 1.3 : 1, u < 0.06 || u > 0.94 ? 0.7 : 1);
       g.font = '10px Consolas'; g.fillStyle = DIM; g.fillText(String(i + 1), x + 4, y + 12);
     }
-    [[12, 'choppy: stop-motion, anime'], [24, 'film look'], [30, 'web video'], [60, 'smooth: games, UI, sports']].forEach(([fps, lab], i) => {
+    /** @type {[number, string][]} */ ([[12, 'choppy: stop-motion, anime'], [24, 'film look'], [30, 'web video'], [60, 'smooth: games, UI, sports']]).forEach(([fps, lab], i) => {
       const y = 140 + i * 40, tq = Math.floor(t * fps) / fps, [x, b] = pos(tq);
       g.font = '700 15px Consolas'; g.fillStyle = [CORAL, AMBER, CYAN, VIOLET][i]; g.fillText(fps + ' fps', 16, y + 5); g.font = '12px Segoe UI'; g.fillStyle = DIM; g.fillText(lab, 16, y + 20);
       g.strokeStyle = '#1e1e2a'; g.lineWidth = 2; g.beginPath(); g.moveTo(150, y); g.lineTo(W - 40, y); g.stroke();

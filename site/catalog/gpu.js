@@ -29,7 +29,7 @@
         col*=.65+.55*l; col+=pow(max(l,0.),24.)*.25*step(.1,b); o=vec4(col,1);}`);
       const st = (L.state = { f: 0.0545, k: 0.062, seedN: 1, seed: () => {}, set: (f, k) => { void f; void k; } });
       st.seed = () => { G.draw(init, pp.write, { uSeed: st.seedN++ }); pp.swap(); };
-      st.set = (f, k) => { L.p.f = f; L.p.k = k; const ins = document.querySelectorAll('#ex-reaction .tweakpanel input'); if (ins.length) { ins[0].value = f; ins[0].oninput(); ins[1].value = k; ins[1].oninput(); } st.seed(); };
+      st.set = (f, k) => { L.p.f = f; L.p.k = k; const ins = /** @type {NodeListOf<HTMLInputElement & { oninput: () => void }>} */ (document.querySelectorAll('#ex-reaction .tweakpanel input')); if (ins.length) { ins[0].value = f; ins[0].oninput(); ins[1].value = k; ins[1].oninput(); } st.seed(); };
       st.seed(); let nextDrop = 2;
       return t => {
         for (let i = 0; i < 16; i++) {

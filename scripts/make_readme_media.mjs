@@ -27,7 +27,7 @@ const LIVE = [
 ];
 // Rendered clips: file under media/ -> gif name, start fraction.
 const CLIPS = [
-  ['engine/liquid.mp4', 'clip-liquid', 0.35], ['engine/cloth.mp4', 'clip-cloth', 0.3], ['engine/particles-fur.mp4', 'clip-fur', 0.45], ['engine/shatter.mp4', 'clip-shatter', 0.3],
+  ['engine/liquid.mp4', 'clip-liquid', 0.35], ['engine/cloth.mp4', 'clip-cloth', 0.3], ['engine/unreal-niagara.mp4', 'clip-unreal-niagara', 0.3], ['engine/shatter.mp4', 'clip-shatter', 0.3],
   ['engine/cycles-photoreal.mp4', 'clip-cycles', 0.2], ['tools/webgpu.mp4', 'clip-webgpu', 0.5], ['tools/threejs.mp4', 'clip-threejs', 0.3], ['tools/remotion.mp4', 'clip-remotion', 0.3],
   ['tools/hyperframes.mp4', 'clip-hyperframes', 0.3], ['tools/manim.mp4', 'clip-manim', 0.3], ['edit/speed-ramp.mp4', 'clip-speed-ramp', 0.1], ['edit/datamosh.mp4', 'clip-datamosh', 0.35],
 ];

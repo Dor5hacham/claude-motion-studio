@@ -57,7 +57,7 @@
     prompt: "Parallax landscape with 5 layers (sky, far mountains, mid hills, trees, foreground grass), camera slides right, depth strength {depth} (0 = flat, everything moves together), haze increases with distance, sunset palette.",
     params: [{"key": "depth", "label": "Depth strength", "min": 0, "max": 2, "step": 0.05, "value": 1}], setup(cv, L) {
       const g = cv.getContext('2d');
-      const layers = [[0.05, 0.62, 70, 'rgba(120,70,120,0.85)'], [0.15, 0.7, 60, '#6a345f'], [0.35, 0.79, 45, '#4a2448'], [0.7, 0.88, 30, '#2a1830'], [1.4, 0.97, 18, '#120a18']];
+      const layers = /** @type {[number, number, number, string][]} */ ([[0.05, 0.62, 70, 'rgba(120,70,120,0.85)'], [0.15, 0.7, 60, '#6a345f'], [0.35, 0.79, 45, '#4a2448'], [0.7, 0.88, 30, '#2a1830'], [1.4, 0.97, 18, '#120a18']]);
       return t => {
         const sky = g.createLinearGradient(0, 0, 0, H); sky.addColorStop(0, '#1b1038'); sky.addColorStop(0.6, '#ff7a4a'); sky.addColorStop(1, '#ffb020'); g.fillStyle = sky; g.fillRect(0, 0, W, H);
         g.fillStyle = 'rgba(255,230,180,0.95)'; g.beginPath(); g.arc(470, 170, 46, 0, 7); g.fill();
