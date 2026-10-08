@@ -58,6 +58,13 @@ p.lead{font-size:19px;color:#d6d0c6;max-width:900px}
 .hub a b{display:block;font:700 22px var(--display);margin-bottom:4px}
 .hub a span{color:var(--dim);font-size:14px}
 .reelvid{width:100%;max-width:1080px;border-radius:14px;border:1px solid var(--line);display:block;background:#000}
+/* Highlights gallery on the overview: GIF tiles that link to their cards. */
+.hl{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0 8px;max-width:1080px}
+.hl a{display:block;text-decoration:none;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.hl a:hover{border-color:var(--coral)}
+.hl img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000}
+.hl b{display:block;font:600 14px var(--ui);padding:8px 10px 0}
+.hl span{display:block;color:var(--dim);font:12px var(--mono);padding:0 10px 9px}
 .pipeline{display:flex;align-items:stretch;margin:22px 0;flex-wrap:wrap}
 .pipeline .step{flex:1;min-width:170px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
 .pipeline .step b{display:block;font:600 13px var(--mono);letter-spacing:2px;margin-bottom:6px}
@@ -188,4 +195,4 @@ article.ex:target{outline:3px solid var(--amber);outline-offset:3px}
 .sk-real{position:absolute;inset:0;padding:16px;display:flex;gap:14px;align-items:center;opacity:0}
 .sk-real b{display:block;font:600 16px var(--ui)}.sk-real span{color:#8a8794;font-size:13px}
 
-@media (max-width:1100px){nav.side{display:none}header.top,main{margin-left:0}main{padding:0 18px 80px}.grid2,.grid3,.builder,.anatomy,.pg,.moods,.hub{grid-template-columns:1fr}.gloss{columns:1}.gal{grid-template-columns:1fr}article.ex{width:100%}}
+@media (max-width:1100px){nav.side{display:none}header.top,main{margin-left:0}main{padding:0 18px 80px}.grid2,.grid3,.builder,.anatomy,.pg,.moods,.hub{grid-template-columns:1fr}.hl{grid-template-columns:1fr 1fr}.gloss{columns:1}.gal{grid-template-columns:1fr}article.ex{width:100%}}

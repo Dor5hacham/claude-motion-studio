@@ -10,8 +10,12 @@ Each folder is a small project that renders one clip in `media/tools/`. Each has
 | `manim/` | Manim Community | Python math animation | `manim.mp4`, Fourier series |
 | `threejs/` | Three.js | WebGL 3D scene rendered frame by frame in headless Chrome | `threejs.mp4`, glass knot over rippling columns |
 | `webgpu/` | WebGPU | WGSL compute shader moving one million particles | `webgpu.mp4`, particles onto a strange attractor |
+| `taichi/` | Taichi | Python kernels compiled for the GPU (Vulkan backend): MLS-MPM solver and renderer | `taichi-mpm.mp4`, water, jelly and snow colliding |
+| `ffmpeg/` | FFmpeg | One filter graph: built-in sources, audio drawn as video, xfade and drawtext expressions | `ffmpeg-graph.mp4`, fractal to Game of Life to Lissajous |
+| `matplotlib/` | Matplotlib | Python plotting: FuncAnimation updates the figure, FFMpegWriter records it | `matplotlib.mp4`, SGD vs momentum vs Adam |
+| `pyvista/` | PyVista (VTK) | Scientific visualization: vector field, stream tracer, tubes, offscreen render | `pyvista.mp4`, streamlines around a sphere |
 
-Common needs: Node 22+ (24 used here), FFmpeg on PATH, Chrome, and for Manim `uv` with Python 3.12. Notes worth knowing before you run them:
+Common needs: Node 22+ (24 used here), FFmpeg on PATH, Chrome, and for Manim, Taichi and PyVista `uv` with Python 3.12. Notes worth knowing before you run them:
 
 - HyperFrames downloads its own headless Chrome (about 270 MB) into `~/.cache/hyperframes` on first render.
 - Remotion downloads Chrome Headless Shell into the project on first render.

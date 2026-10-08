@@ -15,6 +15,14 @@ Each script builds one scene from nothing, bakes its simulation if it has one, a
 | `grease-pencil.py` | `grease-pencil.mp4` | Doodle draws itself | Grease Pencil v3, Build and Noise modifiers |
 | `ocean.py` | `ocean.mp4` | Buoy bobs at sunset in its own foam ring, mirrored in the water | Ocean modifier, scripted floating, shader foam, Cycles on AMD HIP (path-traced reflections) |
 | `particles-fur.py` | `particles-fur.mp4` | Fur ball bounces and shakes | Particle hair, hair dynamics with floor collision |
+| `toon-line-art.py` | `toon-line-art.mp4` | Anime floating island with a windmill and a waterfall | Shader to RGB with constant color ramps (toon bands), Grease Pencil Line Art modifier, camera-only sky gradient |
+| `beat-speaker.py` | `beat-speaker.mp4` (with sound) | Woofer pumps and beads hop to a drum-and-bass loop, LED ring shows the spectrum | Music synthesized in NumPy and written as `beat.wav`, per-frame FFT, keyframes baked with `foreach_set`, motion blur; mux the WAV with `-i beat.wav -c:a aac -shortest` |
+| `god-rays.py` | `god-rays.mp4` | Sun shafts widen through tilting blinds into a dusty room | Eevee volumetrics with sun shadows (tile 1:2, 128 steps), Principled Volume with drifting 4D noise density, Geometry Nodes dust motes, the sun as the only light |
+| `vine-growth.py` | `vine-growth.mp4` | Ivy spirals up a glossy vase, leaves and berries pop in | Geometry Nodes simulation zone built in Python, Sample Nearest Surface and Geometry Proximity, Points to Curves, Curve to Mesh; the script steps every frame before rendering it so the simulation cache is complete |
+| `exploded-view.py` | `exploded-view.mp4` | Keyboard switch comes apart into seven labeled parts, then clicks back together | Parts from primitives (bmesh, Solidify, Bevel), staggered QUINT keyframes, billboard call-outs faded per object, raytraced refraction |
+| `engrave.py` | `engrave.mp4` | V-bit engraves MOTION into an anodized block | Geometry Nodes carving (Geometry Proximity to a timed toolpath, Scene Time), text outlines sampled with `interpolate_bezier` |
+| `domino.py` | `domino.mp4` | 241 dominoes fall along a spiral to the center | Bullet rigid bodies that start deactivated, kinematic nudge, wave front read from the bake to aim the camera |
+| `skipping-stone.py` | `skipping-stone.mp4` | Stone skips seven times across a dusk pond, rings interfere | Wave equation solved in NumPy, frame-change handler writes the mesh, procedural sky and tree line in the world shader |
 
 ## Run one
 

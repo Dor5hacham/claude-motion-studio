@@ -2,7 +2,7 @@
 // sidebar counts, the current-section highlight and the prompt-anatomy hover.
 (function () {
   EX.build();
-  const SECTION = { reel: 'The reel', type: 'Text in motion', mg: '2D motion graphics', ui: 'App and web UI', sim: 'Simulation and generative', gpu: 'GPU shaders', audio: 'Sound and motion', libs: 'Animation libraries', engine: '3D engine', tools: 'Code-to-video tools', edit: 'Editing tricks' };
+  const SECTION = { reel: 'The reel', type: 'Text in motion', mg: '2D motion graphics', ui: 'App and web UI', sim: 'Simulation and generative', gpu: 'GPU shaders', audio: 'Sound and motion', libs: 'Animation libraries', engine: '3D engine', tools: 'Code-to-video tools', edit: 'Editing tricks', scratch: 'Built from scratch' };
   const RUNS = { CPU: 'cpu', GPU: 'gpu', WEB: 'web', ENGINE: 'engine' };
 
   // Sidebar counts and the hub total.

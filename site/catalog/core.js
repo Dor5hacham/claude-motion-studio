@@ -125,12 +125,15 @@ vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
       (d.params || []).forEach(q => { L.p[q.key] = q.value; });
       // Playback bar: pause, replay, speed; plus a Tweak toggle when the demo has its own parameters.
       const bar = document.createElement('div'); bar.className = 'tweakbar';
-      bar.innerHTML = `<button class="tb-pause">Pause</button><button class="tb-replay">Replay</button><label class="tb-speed">Speed <input type="range" min="0.25" max="3" step="0.25" value="1"><b>1x</b></label>${d.params ? '<button class="tb-tweak">Tweak</button>' : ''}`;
+      bar.innerHTML = `<button class="tb-pause">Pause</button><button class="tb-replay">Replay</button><label class="tb-speed">Speed <input type="range" min="0.25" max="3" step="0.25" value="1"><b>1x</b></label>${d.params ? '<button class="tb-tweak">Tweak</button>' : ''}${d.kind === 'video' && d.audio ? '<button class="tb-sound">Sound</button>' : ''}`;
       card.appendChild(bar);
       const pauseB = /** @type {HTMLButtonElement} */ (bar.querySelector('.tb-pause'));
       pauseB.onclick = () => { L.paused = !L.paused; pauseB.textContent = L.paused ? 'Play' : 'Pause'; pauseB.classList.toggle('on', L.paused); if (d.kind === 'video') L.paused ? stage.pause() : stage.play().catch(() => {}); };
       /** @type {HTMLButtonElement} */ (bar.querySelector('.tb-replay')).onclick = () => { L.t = 0; L.acc = 0; if (d.kind === 'video') { stage.currentTime = 0; return; } if (!L.started) return; if (d.kind === 'dom') stage.innerHTML = ''; try { L.frame = d.setup(stage, L); } catch (err) { console.error(d.id, err); } };
       const sp = /** @type {HTMLInputElement} */ (bar.querySelector('.tb-speed input')), spL = bar.querySelector('.tb-speed b');
+      // Clips with a soundtrack start muted; the Sound button unmutes this one video.
+      const soundB = /** @type {HTMLButtonElement} */ (bar.querySelector('.tb-sound'));
+      if (soundB) soundB.onclick = () => { const v = /** @type {HTMLVideoElement} */ (stage); v.muted = !v.muted; soundB.classList.toggle('on', !v.muted); soundB.textContent = v.muted ? 'Sound' : 'Sound on'; };
       sp.oninput = () => { L.speed = +sp.value; spL.textContent = L.speed + 'x'; if (d.kind === 'video') stage.playbackRate = L.speed; };
       let panel = null;
       if (d.params) {
@@ -148,7 +151,7 @@ vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
       }
       if (d.controls) {
         const row = document.createElement('div'); row.className = 'ctl';
-        d.controls.forEach(c => { const b = document.createElement('button'); b.textContent = c.label; if (c.on) b.classList.add('on'); b.onclick = () => { if (c.group !== false) row.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); c.fn(); }; row.appendChild(b); });
+        d.controls.forEach(c => { const b = document.createElement('button'); b.textContent = c.label; if (c.on) b.classList.add('on'); b.onclick = () => { if (c.group !== false) row.querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); c.fn(L); }; row.appendChild(b); });
         card.appendChild(row);
       }
       const info = document.createElement('div'); info.className = 'info';
@@ -159,7 +162,6 @@ vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
       const promptSpan = info.querySelector('.say span'); promptSpan.textContent = fill(d.prompt, d, L.p);
       /** @type {HTMLButtonElement} */ (info.querySelector('.copy')).onclick = e => { navigator.clipboard.writeText(promptSpan.textContent); /** @type {HTMLElement} */ (e.target).textContent = 'Copied'; setTimeout(() => /** @type {HTMLElement} */ (e.target).textContent = 'Copy', 1200); };
       card.appendChild(info); host.appendChild(card);
-      if (d.controls) d.controls.forEach(c => { const f = c.fn; c.fn = () => f(L); });
       EX.loops.push(L);
       io.observe(stage);
     }

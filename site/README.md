@@ -25,7 +25,7 @@ Add an `EX.add({...})` call to a file in `catalog/` (or a new file, plus a `<scr
 
 ```js
 EX.add({
-  cat: 'sim',                       // section: reel, type, mg, ui, sim, gpu, audio, libs, engine, tools, edit
+  cat: 'sim',                       // section: reel, type, mg, ui, sim, gpu, audio, libs, engine, tools, edit, scratch
   id: 'mydemo',                     // card id becomes ex-mydemo (linkable as index.html#ex-mydemo)
   title: 'My demo', aka: 'other names', tool: 'Canvas 2D', runs: 'CPU',   // runs: CPU, GPU, WEB, ENGINE
   notice: 'What you see and how it works, in 2 or 3 plain sentences.',
@@ -44,7 +44,7 @@ Options: `kind: 'dom'` gives a 640x360 `<div>` instead of a canvas; `controls: [
 ## Add a rendered clip
 
 1. Put the MP4 in `media/engine/`, `media/tools/`, `media/edit/` or `media/clips/` (1280x720, H.264).
-2. Add an entry to `catalog/clips-meta.json` (id, cat, file, title, aka, tool, runs, notice, use, prompt).
+2. Add an entry to `catalog/clips-meta.json` (id, cat, file, title, aka, tool, runs, notice, use, prompt). Add `"audio": true` when the clip has a soundtrack: its card then gets a Sound button (every clip starts muted).
 3. Run `python scripts/build_catalog.py`. It fails if any clip has no entry, so nothing can be hidden.
 
 ## Check before committing

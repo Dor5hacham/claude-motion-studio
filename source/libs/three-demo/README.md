@@ -6,6 +6,8 @@ Source of `site/vendor/three-demo.js`, the bundle behind the
 The page opens from `file://`, so it cannot load ES modules. esbuild bundles
 `three-entry.js` and Three.js into one classic script. The script sets
 `window.LIBS_THREE`, and `site/catalog/libs.js` uses it to register the card.
+`LIBS_THREE.THREE` is the whole Three.js namespace; `site/catalog/set2-libs.js`
+uses it for the `l2-three-flight` card.
 
 ## Rebuild
 

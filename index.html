@@ -32,6 +32,7 @@
   <a href="#engine" data-cat="engine">3D engines (Blender, Unreal)</a>
   <a href="#tools" data-cat="tools">Code-to-video tools</a>
   <a href="#edit" data-cat="edit">Editing tricks</a>
+  <a href="#scratch" data-cat="scratch">Built from scratch</a>
   <div class="grp">MAKE</div>
   <a href="#toolsmap">Tools and outputs</a>
   <a href="#prompting">How to prompt</a>
@@ -63,6 +64,30 @@
   <h3 style="margin-top:26px">The reel that started this</h3>
   <p class="dim" style="max-width:1080px">60 seconds, 8 scenes, every pixel made with code. Each scene is also a card in the catalog below, and the last section explains how it was made.</p>
   <video class="reelvid" src="media/reel/claude-motion-reel.mp4" controls preload="metadata"></video>
+  <h3 style="margin-top:26px">The second reel</h3>
+  <p class="dim" style="max-width:1080px">42 seconds, 29 clips from the second set, every cut on the beat of a 120 BPM track synthesized in Python. The clips run in full in the catalog below; how it was cut is in <code>source/reel2</code>.</p>
+  <video class="reelvid" src="media/reel/claude-motion-reel-2.mp4" controls preload="metadata"></video>
+  <pre style="max-width:1080px"><button class="copy">Copy</button>Make a 42 s 1080p showreel of 29 clips with an original 120 BPM track synthesized in NumPy: kick, clap, hats, bass, a detuned saw pad, an arpeggio, a riser and snare roll before the drop, and an ending hit. Every cut lands on a beat. Use one cut per bar while it builds, one cut per beat after the drop with a white flash and 14% zoom punch on downbeats, and one long shot at the end. Open with a 3 s Bahnschrift title card on #0b0b10 with a coral bar. Close on an end card that fades to black. Scale the clips up with lanczos and render with FFmpeg.</pre>
+  <h3 style="margin-top:26px">Highlights</h3>
+  <p class="dim" style="max-width:1080px">Sixteen pieces from across the catalog. Click one to jump to its card, where it runs live or plays as a clip, with the prompt that made it.</p>
+  <div class="hl">
+    <a href="#ex-ui2-glass"><img src="media/readme/live-liquid-glass.gif" alt="Liquid glass lens" loading="lazy"><b>Liquid glass lens</b><span>UI</span></a>
+    <a href="#ex-g2-planet"><img src="media/readme/live-planet.gif" alt="Living planet" loading="lazy"><b>Living planet</b><span>GPU shader</span></a>
+    <a href="#ex-clip-toon-line-art"><img src="media/readme/clip-toon-line-art.gif" alt="Anime floating island" loading="lazy"><b>Anime floating island</b><span>Blender</span></a>
+    <a href="#ex-fluid"><img src="media/readme/live-fluid.gif" alt="Fluid simulation" loading="lazy"><b>Fluid simulation</b><span>GPU shader</span></a>
+    <a href="#ex-mg2-walk"><img src="media/readme/live-walk-cycle.gif" alt="Procedural walk cycle" loading="lazy"><b>Procedural walk cycle</b><span>2D motion</span></a>
+    <a href="#ex-t2-neon"><img src="media/readme/live-neon-sign.gif" alt="Neon sign power-on" loading="lazy"><b>Neon sign power-on</b><span>Type</span></a>
+    <a href="#ex-clip-exploded-view"><img src="media/readme/clip-exploded-view.gif" alt="Exploded product view" loading="lazy"><b>Exploded product view</b><span>Blender</span></a>
+    <a href="#ex-blackhole"><img src="media/readme/live-black-hole.gif" alt="Black hole" loading="lazy"><b>Black hole</b><span>GPU shader</span></a>
+    <a href="#ex-x-raster"><img src="media/readme/live-software-rasterizer.gif" alt="Software rasterizer" loading="lazy"><b>Software rasterizer</b><span>From scratch</span></a>
+    <a href="#ex-au2-polyrhythm"><img src="media/readme/live-polyrhythm.gif" alt="Polyrhythm arcs" loading="lazy"><b>Polyrhythm arcs</b><span>Sound</span></a>
+    <a href="#ex-clip-rust-pathtracer"><img src="media/readme/clip-rust-pathtracer.gif" alt="Spectral path tracer in Rust" loading="lazy"><b>Spectral path tracer in Rust</b><span>From scratch</span></a>
+    <a href="#ex-clip-liquid"><img src="media/readme/clip-liquid.gif" alt="Liquid pour" loading="lazy"><b>Liquid pour</b><span>Blender</span></a>
+    <a href="#ex-l2-d3-globe"><img src="media/readme/live-dotted-globe.gif" alt="Dotted globe with flight arcs" loading="lazy"><b>Dotted globe with flight arcs</b><span>D3</span></a>
+    <a href="#ex-clip-unreal-lumen"><img src="media/readme/clip-unreal-lumen.gif" alt="Lumen daylight time-lapse" loading="lazy"><b>Lumen daylight time-lapse</b><span>Unreal</span></a>
+    <a href="#ex-clip-taichi-mpm"><img src="media/readme/clip-taichi-mpm.gif" alt="Taichi: water, jelly and snow" loading="lazy"><b>Taichi: water, jelly and snow</b><span>Taichi</span></a>
+    <a href="#ex-clip-unreal-niagara"><img src="media/readme/clip-unreal-niagara.gif" alt="Niagara particle vortex" loading="lazy"><b>Niagara particle vortex</b><span>Unreal</span></a>
+  </div>
   <div class="note">How to use this page: read <b>Learn</b> once, browse the <b>Catalog</b> (use the search box at the top), then use <b>Ask</b> whenever you want something new. Every card has Pause, Replay and Speed; cards with a <b>Tweak</b> button have sliders, and their prompt text updates as you move them.</div>
 </section>
 
@@ -191,21 +216,22 @@
 <section class="sec cat" id="gpu"><h2><span class="n">12</span>GPU shaders</h2><p class="lead">A <b>shader</b> is a small program that runs on the graphics card for every pixel or point, every frame. A <b>vertex shader</b> places points; a <b>fragment shader</b> colors pixels. <b>GLSL</b> is their language and <b>WebGL2</b> is how a browser reaches the GPU.</p><div class="gal" id="cat-gpu"></div></section>
 <section class="sec cat" id="audio"><h2><span class="n">13</span>Sound and motion</h2><p class="lead">Motion driven by audio. For a video, Claude analyzes your track the same way and syncs cuts and effects to it, or synthesizes music in Python as it did for the reel (kick, bass, pads and risers from sine waves and noise, with hits on every cut).</p><div class="gal" id="cat-audio"></div></section>
 <section class="sec cat" id="libs"><h2><span class="n">14</span>Animation libraries</h2><p class="lead">The same kinds of motion made with popular open-source libraries. Name the library in your prompt when you want code you can keep using in your own project.</p><div class="gal" id="cat-libs"></div></section>
-<section class="sec cat" id="engine"><h2><span class="n">15</span>3D engines (Blender, Unreal)</h2><p class="lead">What a browser cannot simulate well: cloth, liquid, fire, shattering, photoreal light, huge particle counts. Each Blender clip was built by a Python script and rendered headless in Blender 5.2 on this PC; the scripts are in <code>source/blender</code>. Two renderers: <b>Eevee</b> is fast (about half a second per frame here) and <b>Cycles</b> traces real light paths for glass, caustics, reflections and soft bounce light (several seconds per frame). Ask for Cycles when you want photoreal. The <a href="#ex-clip-unreal-niagara">Niagara vortex</a> comes from Unreal Engine 5.8: Claude opened the editor, waited until its MCP server was connected, then built the scene and rendered it through MCP tool calls (<code>source/unreal</code>).</p><div class="gal" id="cat-engine"></div></section>
-<section class="sec cat" id="tools"><h2><span class="n">16</span>Code-to-video tools</h2><p class="lead">Tools that turn code into finished video files: React (Remotion), HTML (HyperFrames), Python (Manim), TypeScript (Motion Canvas), and Three.js or WebGPU scenes rendered frame by frame. Sources are in <code>source/tools</code>.</p><div class="gal" id="cat-tools"></div></section>
-<section class="sec cat" id="edit"><h2><span class="n">17</span>Editing and post-production tricks</h2><p class="lead">What Claude can do to footage you already have, with FFmpeg and Python. Scripts are in <code>source/edit</code>.</p><div class="gal" id="cat-edit"></div></section>
+<section class="sec cat" id="engine"><h2><span class="n">15</span>3D engines (Blender, Unreal)</h2><p class="lead">What a browser cannot simulate well: cloth, liquid, fire, shattering, photoreal light, huge particle counts. Each Blender clip was built by a Python script and rendered headless in Blender 5.2 on this PC; the scripts are in <code>source/blender</code>. Two renderers: <b>Eevee</b> is fast (about half a second per frame here) and <b>Cycles</b> traces real light paths for glass, caustics, reflections and soft bounce light (several seconds per frame). Ask for Cycles when you want photoreal. The Unreal clips (the <a href="#ex-clip-unreal-niagara">Niagara vortex</a>, the <a href="#ex-clip-unreal-lumen">Lumen time-lapse</a> and three more) come from Unreal Engine 5.8: Claude opened the editor, waited until its MCP server was connected, then built each scene and rendered it through MCP tool calls (<code>source/unreal</code>).</p><div class="gal" id="cat-engine"></div></section>
+<section class="sec cat" id="tools"><h2><span class="n">16</span>Code-to-video tools</h2><p class="lead">Tools that turn code into finished video files: React (Remotion), HTML (HyperFrames), Python (Manim, Matplotlib, PyVista, and Taichi on the GPU), TypeScript (Motion Canvas), one FFmpeg filter graph, and Three.js or WebGPU scenes rendered frame by frame. Sources are in <code>source/tools</code>.</p><div class="gal" id="cat-tools"></div></section>
+<section class="sec cat" id="edit"><h2><span class="n">17</span>Editing and post-production tricks</h2><p class="lead">What Claude can do to footage you already have, with FFmpeg, Python and OpenCV. Scripts are in <code>source/edit</code>.</p><div class="gal" id="cat-edit"></div></section>
+<section class="sec cat" id="scratch"><h2><span class="n">18</span>Built from scratch</h2><p class="lead">No engine and no library: Claude writes the renderer, the physics or the synth itself. Each one is a single readable file, so you can see how the engines in the other sections work inside, and ask for a custom one when no tool fits. The live cards run in this page; the clips come from native Rust and Go programs written from scratch (<code>source/scratch</code>).</p><div class="gal" id="cat-scratch"></div></section>
 
 <!-- ======================= MAKE ======================= -->
 <div class="part">MAKE</div>
 <section class="sec" id="toolsmap">
-  <h2><span class="n">18</span>Tools and what they produce</h2>
+  <h2><span class="n">19</span>Tools and what they produce</h2>
   <p class="lead">Every tool here was used on this PC to make something in the catalog; the last column links to it.</p>
   <table>
     <tr><th>Tool</th><th>What it is</th><th>Runs on</th><th>Best for</th><th>Output</th><th>See it</th></tr>
     <tr><td><b>Canvas 2D</b></td><td>Browser 2D drawing</td><td>CPU</td><td>Type, shapes, UI, diagrams, 2D physics</td><td>Live page, frames</td><td><a href="#type">Text</a>, <a href="#sim">Simulation</a></td></tr>
     <tr><td><b>SVG + CSS</b></td><td>Vector graphics and animation for the web</td><td>CPU</td><td>Icons, loaders, trim paths, UI</td><td>Live page</td><td><a href="#ui">UI</a>, <a href="#ex-trimpaths">Trim paths</a></td></tr>
     <tr><td><b>WebGL2 + GLSL</b></td><td>GPU access from the browser</td><td>GPU</td><td>Particles, shaders, fluids, ray marching</td><td>Live page, frames</td><td><a href="#gpu">GPU shaders</a></td></tr>
-    <tr><td><b>WebGPU</b></td><td>Newer GPU API with compute shaders (WGSL)</td><td>GPU</td><td>Millions of particles, simulations</td><td>Live page, frames</td><td><a href="#ex-clip-webgpu">1M particles</a></td></tr>
+    <tr><td><b>WebGPU</b></td><td>Newer GPU API with compute shaders (WGSL)</td><td>GPU</td><td>Millions of particles, simulations</td><td>Live page, frames</td><td><a href="#ex-clip-webgpu">1M particles</a>, <a href="#ex-w2-flow-silk">live flow silk</a></td></tr>
     <tr><td><b>Three.js</b></td><td>3D library on top of WebGL</td><td>GPU</td><td>3D scenes, PBR materials, 3D websites</td><td>Live page, frames</td><td><a href="#ex-clip-threejs-render">Clip</a>, <a href="#libs">Libraries</a></td></tr>
     <tr><td><b>p5.js, GSAP, Motion, PixiJS, Matter.js, D3, Lottie, anime.js</b></td><td>Animation and graphics libraries</td><td>CPU/GPU</td><td>Reusable web animation code</td><td>Code for your project</td><td><a href="#libs">Libraries</a></td></tr>
     <tr><td><b>Remotion</b></td><td>React components rendered to video</td><td>CPU + Chrome</td><td>Templated and data videos, captions</td><td>MP4</td><td><a href="#ex-clip-remotion">Clip</a></td></tr>
@@ -213,9 +239,14 @@
     <tr><td><b>Motion Canvas</b></td><td>TypeScript animation with generators</td><td>CPU + Chrome</td><td>Code explainers, diagrams</td><td>MP4</td><td><a href="#ex-clip-motion-canvas">Clip</a></td></tr>
     <tr><td><b>Manim</b></td><td>Python math animation (3Blue1Brown style)</td><td>CPU</td><td>Math and science explainers</td><td>MP4</td><td><a href="#ex-clip-manim">Clip</a></td></tr>
     <tr><td><b>Blender 5.2</b></td><td>3D suite, scripted with Python</td><td>CPU + GPU</td><td>Physics, photoreal 3D, geometry nodes</td><td>Frames, MP4</td><td><a href="#engine">3D engine</a></td></tr>
-    <tr><td><b>Unreal Engine 5.8</b></td><td>Game engine</td><td>GPU</td><td>Real-time cinematics, Niagara, big worlds</td><td>MP4 via Movie Render Queue</td><td><a href="#ex-clip-unreal-niagara">Niagara vortex</a> (built through the MCP)</td></tr>
-    <tr><td><b>FFmpeg</b></td><td>Video Swiss army knife</td><td>CPU</td><td>Encode, cut, speed ramps, grades, datamosh</td><td>MP4, WebM, GIF, ProRes</td><td><a href="#edit">Editing tricks</a></td></tr>
+    <tr><td><b>Unreal Engine 5.8</b></td><td>Game engine</td><td>GPU</td><td>Real-time cinematics, Niagara, big worlds</td><td>MP4 via Movie Render Queue</td><td><a href="#ex-clip-unreal-niagara">Niagara vortex</a>, <a href="#ex-clip-unreal-lumen">Lumen time-lapse</a> (built through the MCP)</td></tr>
+    <tr><td><b>FFmpeg</b></td><td>Video Swiss army knife</td><td>CPU</td><td>Encode, cut, speed ramps, grades, datamosh, whole motion graphics from one filter graph</td><td>MP4, WebM, GIF, ProRes</td><td><a href="#edit">Editing tricks</a>, <a href="#ex-clip-ffmpeg-graph">Filter graph</a></td></tr>
+    <tr><td><b>OpenCV</b></td><td>Computer vision library for Python</td><td>CPU</td><td>Tracking, stabilization, optical flow, shape detection in footage</td><td>Frames, MP4</td><td><a href="#ex-clip-track-callout">Tracking</a>, <a href="#ex-clip-stabilize">Stabilize</a></td></tr>
+    <tr><td><b>Taichi</b></td><td>Python that compiles physics kernels to the GPU (Vulkan here)</td><td>GPU</td><td>Particle and continuum simulations: snow, jelly, water</td><td>Frames, MP4</td><td><a href="#ex-clip-taichi-mpm">MPM</a></td></tr>
+    <tr><td><b>Matplotlib, PyVista</b></td><td>Python plotting in 2D and 3D (PyVista wraps VTK)</td><td>CPU</td><td>Data and science animations, flow visualization</td><td>MP4</td><td><a href="#ex-clip-matplotlib">Optimizers</a>, <a href="#ex-clip-pyvista">Streamlines</a></td></tr>
+    <tr><td><b>Rust, Go (no libraries)</b></td><td>Native programs written from scratch</td><td>CPU</td><td>Custom renderers and solvers when no tool fits</td><td>Frames, MP4</td><td><a href="#scratch">Built from scratch</a></td></tr>
     <tr><td><b>Python + NumPy</b></td><td>Math and audio synthesis</td><td>CPU</td><td>Music, sound effects, data</td><td>WAV</td><td><a href="#reel">The reel's soundtrack</a></td></tr>
+    <tr><td><b>Web Audio API</b></td><td>Sound synthesis and analysis in the browser</td><td>CPU</td><td>Sound synced to motion, sonification, synths</td><td>Live page</td><td><a href="#audio">Sound and motion</a></td></tr>
     <tr><td><b>After Effects</b></td><td>Industry motion design app</td><td>CPU + GPU</td><td>Hand-made motion graphics</td><td>Any</td><td class="no">Not installed; ask for code or Lottie instead</td></tr>
   </table>
   <h3 style="margin-top:30px">Which tool for which job</h3>
@@ -231,11 +262,13 @@
     <tr><td>Social video from data or templates</td><td>Remotion</td></tr>
     <tr><td>Motion inside your app or site</td><td>CSS, Motion (Framer Motion), GSAP</td></tr>
     <tr><td>Change existing footage</td><td>FFmpeg: speed ramp, grade, split screen, datamosh</td></tr>
+    <tr><td>Track, stabilize or annotate footage</td><td>OpenCV tracking with a pinned callout, or stabilization</td></tr>
+    <tr><td>Something no tool does</td><td>A renderer or solver written from scratch (see Built from scratch)</td></tr>
   </table>
 </section>
 
 <section class="sec" id="prompting">
-  <h2><span class="n">19</span>How to prompt for motion</h2>
+  <h2><span class="n">20</span>How to prompt for motion</h2>
   <p class="lead">A good motion prompt reads like a director's brief. Hover a part on the left to see it in the example prompt.</p>
   <div class="anatomy" id="anatomy">
     <div data-part="1"><b>Deliverable.</b> Length, resolution, fps, format, where to save.</div>
@@ -278,7 +311,7 @@
 </section>
 
 <section class="sec" id="builder">
-  <h2><span class="n">20</span>Prompt builder</h2>
+  <h2><span class="n">21</span>Prompt builder</h2>
   <p class="lead">Pick options on the left. The prompt on the right updates. Copy it into Claude Code and edit anything you like.</p>
   <div class="builder box">
     <div>
@@ -341,7 +374,7 @@
 </section>
 
 <section class="sec" id="examples">
-  <h2><span class="n">21</span>Example prompts</h2>
+  <h2><span class="n">22</span>Example prompts</h2>
   <p class="lead">Copy these and change the details. The first one plays live, exactly as the prompt describes it.</p>
   <h3>Logo reveal, 8 seconds</h3>
   <div class="grid2" style="max-width:1280px;align-items:start">
@@ -409,63 +442,89 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
 <!-- ======================= REFERENCE ======================= -->
 <div class="part">REFERENCE</div>
 <section class="sec" id="index">
-  <h2><span class="n">22</span>Technique index</h2>
+  <h2><span class="n">23</span>Technique index</h2>
   <p class="lead">Everything on this page in one table, built automatically from the catalog, so it can never fall out of date. The search box filters it too.</p>
   <table id="tech-index"><thead><tr><th>Technique</th><th>Section</th><th>Made with</th><th>Runs on</th><th>Type</th></tr></thead><tbody></tbody></table>
 </section>
 
 <section class="sec" id="glossary">
-  <h2><span class="n">23</span>Glossary</h2>
+  <h2><span class="n">24</span>Glossary</h2>
   <div class="gloss">
     <div><b>Additive blending.</b> Overlapping colors add up and glow. <a href="#ex-liveparticles">see it</a></div>
     <div><b>Alpha.</b> Transparency. A video "with alpha" can sit on top of other footage.</div>
     <div><b>Ambient occlusion.</b> Soft darkening in corners and cracks. <a href="#ex-clip-reel-raymarch">see it</a></div>
+    <div><b>Animating on twos.</b> Holding each drawing for two frames, 12 drawings per second, for a hand-made feel. <a href="#ex-mg2-cutout">see it</a></div>
     <div><b>Bake.</b> Calculate a simulation once and store it, so rendering is repeatable. <a href="#ex-clip-cloth">see it</a></div>
     <div><b>Bezier curve.</b> A smooth curve set by handles. Easing curves are Bezier curves. <a href="#easing">see it</a></div>
     <div><b>Bloom.</b> Glow around bright areas. <a href="#post">see it</a></div>
     <div><b>Boids.</b> Flocking agents that follow three simple rules. <a href="#ex-boids">see it</a></div>
     <div><b>BPM.</b> Beats per minute. Sets the rhythm for cuts. <a href="#compare">see it</a></div>
+    <div><b>Color cycling.</b> Animating a still pixel image by rotating the colors of its palette. <a href="#ex-mg2-colorcycle">see it</a></div>
     <div><b>Compositing.</b> Combining layers into the final image.</div>
+    <div><b>Compute shader.</b> A GPU program that does general math, like moving a million particles. <a href="#ex-clip-webgpu">see it</a></div>
     <div><b>Contact sheet.</b> Many frames in one grid image, to check a video at a glance.</div>
     <div><b>Curl noise.</b> Swirling flow without clumping; the standard for particle flow. <a href="#ex-flowfield">see it</a></div>
     <div><b>Datamosh.</b> Deleting keyframes so motion smears pixels. <a href="#ex-clip-datamosh">see it</a></div>
     <div><b>Depth of field.</b> Only one distance is sharp. <a href="#camera">see it</a></div>
-    <div><b>Domain warping.</b> Feeding noise coordinates through more noise; marble and liquid looks. <a href="#ex-clip-reel-noise">see it</a></div>
+    <div><b>Dispersion.</b> Glass bends each color by a different amount, so edges split into rainbows. <a href="#ex-g2-gem">see it</a></div>
     <div><b>Dolly zoom.</b> Camera moves back while zooming in; the background stretches. <a href="#camera">see it</a></div>
+    <div><b>Domain warping.</b> Feeding noise coordinates through more noise; marble and liquid looks. <a href="#ex-clip-reel-noise">see it</a></div>
     <div><b>Easing.</b> How speed changes during a move. <a href="#easing">see it</a></div>
     <div><b>Eevee / Cycles.</b> Blender's fast renderer / Blender's realistic path tracer. <a href="#ex-clip-cycles-photoreal">see it</a></div>
+    <div><b>Exaggeration.</b> Pushing a move past reality so it reads clearly and feels alive. <a href="#ex-p2-exaggeration">see it</a></div>
     <div><b>fBm.</b> Noise layered at several scales for natural detail. <a href="#ex-clip-reel-noise">see it</a></div>
+    <div><b>FLIP fluid.</b> A liquid simulation that moves particles and turns them into a surface. <a href="#ex-clip-liquid">see it</a></div>
     <div><b>Flow field.</b> A grid of directions that particles follow. <a href="#ex-flowfield">see it</a></div>
     <div><b>Follow-through.</b> Parts keep moving after the body stops. <a href="#compare">see it</a></div>
-    <div><b>FLIP fluid.</b> A liquid simulation that moves particles and turns them into a surface. <a href="#ex-clip-liquid">see it</a></div>
-    <div><b>Compute shader.</b> A GPU program that does general math, like moving a million particles. <a href="#ex-clip-webgpu">see it</a></div>
     <div><b>Fragment shader.</b> GPU program that colors each pixel. <a href="#ex-kaleido">see it</a></div>
     <div><b>Geometry nodes.</b> Blender's node system for procedural geometry. <a href="#ex-clip-geometry-nodes">see it</a></div>
     <div><b>GLSL / WGSL.</b> Shader languages of WebGL and WebGPU.</div>
+    <div><b>Graph editor.</b> The panel where an animator shapes the speed of a move as a curve. <a href="#ex-mg2-graph">see it</a></div>
     <div><b>Grease Pencil.</b> Blender's tool for hand-drawn 2D lines inside a 3D scene. <a href="#ex-clip-grease-pencil">see it</a></div>
     <div><b>H.264.</b> The most common video codec.</div>
+    <div><b>Halftone.</b> Printing tones as dots of different sizes. <a href="#ex-mg2-halftone">see it</a></div>
     <div><b>Headless.</b> A program running with no window, controlled by code.</div>
     <div><b>Instancing.</b> Many copies of one object in a single GPU call. <a href="#ex-clip-reel-instancing">see it</a></div>
+    <div><b>Inverse kinematics (IK).</b> Place the foot or the hand, and the joints in between solve themselves. <a href="#ex-mg2-walk">see it</a></div>
     <div><b>Isometric.</b> A 3D look with no perspective: parallel lines stay parallel. <a href="#ex-isocity">see it</a></div>
     <div><b>Keyframe.</b> A value set at a specific time; software fills in between.</div>
     <div><b>Kinetic typography.</b> Animated text. <a href="#type">see it</a></div>
-    <div><b>LUT.</b> A lookup table that remaps every color; used for grades. <a href="#ex-clip-color-grade">see it</a></div>
+    <div><b>Lattice Boltzmann.</b> A fluid solver that streams and collides particle distributions on a grid. <a href="#ex-clip-rust-lbm-windtunnel">see it</a></div>
+    <div><b>Lenia.</b> A continuous cellular automaton whose patterns move like living creatures. <a href="#ex-h2-lenia">see it</a></div>
+    <div><b>Line art.</b> Outlines that the renderer draws from the 3D model, for a drawn or anime look. <a href="#ex-clip-toon-line-art">see it</a></div>
     <div><b>Lottie.</b> A JSON animation format for apps and websites. <a href="#libs">see it</a></div>
+    <div><b>LUT.</b> A lookup table that remaps every color; used for grades. <a href="#ex-clip-color-grade">see it</a></div>
     <div><b>Mask / matte.</b> A shape that hides or reveals part of a layer. <a href="#ex-maskreveal">see it</a></div>
+    <div><b>Material point method (MPM).</b> Particles carry the material and a grid solves the forces; used for snow, sand and jelly. <a href="#ex-clip-taichi-mpm">see it</a></div>
     <div><b>Metaballs.</b> Blobs that merge smoothly. <a href="#ex-metaballs">see it</a></div>
     <div><b>Motion blur.</b> Streaking of fast objects. <a href="#ex-clip-speed-ramp">see it</a></div>
+    <div><b>Motion tracking.</b> Following a point through footage so graphics can stick to it. <a href="#ex-clip-track-callout">see it</a></div>
     <div><b>Noise.</b> Smooth randomness; the base of most organic effects. <a href="#ex-flowfield">see it</a></div>
+    <div><b>Onion skin.</b> Faint earlier and later frames shown while animating, to check spacing and arcs. <a href="#ex-mg2-onion">see it</a></div>
     <div><b>Optical flow.</b> Estimating motion between frames to invent new in-between frames. <a href="#ex-clip-speed-ramp">see it</a></div>
     <div><b>Parallax.</b> Near layers move faster than far layers. <a href="#ex-parallax">see it</a></div>
+    <div><b>Path tracing.</b> Rendering by following random light paths; the noise fades as samples add up. <a href="#ex-x-pathtrace">see it</a></div>
+    <div><b>Pixel sorting.</b> Sorting runs of pixels by brightness, so the image melts into streaks. <a href="#ex-clip-pixel-sort">see it</a></div>
+    <div><b>Polyrhythm.</b> Two or more rhythms with different beat counts played at the same time. <a href="#ex-au2-polyrhythm">see it</a></div>
+    <div><b>Pose to pose.</b> Setting the key poses first and filling the frames between them, instead of animating straight ahead. <a href="#ex-p2-pose-to-pose">see it</a></div>
     <div><b>Procedural.</b> Made by rules and math, not by hand.</div>
+    <div><b>Rasterization.</b> Turning triangles or curves into pixels, which is what a GPU does in hardware. <a href="#ex-x-raster">see it</a></div>
     <div><b>Ray marching.</b> Stepping a ray through a distance field to find surfaces. <a href="#ex-repeat">see it</a></div>
     <div><b>Reaction-diffusion.</b> Two simulated chemicals that grow organic patterns. <a href="#ex-reaction">see it</a></div>
     <div><b>Rigid body.</b> A physics object that does not bend. <a href="#ex-clip-reel-physics">see it</a></div>
     <div><b>SDF.</b> Signed distance field: a formula for the distance to the nearest surface. <a href="#ex-sdfmorph">see it</a></div>
+    <div><b>Simulation zone.</b> A Geometry Nodes block that keeps its result from the previous frame, so it can grow. <a href="#ex-clip-vine-growth">see it</a></div>
+    <div><b>Slit-scan.</b> Each row of the image comes from a different moment, so motion stretches. <a href="#ex-clip-slit-scan">see it</a></div>
+    <div><b>Smear frame.</b> One stretched frame that sells a very fast move. <a href="#ex-mg2-smear">see it</a></div>
+    <div><b>Solid drawing.</b> Drawing shapes with volume, weight and perspective, so they feel like objects and not flat cards. <a href="#ex-p2-solid-drawing">see it</a></div>
+    <div><b>Sonification.</b> Turning data into sound. <a href="#ex-au2-sonify">see it</a></div>
     <div><b>Speed ramp.</b> Smoothly changing playback speed inside one shot. <a href="#ex-clip-speed-ramp">see it</a></div>
     <div><b>Spring.</b> Physics-based easing set by stiffness and damping. <a href="#ex-springtail">see it</a></div>
-    <div><b>Stagger.</b> The same move on many items, offset in time. <a href="#stagger">see it</a></div>
+    <div><b>Stabilization.</b> Removing camera shake by tracking the image and moving it back. <a href="#ex-clip-stabilize">see it</a></div>
     <div><b>Stable fluids.</b> A real-time fluid solver. <a href="#ex-fluid">see it</a></div>
+    <div><b>Stagger.</b> The same move on many items, offset in time. <a href="#stagger">see it</a></div>
+    <div><b>Staging.</b> Directing the eye: one clear action at a time, with everything else calmer. <a href="#ex-p2-staging">see it</a></div>
+    <div><b>Thin-film interference.</b> The colors of soap bubbles and oil, from light reflecting off two very close surfaces. <a href="#ex-g2-bubbles">see it</a></div>
     <div><b>Tone mapping.</b> Turning very bright render values into screen colors (AgX, ACES).</div>
     <div><b>Trim paths.</b> Animating how much of a line is drawn. <a href="#ex-trimpaths">see it</a></div>
     <div><b>Truchet tiles.</b> Simple tiles that form endless patterns when rotated. <a href="#ex-p5-truchet">see it</a></div>
@@ -473,11 +532,13 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
     <div><b>Vignette.</b> Darkened edges of the frame. <a href="#post">see it</a></div>
     <div><b>Volumetrics.</b> Rendering smoke, fog and fire as light passing through a volume. <a href="#ex-clip-smoke-fire">see it</a></div>
     <div><b>Voronoi.</b> Cells around random points. <a href="#ex-voronoi">see it</a></div>
+    <div><b>Wave function collapse.</b> Filling a grid tile by tile so that every tile fits its neighbors. <a href="#ex-a2-wfc">see it</a></div>
+    <div><b>Z-buffer.</b> A depth value per pixel that decides which surface is in front. <a href="#ex-x-raster">see it</a></div>
   </div>
 </section>
 
 <section class="sec" id="reel">
-  <h2><span class="n">24</span>How the reel was made</h2>
+  <h2><span class="n">25</span>How the reel was made</h2>
   <p class="lead">The source is in <code>source/reel</code>. Times are from the actual run on this PC.</p>
   <table>
     <tr><th>Time</th><th>Scene</th><th>Technique</th><th>Tool</th><th>Card</th></tr>
@@ -496,6 +557,8 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
     <div class="box"><h3>Web scenes</h3><p class="dim">3,600 frames with 6 headless Chrome pages, about 300 ms per frame, so roughly 17 to 18 minutes for all frames.</p></div>
     <div class="box"><h3>Music and encode</h3><p class="dim">Soundtrack synthesized in 4 seconds. FFmpeg joined frames and audio into H.264 + AAC.</p></div>
   </div>
+  <h3 style="margin-top:30px">The second reel</h3>
+  <p class="dim" style="max-width:1080px">The second reel took no new rendering. One Python script (<code>source/reel2/make_reel2.py</code>) synthesizes a 120 BPM track with NumPy, picks a 2 s section of 29 finished clips, places every cut on an exact beat frame, adds title cards, flashes and zoom punches with FFmpeg filters, and encodes 1080p H.264 with AAC. It runs in about 30 seconds on the CPU.</p>
   <footer>Made by Claude (Opus 5.5) in Claude Code. Works offline: open <code>index.html</code> in Chrome or Edge.</footer>
 </section>
 </main>
@@ -516,6 +579,17 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
 <script src="site/catalog/more-gpu.js"></script>
 <script src="site/catalog/more-audio.js"></script>
 <script src="site/catalog/from-guide.js"></script>
+<script src="site/catalog/set2-type.js"></script>
+<script src="site/catalog/set2-mg.js"></script>
+<script src="site/catalog/set2-ui.js"></script>
+<script src="site/catalog/set2-sim.js"></script>
+<script src="site/catalog/set2-algo.js"></script>
+<script src="site/catalog/set2-gpu.js"></script>
+<script src="site/catalog/set2-gpu2.js"></script>
+<script src="site/catalog/set2-audio.js"></script>
+<script src="site/catalog/scratch.js"></script>
+<script src="site/catalog/set2-webgpu.js"></script>
+<script src="site/catalog/set2-principles.js"></script>
 <!-- LIBS-SCRIPTS-START -->
 <script src="site/vendor/three-demo.js"></script>
 <script src="site/vendor/pixi.min.js"></script>
@@ -530,6 +604,7 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
 <script src="site/vendor/matter.min.js"></script>
 <script src="site/vendor/rough.js"></script>
 <script src="site/catalog/libs.js"></script>
+<script src="site/catalog/set2-libs.js"></script>
 <!-- LIBS-SCRIPTS-END -->
 <script src="site/catalog/clips.js"></script>
 <script src="site/catalog/engine.js"></script>

@@ -145,4 +145,5 @@ function setup(stage, L) {
   };
 }
 
-window.LIBS_THREE = { setup, version: THREE.REVISION };
+// THREE is the whole namespace, for other cards that build their own scene (set2-libs.js, card l2-three-flight).
+window.LIBS_THREE = { setup, version: THREE.REVISION, THREE };

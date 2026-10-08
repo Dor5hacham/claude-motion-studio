@@ -1,0 +1,24 @@
+mandelbrot=s=1280x720:r=30:start_scale=3:end_scale=0.004:end_pts=84:maxiter=900:start_x=-0.743643887037151:start_y=0.131825904205330:outer=normalized_iteration_count:inner=black,
+  trim=duration=2.8,setpts=PTS-STARTPTS,format=gray,format=yuv420p,pseudocolor=preset=magma,eq=contrast=1.1,setsar=1,fps=30,settb=1/30 [A];
+life=s=320x180:r=30:ratio=0.14:seed=7:mold=14:life_color=#FFB020:death_color=#0B0B10:mold_color=#3A1E8A,
+  scale=1280:720:flags=neighbor,trim=duration=2.8,setpts=PTS-STARTPTS,format=yuv420p,setsar=1,fps=30,settb=1/30 [B];
+aevalsrc=exprs='0.30*sin(2*PI*220*t)*(0.75+0.25*sin(2*PI*1.5*t))+0.10*sin(2*PI*440*t)|0.30*sin(2*PI*330.4*t)*(0.75+0.25*sin(2*PI*1.5*t+1))+0.10*sin(2*PI*660*t)':s=44100:d=8.2,
+  afade=t=in:d=0.4,afade=t=out:st=7.3:d=0.7,asplit=3 [aout][aw][av];
+[aw] atrim=start=4.8,asetpts=PTS-STARTPTS,showwaves=s=1280x220:mode=cline:rate=30:colors=0xFF5A36|0x2BC4E6:scale=lin [waves];
+[av] atrim=start=4.8,asetpts=PTS-STARTPTS,avectorscope=s=400x400:r=30:mode=lissajous_xy:draw=line:scale=lin:zoom=1.6:rc=244:gc=239:bc=230:ac=255:rf=12:gf=12:bf=12:af=12 [scope];
+gradients=s=1280x720:r=30:c0=0x0B0B10:c1=0x2A1A6A:c2=0x0B3A4A:c3=0x0B0B10:nb_colors=4:speed=0.02:type=spiral:d=3.4,
+  setpts=PTS-STARTPTS,format=yuv420p,setsar=1 [bg];
+[bg][waves] overlay=0:470:shortest=1 [c1];
+[c1][scope] overlay=(W-w)/2:110:shortest=1,format=yuv420p,setsar=1,fps=30,settb=1/30 [C];
+[A][B] xfade=transition=circleopen:duration=0.4:offset=2.4 [AB];
+[AB][C] xfade=transition=radial:duration=0.4:offset=4.8,
+  drawbox=x=0:y=0:w=iw:h=118:color=0x0B0B10@0.55:t=fill,
+  drawbox=x=36:y=30:w=6:h=60:color=0xFF5A36:t=fill,
+  drawtext=fontfile='C\:/Windows/Fonts/bahnschrift.ttf':text='ONE FFMPEG COMMAND':fontsize=40:fontcolor=0xF4EFE6:x='56-700*pow(max(0\,1-t/0.7)\,3)':y=28,
+  drawtext=fontfile='C\:/Windows/Fonts/bahnschrift.ttf':text='no code, only a filter graph':fontsize=22:fontcolor=0xC8C6D2:x=58:y=76:alpha='min(1\,max(0\,(t-0.4)/0.4))',
+  drawbox=x=36:y=622:w=600:h=62:color=0x0B0B10@0.7:t=fill,
+  drawtext=fontfile='C\:/Windows/Fonts/consola.ttf':text='mandelbrot  >  pseudocolor magma':fontsize=24:fontcolor=0x2BC4E6:x='54-640*pow(max(0\,1-(t-0.2)/0.5)\,3)':y=640:enable='lt(t\,2.6)',
+  drawtext=fontfile='C\:/Windows/Fonts/consola.ttf':text='life  >  scale (nearest)  >  xfade circleopen':fontsize=24:fontcolor=0xFFB020:x='54-640*pow(max(0\,1-(t-2.6)/0.5)\,3)':y=640:enable='between(t\,2.6\,5.0)',
+  drawtext=fontfile='C\:/Windows/Fonts/consola.ttf':text='aevalsrc  >  showwaves + avectorscope':fontsize=24:fontcolor=0xFF5A36:x='54-640*pow(max(0\,1-(t-5.0)/0.5)\,3)':y=640:enable='gte(t\,5.0)',
+  drawtext=fontfile='C\:/Windows/Fonts/consola.ttf':text='%{pts\:hms}':fontsize=20:fontcolor=0xAAA8B9:x=w-tw-40:y=650,
+  fade=t=out:st=7.5:d=0.5 [vout]
