@@ -10,3 +10,10 @@ source/reel/blender/
 source/reel/test/
 # Python bytecode
 __pycache__/
+# native builds and renders inside source/scratch (each README builds and renders in place)
+source/scratch/*/target/
+source/scratch/*/frames/
+source/scratch/*/*.exe
+source/scratch/*/*.mp4
+# lint cache
+.ruff_cache/

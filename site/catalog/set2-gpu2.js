@@ -143,9 +143,9 @@
       const st = (L.state = { mode: 0, view: 0, set: m => { st.mode = m; G.draw(clear, pp.write); pp.swap(); G.draw(clear, pp.write); pp.swap(); G.draw(clear, en.write); en.swap(); G.draw(clear, en.write); en.swap(); } });
       let B = [70, 90 + 20], drag = false, ph = 0, acc = 0;
       const toGrid = e => { const r = cv.getBoundingClientRect(); return [EX.clamp01((e.clientX - r.left) / r.width) * SW, (1 - EX.clamp01((e.clientY - r.top) / r.height)) * SH]; };
-      cv.addEventListener('pointerdown', e => { if (st.mode !== 1) return; drag = true; B = toGrid(e); });
+      cv.addEventListener('pointerdown', e => { if (st.mode !== 1) return; drag = true; B = toGrid(e); cv.setPointerCapture(e.pointerId); });
       cv.addEventListener('pointermove', e => { if (drag) B = toGrid(e); });
-      window.addEventListener('pointerup', () => { drag = false; });
+      cv.addEventListener('pointerup', () => { drag = false; });
       st.set(0);
       return (t, dt) => {
         const geo = { uMode: st.mode, uSep: L.p.sep, uLam: L.p.lam, uB: drag || st.mode !== 1 ? B : [70 + Math.sin(t * 0.4) * 30, 90 + L.p.sep * 0.5 + Math.sin(t * 0.27) * 10] };

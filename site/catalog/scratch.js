@@ -684,6 +684,8 @@
       };
       st.play = () => { if (!st.ac) st.ac = new AudioContext(); st.ac.resume(); start(0); };
       st.stop = () => { if (st.src) { st.src.stop(); st.src = null; } };
+      // The looping sound stops when the card scrolls out of view.
+      if (!cv.dataset.soundWatch) { cv.dataset.soundWatch = '1'; new IntersectionObserver(es => { if (!es[0].isIntersecting) { L.state.stop(); if (L.state.ac) L.state.ac.suspend(); } }).observe(cv); }
       const key = () => [L.p.cut, L.p.res, L.p.env, L.p.dec].join();
       let changedAt = -1, pend = '';
       render(); rendered = key();
@@ -1227,6 +1229,8 @@
       };
       st.play = () => { if (!st.ac) st.ac = new AudioContext(); st.ac.resume(); start(0); };
       st.stop = () => { if (st.src) { st.src.stop(); st.src = null; } };
+      // The looping sound stops when the card scrolls out of view.
+      if (!cv.dataset.soundWatch) { cv.dataset.soundWatch = '1'; new IntersectionObserver(es => { if (!es[0].isIntersecting) { L.state.stop(); if (L.state.ac) L.state.ac.suspend(); } }).observe(cv); }
       const key = () => L.p.decay + ',' + L.p.bright; let rendered = key(), pend = '', changedAt = 0; render();
       const COLS = [C.coral, C.amber, C.cream, C.cyan, C.violet, C.coral, C.amber, C.cyan], X0 = 96, X1 = 600;
       return t => {
