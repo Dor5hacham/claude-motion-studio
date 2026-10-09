@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved. SPDX-License-Identifier: Proprietary -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 180" width="1280" height="180" role="img" aria-labelledby="t d">
+<title id="t">The ten parts of a motion brief</title>
+<desc id="d">Ten keyframes on one track: Deliverable, Purpose, Look, Technique, Timeline, Motion feel, Camera, Text on screen, Sound, Checks. The first five do most of the work.</desc>
+<style>
+text{font-family:'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace}.d{font-family:Bahnschrift, 'Segoe UI', Helvetica, Arial, sans-serif}
+.ph{animation:ph 10s linear infinite both}@keyframes ph{0%{transform:translate(64px,0)}60%,100%{transform:translate(1224px,0)}}
+.l0{animation:l0 10s linear infinite both}@keyframes l0{0%,2.369%{opacity:.35}4.379%,100%{opacity:1}}
+.l1{animation:l1 10s linear infinite both}@keyframes l1{0%,8.519%{opacity:.35}10.529%,100%{opacity:1}}
+.l2{animation:l2 10s linear infinite both}@keyframes l2{0%,14.668%{opacity:.35}16.678%,100%{opacity:1}}
+.l3{animation:l3 10s linear infinite both}@keyframes l3{0%,20.818%{opacity:.35}22.828%,100%{opacity:1}}
+.l4{animation:l4 10s linear infinite both}@keyframes l4{0%,26.967%{opacity:.35}28.977%,100%{opacity:1}}
+.l5{animation:l5 10s linear infinite both}@keyframes l5{0%,33.116%{opacity:.35}35.126%,100%{opacity:1}}
+.l6{animation:l6 10s linear infinite both}@keyframes l6{0%,39.266%{opacity:.35}41.276%,100%{opacity:1}}
+.l7{animation:l7 10s linear infinite both}@keyframes l7{0%,45.415%{opacity:.35}47.425%,100%{opacity:1}}
+.l8{animation:l8 10s linear infinite both}@keyframes l8{0%,51.565%{opacity:.35}53.575%,100%{opacity:1}}
+.l9{animation:l9 10s linear infinite both}@keyframes l9{0%,57.714%{opacity:.35}59.724%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<rect x=".5" y=".5" width="1279" height="179" rx="14" fill="#0b0b10" stroke="#2a2a38"/>
+<path d="M76,34V26H226.8M468.8,26H619.6V34" fill="none" stroke="#ff5a36" stroke-opacity=".7"/>
+<text x="347.8" y="30" font-size="12" text-anchor="middle" fill="#ff5a36">these five do most of the work</text>
+<text x="1256" y="30" font-size="12" font-weight="700" letter-spacing=".14em" text-anchor="end" fill="#a39e96">10 PARTS OF A BRIEF</text>
+<rect x="56" y="90" width="1176" height="20" rx="5" fill="#14141c" stroke="#2a2a38"/>
+<rect x="76" y="90" width="543.6" height="20" rx="5" fill="#ff5a36" fill-opacity=".14" stroke="#ff5a36" stroke-opacity=".5"/>
+<path d="M64,109v-3M84,109v-3M104,109v-3M124,109v-3M144,109v-3M164,109v-3M184,109v-3M204,109v-3M224,109v-3M244,109v-3M264,109v-3M284,109v-3M304,109v-3M324,109v-3M344,109v-3M364,109v-3M384,109v-3M404,109v-3M424,109v-3M444,109v-3M464,109v-3M484,109v-3M504,109v-3M524,109v-3M544,109v-3M564,109v-3M584,109v-3M604,109v-3M624,109v-3M644,109v-3M664,109v-3M684,109v-3M704,109v-3M724,109v-3M744,109v-3M764,109v-3M784,109v-3M804,109v-3M824,109v-3M844,109v-3M864,109v-3M884,109v-3M904,109v-3M924,109v-3M944,109v-3M964,109v-3M984,109v-3M1004,109v-3M1024,109v-3M1044,109v-3M1064,109v-3M1084,109v-3M1104,109v-3M1124,109v-3M1144,109v-3M1164,109v-3M1184,109v-3M1204,109v-3M1224,109v-3" stroke="#a39e96" stroke-opacity="0.35"/>
+<path d="M110,74v14" stroke="#ff5a36" stroke-opacity=".6"/>
+<path d="M110,91l9,9-9,9-9,-9z" fill="#ff5a36" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l0"><text x="110" y="50" font-size="12" font-weight="700" text-anchor="middle" fill="#ff5a36">01</text><text class="d" x="110" y="68" font-size="13" font-weight="600" textLength="66.3" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Deliverable</text></g>
+<path d="M228.9,112v14" stroke="#ff5a36" stroke-opacity=".6"/>
+<path d="M228.9,91l9,9-9,9-9,-9z" fill="#ff5a36" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l1"><text class="d" x="228.9" y="140" font-size="13" font-weight="600" textLength="48.6" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Purpose</text><text x="228.9" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#ff5a36">02</text></g>
+<path d="M347.8,74v14" stroke="#ff5a36" stroke-opacity=".6"/>
+<path d="M347.8,91l9,9-9,9-9,-9z" fill="#ff5a36" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l2"><text x="347.8" y="50" font-size="12" font-weight="700" text-anchor="middle" fill="#ff5a36">03</text><text class="d" x="347.8" y="68" font-size="13" font-weight="600" textLength="28.3" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Look</text></g>
+<path d="M466.7,112v14" stroke="#ff5a36" stroke-opacity=".6"/>
+<path d="M466.7,91l9,9-9,9-9,-9z" fill="#ff5a36" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l3"><text class="d" x="466.7" y="140" font-size="13" font-weight="600" textLength="59.7" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Technique</text><text x="466.7" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#ff5a36">04</text></g>
+<path d="M585.6,74v14" stroke="#ff5a36" stroke-opacity=".6"/>
+<path d="M585.6,91l9,9-9,9-9,-9z" fill="#ff5a36" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l4"><text x="585.6" y="50" font-size="12" font-weight="700" text-anchor="middle" fill="#ff5a36">05</text><text class="d" x="585.6" y="68" font-size="13" font-weight="600" textLength="49.8" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Timeline</text></g>
+<path d="M704.4,112v14" stroke="#a39e96" stroke-opacity=".6"/>
+<path d="M704.4,94l6,6-6,6-6,-6z" fill="#a39e96" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l5"><text class="d" x="704.4" y="140" font-size="13" font-weight="600" textLength="64.5" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Motion feel</text><text x="704.4" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#a39e96">06</text></g>
+<path d="M823.3,74v14" stroke="#a39e96" stroke-opacity=".6"/>
+<path d="M823.3,94l6,6-6,6-6,-6z" fill="#a39e96" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l6"><text x="823.3" y="50" font-size="12" font-weight="700" text-anchor="middle" fill="#a39e96">07</text><text class="d" x="823.3" y="68" font-size="13" font-weight="600" textLength="45.5" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Camera</text></g>
+<path d="M942.2,112v14" stroke="#a39e96" stroke-opacity=".6"/>
+<path d="M942.2,94l6,6-6,6-6,-6z" fill="#a39e96" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l7"><text class="d" x="942.2" y="140" font-size="13" font-weight="600" textLength="86.6" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Text on screen</text><text x="942.2" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#a39e96">08</text></g>
+<path d="M1061.1,74v14" stroke="#a39e96" stroke-opacity=".6"/>
+<path d="M1061.1,94l6,6-6,6-6,-6z" fill="#a39e96" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l8"><text x="1061.1" y="50" font-size="12" font-weight="700" text-anchor="middle" fill="#a39e96">09</text><text class="d" x="1061.1" y="68" font-size="13" font-weight="600" textLength="36.5" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Sound</text></g>
+<path d="M1180,112v14" stroke="#a39e96" stroke-opacity=".6"/>
+<path d="M1180,94l6,6-6,6-6,-6z" fill="#a39e96" stroke="#0b0b10" stroke-width="1.5"/>
+<g class="l9"><text class="d" x="1180" y="140" font-size="13" font-weight="600" textLength="42.4" lengthAdjust="spacingAndGlyphs" text-anchor="middle" fill="#ece7de">Checks</text><text x="1180" y="158" font-size="12" font-weight="700" text-anchor="middle" fill="#a39e96">10</text></g>
+<g class="ph" transform="translate(1224,0)"><line x1="0" y1="86" x2="0" y2="124" stroke="#ff5a36" stroke-width="5" stroke-opacity=".22"/><line x1="0" y1="86" x2="0" y2="124" stroke="#ff5a36" stroke-width="1.6"/><path d="M-6,78h12v7l-6,6-6,-6z" fill="#ff5a36"/></g>
+</svg>

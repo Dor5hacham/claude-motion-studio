@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved. SPDX-License-Identifier: Proprietary -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-labelledby="t d">
+<title id="t">The catalog at a glance</title>
+<desc id="d">The 12 catalog sections as bars, sized by technique count: 332 in total, 265 live, 67 clips. The reel, scene by scene: 9; Text in motion: 36; 2D motion graphics: 33; App and web UI motion: 32; Simulation and generative art: 57; GPU shaders: 48; Sound and motion: 19; Animation libraries: 25; 3D engines (Blender, Unreal): 24; Code-to-video tools: 10; Editing and post-production: 17; Built from scratch: 22.</desc>
+<style>
+text{font-family:'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace}.d{font-family:Bahnschrift, 'Segoe UI', Helvetica, Arial, sans-serif}
+.bar{transform-box:fill-box;transform-origin:0 50%}
+@keyframes grow{0%{transform:scaleX(0);animation-timing-function:cubic-bezier(0.16,1,0.3,1)}15%,100%{transform:scaleX(1)}}
+@keyframes fade{0%,8%{opacity:0}16%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<defs><pattern id="hece7de" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#ece7de" fill-opacity=".16"/><rect width="2.5" height="6" fill="#ece7de" fill-opacity=".9"/></pattern><pattern id="h5fd38d" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#5fd38d" fill-opacity=".16"/><rect width="2.5" height="6" fill="#5fd38d" fill-opacity=".9"/></pattern><pattern id="h7a5cff" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#7a5cff" fill-opacity=".16"/><rect width="2.5" height="6" fill="#7a5cff" fill-opacity=".9"/></pattern><pattern id="hffb020" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#ffb020" fill-opacity=".16"/><rect width="2.5" height="6" fill="#ffb020" fill-opacity=".9"/></pattern><pattern id="hdim" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="#a39e96" fill-opacity=".16"/><rect width="2.5" height="6" fill="#a39e96"/></pattern></defs>
+<rect x=".5" y=".5" width="1279" height="339" rx="14" fill="#0b0b10" stroke="#2a2a38"/>
+<text x="24" y="32" font-size="12" font-weight="700" letter-spacing=".14em" fill="#a39e96">CATALOG</text>
+<rect x="280" y="22" width="18" height="12" rx="2" fill="#a39e96"/><text x="306" y="32" font-size="12" fill="#a39e96">live in the page</text>
+<rect x="450" y="22" width="18" height="12" rx="2" fill="url(#hdim)"/><text x="476" y="32" font-size="12" fill="#a39e96">rendered clip</text>
+<text x="1256" y="32" font-size="12" font-weight="700" letter-spacing=".12em" text-anchor="end" fill="#a39e96"><tspan fill="#ece7de">332</tspan> TECHNIQUES / <tspan fill="#ece7de">265</tspan> LIVE / <tspan fill="#ece7de">67</tspan> CLIPS</text>
+<path d="M427.4,48V316M574.7,48V316M722.1,48V316M869.5,48V316M1016.8,48V316" stroke="#2a2a38" stroke-dasharray="2 4"/>
+<text x="24" y="67" font-size="12" fill="#a39e96">01</text>
+<text class="d" x="52" y="67.5" font-size="14" font-weight="500" textLength="155.3" lengthAdjust="spacingAndGlyphs" fill="#ece7de">The reel, scene by scene</text>
+<g class="bar" style="animation:grow 8s linear infinite both"><rect x="280" y="57" width="132.6" height="12" rx="2" fill="url(#hece7de)"/></g>
+<g style="animation:fade 8s linear infinite both"><text class="d" x="422.6" y="68" font-size="14" font-weight="700" textLength="7.1" lengthAdjust="spacingAndGlyphs" fill="#ece7de">9</text><text x="437.8" y="67.5" font-size="12" fill="#a39e96">all clips</text></g>
+<text x="24" y="89" font-size="12" fill="#a39e96">02</text>
+<text class="d" x="52" y="89.5" font-size="14" font-weight="500" textLength="89" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Text in motion</text>
+<g class="bar" style="animation:grow 8s linear 0.06s infinite both"><rect x="280" y="79" width="530.5" height="12" rx="2" fill="#ff5a36"/></g>
+<g style="animation:fade 8s linear 0.06s infinite both"><text class="d" x="820.5" y="90" font-size="14" font-weight="700" textLength="14.6" lengthAdjust="spacingAndGlyphs" fill="#ece7de">36</text><text x="843.1" y="89.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="111" font-size="12" fill="#a39e96">03</text>
+<text class="d" x="52" y="111.5" font-size="14" font-weight="500" textLength="121.2" lengthAdjust="spacingAndGlyphs" fill="#ece7de">2D motion graphics</text>
+<g class="bar" style="animation:grow 8s linear 0.12s infinite both"><rect x="280" y="101" width="486.3" height="12" rx="2" fill="#ff5a36"/></g>
+<g style="animation:fade 8s linear 0.12s infinite both"><text class="d" x="776.3" y="112" font-size="14" font-weight="700" textLength="14.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">33</text><text x="799.2" y="111.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="133" font-size="12" fill="#a39e96">04</text>
+<text class="d" x="52" y="133.5" font-size="14" font-weight="500" textLength="144.1" lengthAdjust="spacingAndGlyphs" fill="#ece7de">App and web UI motion</text>
+<g class="bar" style="animation:grow 8s linear 0.18s infinite both"><rect x="280" y="123" width="471.6" height="12" rx="2" fill="#ff5a36"/></g>
+<g style="animation:fade 8s linear 0.18s infinite both"><text class="d" x="761.6" y="134" font-size="14" font-weight="700" textLength="14.7" lengthAdjust="spacingAndGlyphs" fill="#ece7de">32</text><text x="784.3" y="133.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="155" font-size="12" fill="#a39e96">05</text>
+<text class="d" x="52" y="155.5" font-size="14" font-weight="500" textLength="185.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Simulation and generative art</text>
+<g class="bar" style="animation:grow 8s linear 0.24s infinite both"><rect x="280" y="145" width="840" height="12" rx="2" fill="#2bc4e6"/></g>
+<g style="animation:fade 8s linear 0.24s infinite both"><text class="d" x="1130" y="156" font-size="14" font-weight="700" textLength="14.6" lengthAdjust="spacingAndGlyphs" fill="#ece7de">57</text><text x="1152.6" y="155.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="177" font-size="12" fill="#a39e96">06</text>
+<text class="d" x="52" y="177.5" font-size="14" font-weight="500" textLength="81.3" lengthAdjust="spacingAndGlyphs" fill="#ece7de">GPU shaders</text>
+<g class="bar" style="animation:grow 8s linear 0.3s infinite both"><rect x="280" y="167" width="707.4" height="12" rx="2" fill="#7a5cff"/></g>
+<g style="animation:fade 8s linear 0.3s infinite both"><text class="d" x="997.4" y="178" font-size="14" font-weight="700" textLength="15.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">48</text><text x="1021.2" y="177.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="199" font-size="12" fill="#a39e96">07</text>
+<text class="d" x="52" y="199.5" font-size="14" font-weight="500" textLength="112.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Sound and motion</text>
+<g class="bar" style="animation:grow 8s linear 0.36s infinite both"><rect x="280" y="189" width="280" height="12" rx="2" fill="#ffb020"/></g>
+<g style="animation:fade 8s linear 0.36s infinite both"><text class="d" x="570" y="200" font-size="14" font-weight="700" textLength="11.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">19</text><text x="589.8" y="199.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="221" font-size="12" fill="#a39e96">08</text>
+<text class="d" x="52" y="221.5" font-size="14" font-weight="500" textLength="120" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Animation libraries</text>
+<g class="bar" style="animation:grow 8s linear 0.42s infinite both"><rect x="280" y="211" width="368.4" height="12" rx="2" fill="#2bc4e6"/></g>
+<g style="animation:fade 8s linear 0.42s infinite both"><text class="d" x="658.4" y="222" font-size="14" font-weight="700" textLength="14.8" lengthAdjust="spacingAndGlyphs" fill="#ece7de">25</text><text x="681.3" y="221.5" font-size="12" fill="#a39e96">all live</text></g>
+<text x="24" y="243" font-size="12" fill="#a39e96">09</text>
+<text class="d" x="52" y="243.5" font-size="14" font-weight="500" textLength="181.4" lengthAdjust="spacingAndGlyphs" fill="#ece7de">3D engines (Blender, Unreal)</text>
+<g class="bar" style="animation:grow 8s linear 0.48s infinite both"><rect x="280" y="233" width="353.7" height="12" rx="2" fill="url(#h5fd38d)"/></g>
+<g style="animation:fade 8s linear 0.48s infinite both"><text class="d" x="643.7" y="244" font-size="14" font-weight="700" textLength="15.3" lengthAdjust="spacingAndGlyphs" fill="#ece7de">24</text><text x="666.9" y="243.5" font-size="12" fill="#a39e96">all clips</text></g>
+<text x="24" y="265" font-size="12" fill="#a39e96">10</text>
+<text class="d" x="52" y="265.5" font-size="14" font-weight="500" textLength="124.9" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Code-to-video tools</text>
+<g class="bar" style="animation:grow 8s linear 0.54s infinite both"><rect x="280" y="255" width="147.4" height="12" rx="2" fill="url(#h7a5cff)"/></g>
+<g style="animation:fade 8s linear 0.54s infinite both"><text class="d" x="437.4" y="266" font-size="14" font-weight="700" textLength="12.2" lengthAdjust="spacingAndGlyphs" fill="#ece7de">10</text><text x="457.5" y="265.5" font-size="12" fill="#a39e96">all clips</text></g>
+<text x="24" y="287" font-size="12" fill="#a39e96">11</text>
+<text class="d" x="52" y="287.5" font-size="14" font-weight="500" textLength="174.2" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Editing and post-production</text>
+<g class="bar" style="animation:grow 8s linear 0.6s infinite both"><rect x="280" y="277" width="250.5" height="12" rx="2" fill="url(#hffb020)"/></g>
+<g style="animation:fade 8s linear 0.6s infinite both"><text class="d" x="540.5" y="288" font-size="14" font-weight="700" textLength="11.6" lengthAdjust="spacingAndGlyphs" fill="#ece7de">17</text><text x="560.1" y="287.5" font-size="12" fill="#a39e96">all clips</text></g>
+<text x="24" y="309" font-size="12" fill="#a39e96">12</text>
+<text class="d" x="52" y="309.5" font-size="14" font-weight="500" textLength="114" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Built from scratch</text>
+<g class="bar" style="animation:grow 8s linear 0.66s infinite both"><rect x="280" y="299" width="221.1" height="12" rx="2" fill="#5fd38d"/><rect x="501.1" y="299" width="103.2" height="12" rx="2" fill="url(#h5fd38d)"/></g>
+<g style="animation:fade 8s linear 0.66s infinite both"><text class="d" x="614.2" y="310" font-size="14" font-weight="700" textLength="14.6" lengthAdjust="spacingAndGlyphs" fill="#ece7de">22</text><text x="636.8" y="309.5" font-size="12" fill="#a39e96">15 live / 7 clips</text></g>
+</svg>

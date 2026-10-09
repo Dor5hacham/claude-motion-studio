@@ -25,7 +25,7 @@ node scripts/check_site.mjs                     # links, coverage, vendor files,
 uvx ruff check --select F,E9 --ignore F403,F405 source scripts
 npx -y -p typescript tsc --noEmit --allowJs --checkJs --noImplicitAny false --strict false --noUnusedLocals --target es2022 --lib dom,es2022 site/globals.d.ts site/learn/*.js site/catalog/*.js site/site.js
 ```
-After catalog or clip changes, regenerate the README: `node scripts/make_readme_media.mjs`, `node scripts/export_catalog.mjs`, `python scripts/build_readme.py`. Then delete `scripts/node_modules/`, `scripts/catalog.json` and `_work/`.
+After catalog or clip changes, regenerate the README in this order: `node scripts/export_catalog.mjs`, `node scripts/make_readme_media.mjs`, `node scripts/make_readme_art.mjs`, `python scripts/build_readme.py`. Then delete `scripts/node_modules/`, `scripts/catalog.json` and `_work/`.
 
 ## Your machine
 - Paths and hardware differ per machine. Set `BLENDER` to the Blender 5.2 executable and `UNREAL_EDITOR` to UnrealEditor. Set `CHROME_PATH` if Chrome is not in its default install folder.

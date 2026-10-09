@@ -1,18 +1,44 @@
+<p align="center"><img src="media/readme/art/banner.svg" width="100%" alt="Motion Studio drawn as a motion editor: a title layer, five tracks of catalog clips, an ease-out-back curve and a moving playhead"></p>
+
 # Motion Studio: what Claude can animate, what it is called, and how to ask for it
 
-![The reel, one second per scene](media/readme/hero-reel.gif)
+<p align="center">
+<kbd><a href="#quick-start">00 Quick start</a></kbd>
+<kbd><a href="#requirements">01 Requirements</a></kbd>
+<kbd><a href="#tutorial">02 Tutorial</a></kbd>
+<kbd><a href="#catalog">03 Catalog</a></kbd>
+<kbd><a href="#cheat-sheet">04 Cheat sheet</a></kbd>
+<kbd><a href="#tools-used-here">05 Tools</a></kbd>
+<kbd><a href="#reproduce">06 Reproduce</a></kbd>
+<kbd><a href="#license">07 License</a></kbd>
+</p>
+
+<div align="center">
+<table>
+<tr>
+<td align="center"><img src="media/readme/hero-reel.gif" width="420" alt="The reel, one second per scene"><br><sub>Reel 1, 60 s: shaders, a Blender physics shot, a synthesized score</sub></td>
+<td align="center"><img src="media/readme/hero-reel-2.gif" width="420" alt="The second reel"><br><sub>Reel 2, 42 s: 29 clips of the second set cut to a synthesized beat</sub></td>
+</tr>
+</table>
+</div>
 
 This repository is a complete, hands-on resource for motion design with Claude. It has three parts:
 
-1. **Two motion reels** made entirely with code: the 60-second original (WebGL shaders, a Blender physics shot, a synthesized soundtrack, assembled with FFmpeg) and a 42-second second reel that cuts 29 clips of the second set to a synthesized beat.
-2. **Motion Studio (`index.html`)**: one offline page that teaches the vocabulary of motion with live side-by-side demos, and runs every technique in a searchable catalog you can filter by kind (live, with sliders, clips) and by what it runs on. Most cards have sliders, and their prompt text updates as you move them.
-3. **This README**: the tutorial and the cheat sheet in one place.
+1. **Two motion reels.** Made entirely with code: the 60-second original (WebGL shaders, a Blender physics shot, a synthesized soundtrack, assembled with FFmpeg) and a 42-second second reel that cuts 29 clips of the second set to a synthesized beat.
+2. **Motion Studio (`index.html`).** One offline page that teaches the vocabulary of motion with live side-by-side demos, and runs every technique in a searchable catalog you can filter by kind (live, with sliders, clips) and by what it runs on. Most cards have sliders, and their prompt text updates as you move them.
+3. **This README.** The tutorial and the cheat sheet in one place.
 
 Created by Dor Shacham (Dor5hacham) with Claude Code (Opus 5.5). No stock footage, no downloaded assets and no AI video model were used, and the only templates are the ones built into Blender and Unreal Engine. Every frame comes from code written in Claude Code, and all of that code is in this repository. The only outside parts are the third-party libraries and the map data listed under [Credits and licenses](#credits-and-licenses).
 
-This repository is public so you can read it, but it is not open source: all rights are reserved. See [License](#license).
+> [!IMPORTANT]
+> This repository is public so you can read it, but it is not open source: all rights are reserved. See [License](#license).
 
 ## Quick start
+
+<img src="media/readme/art/track-quick-start.svg" width="100%" alt="Track 00, expo-out">
+
+> [!TIP]
+> Open `index.html` in Chrome or Edge. It runs offline, with no install and no server.
 
 | I want to | Do this |
 |---|---|
@@ -26,6 +52,8 @@ This repository is public so you can read it, but it is not open source: all rig
 
 ## Requirements
 
+<img src="media/readme/art/track-requirements.svg" width="100%" alt="Track 01, linear">
+
 To view the page you need only a Chromium browser. Chrome or Edge 113 or later runs every card, including the WebGPU ones. `index.html` opens from disk, with no install and no server.
 
 To rebuild clips, install only the tools for the part you rebuild:
@@ -38,13 +66,21 @@ To rebuild clips, install only the tools for the part you rebuild:
 | Unreal clips | Unreal Engine 5.8 |
 | Built-from-scratch clips | Rust (cargo) and Go |
 
-The clone is about 350 MB, mostly video. `git clone --depth 1 https://github.com/Dor5hacham/claude-motion-studio.git` skips the history and downloads less. The 494 MB full-quality reel master is not in the repository; download it from [Release v1.0](https://github.com/Dor5hacham/claude-motion-studio/releases/tag/v1.0).
+> [!TIP]
+> The clone is about 350 MB, mostly video. `git clone --depth 1 https://github.com/Dor5hacham/claude-motion-studio.git` skips the history and downloads less. The 494 MB full-quality reel master is not in the repository; download it from [Release v1.0](https://github.com/Dor5hacham/claude-motion-studio/releases/tag/v1.0).
 
 ## Tutorial
+
+<img src="media/readme/art/track-tutorial.svg" width="100%" alt="Track 02, ease-in-out">
 
 ### 1. How a video gets made
 
 Claude does not paint pixels and does not generate video with an AI model. It writes a program or a scene file, a renderer runs that program once per frame, and FFmpeg joins the frames and the sound into a video file.
+
+<p align="center"><img src="media/readme/art/pipeline.svg" width="100%" alt="You describe it, Claude writes code, a renderer draws every frame, and FFmpeg makes the MP4"></p>
+
+<details>
+<summary>Text version of the diagram</summary>
 
 ```
 You describe it  ->  Claude writes code  ->  a renderer draws every frame  ->  FFmpeg makes the MP4
@@ -52,6 +88,8 @@ You describe it  ->  Claude writes code  ->  a renderer draws every frame  ->  F
  timing)              React, Python,         Blender, Remotion)               GIF, ProRes)
                       Blender scripts)
 ```
+
+</details>
 
 | Word | Meaning |
 |---|---|
@@ -69,16 +107,16 @@ These are the words motion designers use. In `index.html` each one runs live, an
 
 ![Easing race](media/readme/learn-easing-race.gif)
 
-| Word | What it does | Say in a prompt |
-|---|---|---|
-| Linear | Constant speed, robotic | "linear scroll for the ticker" |
-| Ease-in | Slow start, fast end (exits) | "ease-in exit" |
-| Ease-out | Fast start, slow end (entrances) | "ease-out entrance, 400 ms" |
-| Ease-in-out | Slow at both ends, calm | "smooth ease-in-out move" |
-| Expo-out | Very fast start, long glide, snappy tech feel | "ease-out-expo" |
-| Back / overshoot | Goes past the target and settles | "ease-out-back pop" |
-| Elastic, bounce | Wobbles or bounces at the end | "small elastic settle" |
-| Spring | Physics easing: stiffness and damping instead of duration | "spring, stiffness 300, damping 25" |
+| Curve | Word | What it does | Say in a prompt |
+|---|---|---|---|
+| <img src="media/readme/art/ease-linear.svg" width="96" alt="Linear curve"> | Linear | Constant speed, robotic | "linear scroll for the ticker" |
+| <img src="media/readme/art/ease-in.svg" width="96" alt="Ease-in curve"> | Ease-in | Slow start, fast end (exits) | "ease-in exit" |
+| <img src="media/readme/art/ease-out.svg" width="96" alt="Ease-out curve"> | Ease-out | Fast start, slow end (entrances) | "ease-out entrance, 400 ms" |
+| <img src="media/readme/art/ease-in-out.svg" width="96" alt="Ease-in-out curve"> | Ease-in-out | Slow at both ends, calm | "smooth ease-in-out move" |
+| <img src="media/readme/art/ease-expo-out.svg" width="96" alt="Expo-out curve"> | Expo-out | Very fast start, long glide, snappy tech feel | "ease-out-expo" |
+| <img src="media/readme/art/ease-back.svg" width="96" alt="Back / overshoot curve"> | Back / overshoot | Goes past the target and settles | "ease-out-back pop" |
+| <img src="media/readme/art/ease-elastic.svg" width="96" alt="Elastic curve"> | Elastic, bounce | Wobbles or bounces at the end | "small elastic settle" |
+| <img src="media/readme/art/ease-spring.svg" width="96" alt="Spring curve"> | Spring | Physics easing: stiffness and damping instead of duration | "spring, stiffness 300, damping 25" |
 
 **The other principles**, each with a with-vs-without demo on the page:
 
@@ -104,9 +142,14 @@ These are the words motion designers use. In `index.html` each one runs live, an
 |---|---|---|
 | ![Follow-through](media/readme/learn-follow-through.gif) | ![Secondary motion](media/readme/learn-secondary-motion.gif) | ![Arcs](media/readme/learn-arcs.gif) |
 
-**Camera moves** (all 11 run in the page on the same scene): static, push-in, pull-out, orbit, pan, tilt, crane, whip pan, rack focus, camera shake, dolly zoom.
-**Transitions** (11 in the page): hard cut, crossfade, dip to black, wipe, iris, push, zoom through, whip pan, glitch, blinds, match cut.
-**Post effects** (toggle them on a reel frame in the page): bloom, film grain, vignette, chromatic aberration, color grade, depth of field, letterbox, scanlines.
+**Camera moves** (all 11 run in the page on the same scene):<br>
+<kbd>static</kbd> <kbd>push-in</kbd> <kbd>pull-out</kbd> <kbd>orbit</kbd> <kbd>pan</kbd> <kbd>tilt</kbd> <kbd>crane</kbd> <kbd>whip pan</kbd> <kbd>rack focus</kbd> <kbd>camera shake</kbd> <kbd>dolly zoom</kbd>
+
+**Transitions** (11 in the page):<br>
+<kbd>hard cut</kbd> <kbd>crossfade</kbd> <kbd>dip to black</kbd> <kbd>wipe</kbd> <kbd>iris</kbd> <kbd>push</kbd> <kbd>zoom through</kbd> <kbd>whip pan</kbd> <kbd>glitch</kbd> <kbd>blinds</kbd> <kbd>match cut</kbd>
+
+**Post effects** (toggle them on a reel frame in the page):<br>
+<kbd>bloom</kbd> <kbd>film grain</kbd> <kbd>vignette</kbd> <kbd>chromatic aberration</kbd> <kbd>color grade</kbd> <kbd>depth of field</kbd> <kbd>letterbox</kbd> <kbd>scanlines</kbd>
 
 | Camera orbit | Iris transition |
 |---|---|
@@ -115,6 +158,8 @@ These are the words motion designers use. In `index.html` each one runs live, an
 ### 3. How to prompt for motion
 
 A good motion prompt reads like a director's brief. These ten parts cover almost everything; the first five do most of the work.
+
+<p align="center"><img src="media/readme/art/prompt-anatomy.svg" width="100%" alt="The ten parts of a motion brief as keyframes on one track. Deliverable, purpose, look, technique and timeline do most of the work. Motion feel, camera, text on screen, sound and checks follow."></p>
 
 1. **Deliverable**: length, resolution, fps, format, where to save.
 2. **Purpose**: who watches and why.
@@ -162,41 +207,43 @@ Show me 6 test frames before the full render.
 
 ## Catalog
 
+<img src="media/readme/art/track-catalog.svg" width="100%" alt="Track 03, back">
+
 Every technique Claude made for this project. Click a name to open it live in `index.html` (open the file locally; links jump to the card). Highlights:
+
+<p align="center"><img src="media/readme/art/catalog-overview.svg" width="100%" alt="The 12 catalog sections as bars, sized by technique count: 332 in total, 265 live, 67 clips"></p>
 
 | Fluid simulation | Reaction-diffusion | Slime mold |
 |---|---|---|
-| ![](media/readme/live-fluid.gif) | ![](media/readme/live-reaction-diffusion.gif) | ![](media/readme/live-slime-mold.gif) |
+| ![Fluid simulation](media/readme/live-fluid.gif) | ![Reaction-diffusion](media/readme/live-reaction-diffusion.gif) | ![Slime mold](media/readme/live-slime-mold.gif) |
 | **Black hole** | **Ocean** | **Isometric city** |
-| ![](media/readme/live-black-hole.gif) | ![](media/readme/live-ocean.gif) | ![](media/readme/live-isometric-city.gif) |
+| ![Black hole](media/readme/live-black-hole.gif) | ![Ocean](media/readme/live-ocean.gif) | ![Isometric city](media/readme/live-isometric-city.gif) |
 | **Particle text** | **Liquid type** | **Split-flap board** |
-| ![](media/readme/live-particle-text.gif) | ![](media/readme/live-liquid-type.gif) | ![](media/readme/live-split-flap.gif) |
+| ![Particle text](media/readme/live-particle-text.gif) | ![Liquid type](media/readme/live-liquid-type.gif) | ![Split-flap board](media/readme/live-split-flap.gif) |
 | **Soft-body blobs** | **Oscilloscope music** | **Like-button burst** |
-| ![](media/readme/live-soft-blobs.gif) | ![](media/readme/live-oscilloscope.gif) | ![](media/readme/live-like-burst.gif) |
+| ![Soft-body blobs](media/readme/live-soft-blobs.gif) | ![Oscilloscope music](media/readme/live-oscilloscope.gif) | ![Like-button burst](media/readme/live-like-burst.gif) |
 | **Blender liquid** | **Blender cloth** | **Unreal Niagara** |
-| ![](media/readme/clip-liquid.gif) | ![](media/readme/clip-cloth.gif) | ![](media/readme/clip-unreal-niagara.gif) |
+| ![Blender liquid](media/readme/clip-liquid.gif) | ![Blender cloth](media/readme/clip-cloth.gif) | ![Unreal Niagara](media/readme/clip-unreal-niagara.gif) |
 | **Blender shatter** | **Cycles photoreal** | **WebGPU, 1M particles** |
-| ![](media/readme/clip-shatter.gif) | ![](media/readme/clip-cycles.gif) | ![](media/readme/clip-webgpu.gif) |
+| ![Blender shatter](media/readme/clip-shatter.gif) | ![Cycles photoreal](media/readme/clip-cycles.gif) | ![WebGPU, 1M particles](media/readme/clip-webgpu.gif) |
 | **Three.js** | **Remotion** | **HyperFrames** |
-| ![](media/readme/clip-threejs.gif) | ![](media/readme/clip-remotion.gif) | ![](media/readme/clip-hyperframes.gif) |
+| ![Three.js](media/readme/clip-threejs.gif) | ![Remotion](media/readme/clip-remotion.gif) | ![HyperFrames](media/readme/clip-hyperframes.gif) |
 | **Manim** | **Speed ramp** | **Datamosh** |
-| ![](media/readme/clip-manim.gif) | ![](media/readme/clip-speed-ramp.gif) | ![](media/readme/clip-datamosh.gif) |
+| ![Manim](media/readme/clip-manim.gif) | ![Speed ramp](media/readme/clip-speed-ramp.gif) | ![Datamosh](media/readme/clip-datamosh.gif) |
 
-From the second set, which added the section "Built from scratch" (renderers, solvers and synths that Claude wrote without an engine or a library). The second reel cuts 29 of its clips to a synthesized beat (`media/reel/claude-motion-reel-2.mp4`):
-
-![The second reel](media/readme/hero-reel-2.gif)
+From the second set, which added the section "Built from scratch" (renderers, solvers and synths that Claude wrote without an engine or a library). The second reel cuts 29 of its clips to a synthesized beat: [`media/reel/claude-motion-reel-2.mp4`](media/reel/claude-motion-reel-2.mp4).
 
 | Liquid glass lens | Living planet | Anime floating island |
 |---|---|---|
-| ![](media/readme/live-liquid-glass.gif) | ![](media/readme/live-planet.gif) | ![](media/readme/clip-toon-line-art.gif) |
+| ![Liquid glass lens](media/readme/live-liquid-glass.gif) | ![Living planet](media/readme/live-planet.gif) | ![Anime floating island](media/readme/clip-toon-line-art.gif) |
 | **Procedural walk cycle** | **Neon sign power-on** | **Exploded product view** |
-| ![](media/readme/live-walk-cycle.gif) | ![](media/readme/live-neon-sign.gif) | ![](media/readme/clip-exploded-view.gif) |
+| ![Procedural walk cycle](media/readme/live-walk-cycle.gif) | ![Neon sign power-on](media/readme/live-neon-sign.gif) | ![Exploded product view](media/readme/clip-exploded-view.gif) |
 | **Software rasterizer** | **Polyrhythm arcs** | **Spectral path tracer in Rust** |
-| ![](media/readme/live-software-rasterizer.gif) | ![](media/readme/live-polyrhythm.gif) | ![](media/readme/clip-rust-pathtracer.gif) |
+| ![Software rasterizer](media/readme/live-software-rasterizer.gif) | ![Polyrhythm arcs](media/readme/live-polyrhythm.gif) | ![Spectral path tracer in Rust](media/readme/clip-rust-pathtracer.gif) |
 | **Dotted globe with flight arcs** | **Strange attractors** | **Lumen daylight time-lapse** |
-| ![](media/readme/live-dotted-globe.gif) | ![](media/readme/live-strange-attractors.gif) | ![](media/readme/clip-unreal-lumen.gif) |
+| ![Dotted globe with flight arcs](media/readme/live-dotted-globe.gif) | ![Strange attractors](media/readme/live-strange-attractors.gif) | ![Lumen daylight time-lapse](media/readme/clip-unreal-lumen.gif) |
 | **Lenia creatures** | **Liquid hourglass (FLIP solver in Go)** | **Taichi: water, jelly and snow (MPM)** |
-| ![](media/readme/live-lenia.gif) | ![](media/readme/clip-flip-hourglass.gif) | ![](media/readme/clip-taichi-mpm.gif) |
+| ![Lenia creatures](media/readme/live-lenia.gif) | ![Liquid hourglass, FLIP solver in Go](media/readme/clip-flip-hourglass.gif) | ![Taichi: water, jelly and snow, MPM](media/readme/clip-taichi-mpm.gif) |
 
 The full list below is generated from the same registry the page uses (`scripts/build_readme.py`), so it always matches the site.
 
@@ -206,7 +253,10 @@ The full list below is generated from the same registry the page uses (`scripts/
 
 ### The reel, scene by scene (9)
 
-![The reel, scene by scene](media/readme/poster-reel.jpg)
+<details>
+<summary><b>Show all 9 techniques with prompts</b> <sub>SECTION&nbsp;01&nbsp;OF&nbsp;12&nbsp;/&nbsp;9&nbsp;CLIPS</sub><br>The nine scenes and cuts of the first reel.</summary>
+
+<p><img src="media/readme/poster-reel.jpg" width="100%" alt="The reel, scene by scene: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -220,9 +270,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Domain-warped noise with word slams (reel scene 7)](index.html#ex-clip-reel-noise) (clip) | GLSL fragment shader + Canvas 2D text | GPU | Domain-warped fBm marble background, cosine palette violet and orange, words "ANYTHING / THAT / MOVES." slam in on the beat at 120 BPM with an RGB glitch hit each. |
 | [Rigid-body wall smash (reel scene 4)](index.html#ex-clip-reel-physics) (clip) | Blender 5.2: Bullet physics, Eevee | ENGINE | Blender rigid-body sim: 500 glossy cubes in a wall, a chrome wrecking ball hits it at 1 s, half-speed slow motion, Eevee with motion blur and depth of field. |
 
+</details>
+
 ### Text in motion (36)
 
-![Text in motion](media/readme/poster-type.jpg)
+<details>
+<summary><b>Show all 36 techniques with prompts</b> <sub>SECTION&nbsp;02&nbsp;OF&nbsp;12&nbsp;/&nbsp;36&nbsp;LIVE</sub><br>Kinetic type, reveals, scrambles and letters that melt, fill or fly.</summary>
+
+<p><img src="media/readme/poster-type.jpg" width="100%" alt="Text in motion: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -263,9 +318,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Rack focus type](index.html#ex-t2-rackfocus) | Canvas 2D (per-layer blur from a thin-lens formula, drawn bokeh discs, parallax) | CPU | Rack focus title: three layers of type at different depths (a huge coral "FOCUS" close to the lens, "on what matters" in cream in the middle, a far wall of small grey words with warm city lights), slow lateral camera drift with parallax, the focus pulls near, middle, far and back with eased holds, blur per layer from the thin-lens circle of confusion (aperture 1.00), background lights bloom into round bokeh discs when out of focus, small focus-distance readout. |
 | [Ransom-note collage](index.html#ex-t2-ransom) | Canvas 2D (pre-cut letter sprites, stepped time at 12 fps, boil jitter) | CPU | Ransom-note collage: "MAKE IT MOVE" built from letters cut out of magazines, each on its own scrap with a different typeface, weight, color and slight tilt, slapped onto off-white paper one by one with a tiny scale-down settle, animated on stepped time at 12 fps like stop motion, every scrap boils with small random jitter on each step, soft drop shadows, then swept off and rebuilt, 7 s loop. |
 
+</details>
+
 ### 2D motion graphics (33)
 
-![2D motion graphics](media/readme/poster-mg.jpg)
+<details>
+<summary><b>Show all 33 techniques with prompts</b> <sub>SECTION&nbsp;03&nbsp;OF&nbsp;12&nbsp;/&nbsp;33&nbsp;LIVE</sub><br>Shape layers, paths, morphs, parallax and other 2D animation.</summary>
+
+<p><img src="media/readme/poster-mg.jpg" width="100%" alt="2D motion graphics: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -303,14 +363,19 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Solid drawing](index.html#ex-p2-solid-drawing) | Canvas 2D (3D projection) | CPU | Solid drawing demo, 640x360 split screen on a near-black background. A cream box makes a quarter turn every 2.4 s with ease in-out and a hold. Left half: a flat card fakes the turn by squashing its width to a sliver. Right half: a real cube projected in 3D with a 22 deg camera tilt, three faces shaded by one upper-left light, and a soft contact shadow. Bahnschrift labels, seamless loop. |
 | [Pythagorean theorem by rearrangement](index.html#ex-vp-pythag) | Canvas 2D | CPU | A calm, 3Blue1Brown-style animated proof of the Pythagorean theorem on a near-black background: four equal right triangles (legs a = 3.0 and b = 10 - a) fill a square and leave a tilted c-squared gap, then slide one by one inside the same frame until the gap is an a-squared and a b-squared square. Numbered step captions on the right, soft colors, the equation with real numbers at the end, seamless loop. |
 
+</details>
+
 ### App and web UI motion (32)
 
-![App and web UI motion](media/readme/poster-ui.jpg)
+<details>
+<summary><b>Show all 32 techniques with prompts</b> <sub>SECTION&nbsp;04&nbsp;OF&nbsp;12&nbsp;/&nbsp;32&nbsp;LIVE</sub><br>Buttons, loaders, toggles, cards and transitions for apps and sites.</summary>
+
+<p><img src="media/readme/poster-ui.jpg" width="100%" alt="App and web UI motion: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
 | [Like-button burst](index.html#ex-like) | SVG + JavaScript (also Lottie) | WEB | Like-button micro-interaction: heart scales 1 > 0.7 > 1.25 > 1 with ease-out-back, a coral ring expands and fades, 12 dots burst out, counter digit rolls up. Total 600 ms. |
-| [Loaders](index.html#ex-loaders) | Pure CSS @keyframes | WEB | Make a pure-CSS loader: three dots that bounce in a wave (120 ms stagger), ease-in-out, coral, 1 s loop, and respect prefers-reduced-motion. |
+| [Loaders](index.html#ex-loaders) | Pure CSS `@keyframes` | WEB | Make a pure-CSS loader: three dots that bounce in a wave (120 ms stagger), ease-in-out, coral, 1 s loop, and respect prefers-reduced-motion. |
 | [Gooey merge](index.html#ex-gooey) | SVG filter (blur + alpha threshold) | WEB | Gooey menu button: the main circle splits into 4 smaller circles that slide out with ease-out-back, connected by a liquid SVG goo filter while they separate. |
 | [Menu morph and staggered reveal](index.html#ex-menu) | CSS transforms driven by JavaScript (or Framer Motion) | WEB | Mobile menu: hamburger morphs to X in 300 ms, drawer slides in from the right with ease-out-expo, menu items stagger in 40 ms apart with a 16 px slide; reverse on close. |
 | [Skeleton loading to content](index.html#ex-skeleton) | CSS gradients + JavaScript | WEB | Skeleton loading state for the feed: grey blocks with a left-to-right shimmer every 1.2 s, then real cards fade and slide up 12 px, 60 ms stagger. |
@@ -324,7 +389,7 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Dynamic Island morph](index.html#ex-ui2-island) | DOM + JavaScript spring physics (width, height, radius) | WEB | Dynamic Island style morph: a black pill (120 x 34 px) at the top of a phone springs into an incoming-call banner (396 x 76), a compact then expanded music player (396 x 176) and a timer that splits off a small bubble. Width, height and radius use springs (stiffness 230, damping 19); content crossfades with a slight blur and scale 150 ms after the shape moves; album art is a shared element between compact and expanded. Clicking the pill expands or collapses it. |
 | [Swipe card deck](index.html#ex-ui2-swipe) | Pointer events + JavaScript (velocity tracking, springs) | WEB | Swipe card deck: the top card follows the pointer with rotation proportional to x (sign flips if grabbed below center), KEEP and NOPE stamps fade in by distance. On release throw the card if it moved more than 110 px or the flick was faster than 650 px/s, keeping its velocity; otherwise spring back (stiffness 320, damping 18). The next card scales from 0.94 to 1 as the top card moves away. Round nope and like buttons swell toward the drag direction. |
 | [Submit button states](index.html#ex-ui2-submit) | DOM + JavaScript timeline (SVG stroke drawing) | WEB | Submit button with full async states: on press scale to 0.95, then the 282 x 52 px pill morphs into a 52 px circle (380 ms ease-in-out) while the label fades, a spinner arc rotates for 1.5 s; success turns it green and draws a check mark with stroke-dashoffset, then it springs back to a pill reading "Account created"; failure turns it coral, draws an X, shakes 10 px with a decaying sine, reopens as "Try again" and slides an error message under the password field. Show a small state list that highlights idle, pressed, loading, success or error. |
-| [CSS scroll-driven animations](index.html#ex-ui2-scrolltl) | Pure CSS (animation-timeline, animation-range, timeline-scope, @property) | WEB | Build a scroll-driven article page in pure CSS, no JavaScript animation: a reading progress bar on scroll-timeline --page (shared with timeline-scope), a sticky header that shrinks from 96 to 44 px over the first 140 px of scroll with animation-timeline: scroll(), a parallax hero, cards that fade and rise with animation-timeline: view() and animation-range: entry 10% cover 30%, and a percent counter animated through an @property integer. Respect prefers-reduced-motion. |
+| [CSS scroll-driven animations](index.html#ex-ui2-scrolltl) | Pure CSS (animation-timeline, animation-range, timeline-scope, `@property`) | WEB | Build a scroll-driven article page in pure CSS, no JavaScript animation: a reading progress bar on scroll-timeline --page (shared with timeline-scope), a sticky header that shrinks from 96 to 44 px over the first 140 px of scroll with animation-timeline: scroll(), a parallax hero, cards that fade and rise with animation-timeline: view() and animation-range: entry 10% cover 30%, and a percent counter animated through an `@property` integer. Respect prefers-reduced-motion. |
 | [Activity rings](index.html#ex-ui2-rings) | Canvas 2D (conic gradients, arc caps, particles) | CPU | Activity rings in Canvas 2D: three concentric rings (coral Move, green Exercise, cyan Stand, 24 px thick) fill to 132%, 112% and 100% over 1.8 s each with a 0.25 s stagger and ease-out-expo. Use a conic gradient from a dark to a bright shade, round caps, and a drop shadow under the tip once a ring passes 100%. Stats on the right count up in sync. When all three close, spin the set 360 degrees and burst sparkles, then unwind and loop. Hover focuses a ring; dragging around a ring sets its value. |
 | [Page curl](index.html#ex-ui2-curl) | WebGL2 fragment shader (cylinder fold) over a Canvas 2D page atlas | GPU | Page turn in a WebGL fragment shader: a two-page magazine spread; the right page curls from its bottom corner around a cylinder (radius up to 38 px) that moves to the spine, showing the back of the page on top, shading by the paper angle, and a soft shadow (0.55) on the page below. The corner follows the mouse when dragged, constrained so the page never stretches past the spine; released past the spine it completes the turn with ease-out, otherwise it falls back. Auto-play one turn every 3.4 s. |
 | [Dock magnification](index.html#ex-ui2-dock) | DOM + JavaScript (cosine falloff, smoothed pointer) | WEB | macOS-style dock in HTML and JavaScript: 10 app icons (38 px) in a frosted glass bar; icons scale up to 1.90x near the pointer with a cosine falloff over 140 px, measured from the resting layout so the row does not jitter; the bar widens to fit; a label fades in above the hovered icon. Clicking an icon bounces it three times with decaying height over 1.2 s, then a small dot appears under it. |
@@ -338,13 +403,18 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Spotlight card grid](index.html#ex-ui2-spotlight) | CSS radial gradients + mask-composite, driven by CSS variables | WEB | Spotlight hover for a grid of dark feature cards: set --x and --y on every card to the pointer position relative to that card; a ::before layer draws radial-gradient(260 px circle at var(--x) var(--y), amber, transparent 60%) on a 1 px border cut out with mask-composite: exclude, and an ::after layer adds a faint inner glow, so neighbouring borders light up across the gaps. Ease the light toward the pointer, and ripple out from the click point. |
 | [Slider with a swinging bubble](index.html#ex-ui2-slider) | Pointer events + JavaScript (pendulum spring, rubber band, magnetic snapping) | WEB | Two custom sliders. Volume: the value bubble above the thumb is a damped pendulum driven by the thumb acceleration (swing 1.2), it scales in on press and out on release, and the thumb rubber-bands past the ends. Room size: five labelled stops; while dragging pull the thumb toward the nearest stop with strength 0.60 inside 30 px, light the stop it is near, and on release snap with a spring. Thumbs squash slightly on press. |
 | [Drag to reorder](index.html#ex-ui2-reorder) | Pointer events + JavaScript (live reorder, one spring per row) | WEB | Sortable playlist: on press the row scales to 1.03 with a larger shadow and tilts up to 4 degrees with its vertical velocity; while dragging, compute the slot under the row and reorder the array live; every row springs to its slot (stiffness 420, slight overshoot); on release the dragged row springs into place and the numbers update. Rubber-band the row at the top and bottom of the list. |
-| [Native CSS open and close](index.html#ex-ui2-cssnative) | Pure CSS (interpolate-size, ::details-content, @starting-style, transition-behavior, sibling-index()) | WEB | Build with modern CSS only: an exclusive FAQ (details name="faq") whose ::details-content transitions height from 0 to auto using interpolate-size: allow-keywords, plus content-visibility with allow-discrete; the chevron rotates. Filter chips enter with @starting-style (opacity 0, scale 0.8), exit to display: none with transition-behavior: allow-discrete, and stagger with transition-delay: calc(sibling-index() * 40ms). A selected chip transitions its width to auto to make room for a check mark. |
+| [Native CSS open and close](index.html#ex-ui2-cssnative) | Pure CSS (interpolate-size, ::details-content, `@starting-style`, transition-behavior, sibling-index()) | WEB | Build with modern CSS only: an exclusive FAQ (details name="faq") whose ::details-content transitions height from 0 to auto using interpolate-size: allow-keywords, plus content-visibility with allow-discrete; the chevron rotates. Filter chips enter with `@starting-style` (opacity 0, scale 0.8), exit to display: none with transition-behavior: allow-discrete, and stagger with transition-delay: calc(sibling-index() * 40ms). A selected chip transitions its width to auto to make room for a check mark. |
 | [Form field micro-interactions](index.html#ex-ui2-fields) | DOM + JavaScript (springs driven by input state) | WEB | Form micro-interactions: floating labels rise 20 px and scale to 0.78 on focus with a spring; a 2 px underline grows from the click x position with scaleX; invalid email shakes (decaying sine, 8 px) and slides a hint down on blur, valid email draws a check with stroke-dashoffset; a 4-bar password meter fills with a 60 ms stagger, coral to amber to green; a bio counter ring fills to the 40 character limit, turns amber at 80% and coral past it. |
 | [Lightbox with drag to dismiss](index.html#ex-ui2-lightbox) | Pointer events + JavaScript (shared element, gesture-driven progress, springs) | WEB | Photo lightbox: on tap the thumbnail animates from its grid rect to a 280 px centred viewer (shared element, spring) while a black backdrop fades to 85%. Dragging the open photo moves it with the pointer, scales it down by distance (up to 40%) and fades the backdrop by distance; on release, if it moved more than 90 px or faster than 700 px/s, animate it back into its original cell, otherwise spring it back to the centre. Hide the source cell while the photo is out. |
 
+</details>
+
 ### Simulation and generative art (57)
 
-![Simulation and generative art](media/readme/poster-sim.jpg)
+<details>
+<summary><b>Show all 57 techniques with prompts</b> <sub>SECTION&nbsp;05&nbsp;OF&nbsp;12&nbsp;/&nbsp;57&nbsp;LIVE</sub><br>Flow fields, flocks, cloth, sand, slime mold and generative art.</summary>
+
+<p><img src="media/readme/poster-sim.jpg" width="100%" alt="Simulation and generative art: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -406,9 +476,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Dragon curve unfolding](index.html#ex-gn-dragonfold) | Canvas 2D | CPU | Heighway dragon curve that builds itself fold by fold: start from one line, then 12 times copy the whole curve and swing the copy 90 degrees around its end point with an eased rotation, 1.2 folds per second. Color each fold differently (coral, amber, cream, cyan, violet), zoom the camera out smoothly to keep the curve framed, hold, then repeat. |
 | [Strandbeest leg linkage](index.html#ex-mc-strandbeest) | Canvas 2D + circle-intersection kinematics | CPU | A Theo Jansen Strandbeest leg linkage walking, solved with real kinematics from Jansen's holy numbers (crank length 15.0), the crank turning at 0.45 rev/s, two mirrored legs plus a dim back pair, the foot path traced in coral, clean technical-illustration line style on a dark background. |
 
+</details>
+
 ### GPU shaders (48)
 
-![GPU shaders](media/readme/poster-gpu.jpg)
+<details>
+<summary><b>Show all 48 techniques with prompts</b> <sub>SECTION&nbsp;06&nbsp;OF&nbsp;12&nbsp;/&nbsp;48&nbsp;LIVE</sub><br>Fragment shaders: fluids, fractals, ray marching, noise and post effects.</summary>
+
+<p><img src="media/readme/poster-gpu.jpg" width="100%" alt="GPU shaders: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -461,9 +536,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Watercolor blooms](index.html#ex-h2-watercolor) | WebGL2 fragment shaders on ping-pong float textures (water flow over a paper height map, pigment transport and deposition) | GPU | Wet-in-wet watercolor on cold-press paper simulated on the GPU: drops of coral, amber, violet, cyan and navy pigment land every 0.9 s, water bleeds along the paper fibers with ragged edges, pigment collects at the rims into dark edges (strength 1.4), granulation in the paper texture, colors mix where wet washes meet, 24 s then a fresh sheet. |
 | [WebGPU flow silk: a million particles](index.html#ex-w2-flow-silk) | WebGPU, WGSL compute shaders | GPU | Live WebGPU hero background: 1.00 million particles moved by a WGSL compute shader through 2D curl noise (scale 2.2, speed 1.2) plus a gather term of 0.60 that pulls them into glowing filaments. Rasterize in compute with atomic adds into a pixel buffer, fade it into trails, color by flow direction in coral, amber, cyan and violet on near-black with a soft glow. When WebGPU is missing, fall back to a CPU preview of the same flow with fewer particles and a note on the stage that says why. |
 
+</details>
+
 ### Sound and motion (19)
 
-![Sound and motion](media/readme/poster-audio.jpg)
+<details>
+<summary><b>Show all 19 techniques with prompts</b> <sub>SECTION&nbsp;07&nbsp;OF&nbsp;12&nbsp;/&nbsp;19&nbsp;LIVE</sub><br>Motion that makes or follows sound: synths, visualizers, beat sync.</summary>
+
+<p><img src="media/readme/poster-audio.jpg" width="100%" alt="Sound and motion: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -487,9 +567,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Granular cloud](index.html#ex-au2-granular) | Web Audio API (AudioBufferSourceNode grains) + Canvas 2D | CPU | Granular synthesis you can see: synthesize a 2.5 s A minor 9 chord, show its waveform as a strip, and move a scan head across it 8 times slower than real time. Cut 28 grains per second of 140 ms with a fade in and out, each from the head position plus up to 0.12 s of random spray, some shifted up a fifth or an octave, and play each with a Web Audio AudioBufferSourceNode at a scheduled time. Draw every grain as a particle born on the strip where it was cut, rising and fading, bright while it sounds, colored by its pitch shift; shade the spray window around the head. |
 | [Marble xylophone](index.html#ex-au2-marbles) | Web Audio API (struck bars) + Canvas 2D ballistics | CPU | Animusic-style marble xylophone: two launchers (left plays the melody of Ode to Joy, right plays a bass note per bar) at 108 BPM. Solve each throw backwards: a marble leaves 1 s before its note on the ballistic arc (gravity 900 px/s^2) that lands it on the right bar exactly when the note plays. Bars are rosewood with metal resonator tubes; a struck bar rings (Web Audio sine plus a 4x partial), glows and dips, and the marble bounces away and falls out of frame. Launchers ease round to aim at the next target and recoil on each shot. Dark stage, marbles colored by bar. |
 
+</details>
+
 ### Animation libraries (25)
 
-![Animation libraries](media/readme/poster-libs.jpg)
+<details>
+<summary><b>Show all 25 techniques with prompts</b> <sub>SECTION&nbsp;08&nbsp;OF&nbsp;12&nbsp;/&nbsp;25&nbsp;LIVE</sub><br>The same ideas with Three.js, GSAP, PixiJS, p5.js, D3, Matter.js and more.</summary>
+
+<p><img src="media/readme/poster-libs.jpg" width="100%" alt="Animation libraries: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -519,9 +604,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Low-poly island, day to night](index.html#ex-l2-three-island) | Three.js (DirectionalLight shadows, PCFShadowMap, flatShading, vertex colors, InstancedMesh, ACES tone mapping) | GPU | Using Three.js, build a low-poly island: a PlaneGeometry displaced by noise with an island falloff, made non-indexed so every triangle gets one vertex color by height (sand, grass, forest, rock, snow), MeshStandardMaterial with flatShading, a transparent water disc and about 260 cone trees in an InstancedMesh. Run a 16 s day: a DirectionalLight sun on an arc with PCFShadowMap shadows, warm at sunrise and sunset, a sky and fog color ramp, a moon light and Points stars at night, ACES tone mapping, and a camera orbiting at 0.08 rad/s. Show the clock. |
 | [Camera flight along a spline](index.html#ex-l2-three-flight) | Three.js (CatmullRomCurve3, getPointAt, TubeGeometry, InstancedMesh, FogExp2, Points) | GPU | Using Three.js, build a closed CatmullRomCurve3 (centripetal) through 12 random points in a wide loop with height changes, and fly the camera along it at 22 units per second with getPointAt. Look at the point 9.0 units ahead and bank up to 0.50 radians from the change in tangent. Place 90 neon square gates (a 4-segment TorusGeometry in an InstancedMesh, plus an additive canvas-texture glow) along the curve, show the spline as a thin TubeGeometry rail just under the path, add 5,000 dust Points, a GridHelper floor and FogExp2 (density 0.030), and a top-down mini-map of the path. |
 
+</details>
+
 ### 3D engines (Blender, Unreal) (24)
 
-![3D engines (Blender, Unreal)](media/readme/poster-engine.jpg)
+<details>
+<summary><b>Show all 24 techniques with prompts</b> <sub>SECTION&nbsp;09&nbsp;OF&nbsp;12&nbsp;/&nbsp;24&nbsp;CLIPS</sub><br>Blender and Unreal shots: physics, cloth, liquid, fire, Lumen, Niagara.</summary>
+
+<p><img src="media/readme/poster-engine.jpg" width="100%" alt="3D engines (Blender, Unreal): a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -550,9 +640,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Rack focus and bokeh](index.html#ex-clip-unreal-focus) (clip) | Unreal Engine 5.8: Cine Camera depth of field (75 mm, f/1.4, 7-blade diaphragm), tracking focus, Sequencer, Movie Render Queue, built through the Unreal MCP | ENGINE | Open Unreal Engine 5.8 on a blank project with the Unreal MCP plugin enabled and wait until its MCP server is connected. Then, through the MCP tools: copy the default template level and delete everything in it for a black void; make emissive bulb materials in amber, warm white, coral and cyan; hang four strands of about 24 small glowing spheres across the view at 1.6, 3, 5.5 and 11 m, each sagging like a catenary, with spacing and size proportional to depth and a little seeded jitter; add a cine camera with a 75 mm lens at f/1.4, a 7-blade diaphragm and tracking focus on an invisible target point; in an 8 s Level Sequence, key the target point to hold on the near strand, pull to the 5.5 m strand, hold, then pull to the far strand, with eased moves, while the camera trucks slowly sideways; manual exposure; render 1280x720 at 30 fps with Movie Render Queue (8 temporal samples) and encode an MP4. |
 | [Ivy grows over a vase](index.html#ex-clip-vine-growth) (clip) | Blender 5.2: Geometry Nodes simulation zone built in Python, Points to Curves, Curve to Mesh, Eevee | ENGINE | Blender 5.2 from Python, 8 s Eevee: a Geometry Nodes simulation zone grows ivy over a glossy navy amphora on a cream cyclorama. 30 tips start around the foot with random delays, speeds and spiral directions; each frame a tip moves along the surface (upward pull, a spiral around the vase and 4D noise, projected onto the tangent plane, snapped back with Geometry Proximity plus the normal from Sample Nearest Surface) and adds a point with its birth time to a trail. Outside the zone: Points to Curves by tip id ordered by birth time, radius tapering at the young end, Curve to Mesh stems colored young to old, leaves and coral berries instanced on random trail points that scale in after the tip passes. Slow orbit that rises with the growth. |
 
+</details>
+
 ### Code-to-video tools (10)
 
-![Code-to-video tools](media/readme/poster-tools.jpg)
+<details>
+<summary><b>Show all 10 techniques with prompts</b> <sub>SECTION&nbsp;10&nbsp;OF&nbsp;12&nbsp;/&nbsp;10&nbsp;CLIPS</sub><br>Remotion, HyperFrames, Motion Canvas, Manim, Taichi and other code-to-video tools.</summary>
+
+<p><img src="media/readme/poster-tools.jpg" width="100%" alt="Code-to-video tools: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -567,9 +662,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Taichi: water, jelly and snow (MPM)](index.html#ex-clip-taichi-mpm) (clip) | Taichi (Python kernels compiled for the GPU, Vulkan backend) | GPU | Write a 2D MLS-MPM simulation in Taichi on the Vulkan backend, 9 s at 1280x720 30 fps: a water column collapses (dam break) into a checkered coral jelly block, a snowball hits the floor and fractures, later a jelly ball, a snow slab and a jelly block drop in. About 60k particles, 64 substeps per frame. Render on the GPU too: splat particles into one density buffer per material, blur, shade as glossy surfaces with a rim light, dark background with a faint grid, labels that follow each body. |
 | [PyVista: flow past a sphere](index.html#ex-clip-pyvista) (clip) | PyVista + VTK (ImageData vector field, stream tracer, tube filter, offscreen OpenGL) | GPU | PyVista offscreen render, 8 s 1280x720 at 30 fps: a velocity field on a 3D grid (potential flow past a sphere of radius 0.72 plus a swirl around the flow axis), 120 streamlines from a golden-angle spiral of seeds upstream with streamlines_from_source, clipped by integration time each frame so they grow downstream, tubes colored by speed (navy, cyan, cream, amber, coral), cream PBR sphere, dark gradient background, SSAA, camera orbiting 95 degrees with ease-in-out, title and a speed legend. |
 
+</details>
+
 ### Editing and post-production (17)
 
-![Editing and post-production](media/readme/poster-edit.jpg)
+<details>
+<summary><b>Show all 17 techniques with prompts</b> <sub>SECTION&nbsp;11&nbsp;OF&nbsp;12&nbsp;/&nbsp;17&nbsp;CLIPS</sub><br>Work on footage: speed ramps, grades, datamosh, tracking, stabilization.</summary>
+
+<p><img src="media/readme/poster-edit.jpg" width="100%" alt="Editing and post-production: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -591,9 +691,14 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [3D video wall fly-in](index.html#ex-clip-video-wall) (clip) | Python (NumPy pinhole camera, OpenCV warpPerspective) fed by FFmpeg | CPU | Build a 3D video wall from my clips without a 3D engine, 8 s 1280x720: 27 playing 16:9 cards in 3 rows on the inside of a cylinder (radius 6, 17 degrees apart), a pinhole camera that trucks sideways with a slow yaw, then eases into the center card until it fills the frame exactly and that clip plays at full resolution. Warp each clip with cv2.warpPerspective onto its projected corners, draw far to near, depth fog, staggered fade-up, thin card outlines, faint floor reflection, a label that fades before the fly-in. |
 | [Auto match cuts on a circle](index.html#ex-clip-match-cut) (clip) | OpenCV (HoughCircles, warpAffine) + NumPy, fed by FFmpeg | CPU | Make an auto match-cut montage, 7 s 1280x720: for each of my 7 shots find the round subject in every frame with cv2.HoughCircles (search radius per shot, nearest to the last hit, smoothed over 5 frames), order the shots from small circle to big, and warp each frame so its circle sits at the screen center with a virtual radius that grows log-linearly through each shot's own radius. Hard cuts every 26 frames, a thin coral guide ring with ticks that flashes at each cut, label with shot name, detected radius and scale. |
 
+</details>
+
 ### Built from scratch (22)
 
-![Built from scratch](media/readme/poster-scratch.jpg)
+<details>
+<summary><b>Show all 22 techniques with prompts</b> <sub>SECTION&nbsp;12&nbsp;OF&nbsp;12&nbsp;/&nbsp;15&nbsp;LIVE&nbsp;/&nbsp;7&nbsp;CLIPS</sub><br>Renderers, solvers and synths written with no engine or library.</summary>
+
+<p><img src="media/readme/poster-scratch.jpg" width="100%" alt="Built from scratch: a contact sheet of the section's cards"></p>
 
 | Technique | Made with | Runs on | Prompt to copy |
 |---|---|---|---|
@@ -619,9 +724,13 @@ The full list below is generated from the same registry the page uses (`scripts/
 | [Newton's prism, traced in 2D](index.html#ex-clip-rust-light2d-prism) (clip) | Rust with the standard library only: 2D spectral light tracer (Fresnel, Snell, Cauchy dispersion), anti-aliased line splatting | CPU | Write a 2D spectral light tracer from scratch in Rust (std threads only) and render 8 s at 1280x720 30 fps: a white beam enters from the left and its front travels across the frame, an equilateral glass prism (Cauchy dispersion, exact Fresnel, reflections kept) fans it into a spectrum that paints a rainbow on a thin screen at the right, then a biconvex lens slides up into the fan and focuses it back to white on the screen. 600,000 rays per frame, one wavelength each, drawn as additive anti-aliased lines with brightness per unit length, glow from two blurs, thin cream outlines on the glass, dark background. |
 | [Spectral path tracer in Rust](index.html#ex-clip-rust-pathtracer) (clip) | Rust with the standard library only (no crates): SAH BVH, GGX metals, next event estimation with MIS, spectral dispersion, a-trous denoiser | CPU | Write a path tracer from scratch in Rust with no crates (std threads only) and render a 7 s 1280x720 30 fps shot: a slowly spinning flint-glass prism and a faceted gem with a wavelength-dependent index (Cauchy, one wavelength per path), a rough gold sphere and a copper torus (GGX), a glossy dark floor, neon bar lights in coral, cream and cyan, three emissive moons orbiting fast enough to motion blur, a camera arc with a thin-lens focus pull from the prism to the sphere. BVH with binned SAH, next event estimation with MIS, 64 samples per pixel, edge-avoiding a-trous denoiser guided by albedo and normals, bloom and ACES. Write PPM frames and encode with FFmpeg. |
 | [A word hidden in sound (spectrogram)](index.html#ex-clip-rust-spectrogram-word) (clip) | Rust with the standard library only: TrueType reader, additive synthesizer, WAV writer, FFT spectrogram | CPU | Write a Rust program from scratch (std only) that hides the word MOTION in sound and shows it, 8 s 1280x720 30 fps with the audio track: rasterize the word from bahnschrift.ttf into a 220-row image, play each row as a sine tone from 7.6 kHz down to 0.9 kHz whose loudness follows the image columns (190 columns per second), add a rising chirp at the start and a soft 110/165 Hz drone, write a 16-bit WAV, then draw a scrolling spectrogram with your own FFT (2048 Hann window, one column per pixel at 162 px/s) up to a coral playhead, decibels mapped through navy, violet, coral, amber and cream, a waveform strip below, faint 1 kHz grid. Mux the audio as AAC. |
+
+</details>
 <!-- CATALOG:END -->
 
 ## Cheat sheet
+
+<img src="media/readme/art/track-cheat-sheet.svg" width="100%" alt="Track 04, spring">
 
 **Prompt template**
 
@@ -670,6 +779,8 @@ Show me test frames as a contact sheet before the full render.
 
 ## Tools used here
 
+<img src="media/readme/art/track-tools.svg" width="100%" alt="Track 05, ease-out">
+
 Every tool below made something in the catalog on the reference machine (Ryzen 9 9950X, Radeon RX 9070 XT), a Windows 11 PC with no NVIDIA GPU.
 
 | Tool | What it is | Used for |
@@ -693,9 +804,12 @@ Every tool below made something in the catalog on the reference machine (Ryzen 9
 | Python + NumPy + SciPy | Audio synthesis | The reel's soundtrack |
 | Headless Chrome + Playwright | Browser driven by code | Rendering web scenes to frames, site checks |
 
-Unreal Engine 5.8 was driven through its built-in MCP server (the experimental Unreal MCP plugin): Claude opened the editor, waited until the MCP was connected, built the whole scene with MCP tool calls and rendered it with Movie Render Queue. See `source/unreal/README.md`.
+> [!NOTE]
+> Unreal Engine 5.8 was driven through its built-in MCP server (the experimental Unreal MCP plugin): Claude opened the editor, waited until the MCP was connected, built the whole scene with MCP tool calls and rendered it with Movie Render Queue. See `source/unreal/README.md`.
 
 ## Reproduce
+
+<img src="media/readme/art/track-reproduce.svg" width="100%" alt="Track 06, steps(7)">
 
 | What | How |
 |---|---|
@@ -708,10 +822,13 @@ Unreal Engine 5.8 was driven through its built-in MCP server (the experimental U
 | Built-from-scratch clips | `source/scratch/README.md`: one Rust or Go project per clip, `cargo run --release` or `go run` |
 | Site catalog | `python scripts/build_catalog.py` (fails if any clip is missing from the site) |
 | Site check | `cd scripts && npm i && node check_site.mjs` (links, coverage, console errors, every card renders) |
-| README tables and GIFs | `node scripts/export_catalog.mjs`, `node scripts/make_readme_media.mjs`, `python scripts/build_readme.py` |
+| README tables, GIFs and art | `node scripts/export_catalog.mjs`, `node scripts/make_readme_media.mjs`, `node scripts/make_readme_art.mjs`, `python scripts/build_readme.py` |
 | Add a technique | `site/README.md` explains the card API, sliders, and how to add a clip |
 
 ## Repository map
+
+<details open>
+<summary>Repository tree</summary>
 
 ```
 index.html            Motion Studio: the whole resource in one offline page
@@ -725,7 +842,7 @@ media/
   tools/              Remotion, HyperFrames, Motion Canvas, Manim, Three.js, WebGPU, Taichi, Matplotlib,
                       PyVista and FFmpeg-graph clips, plus the native Rust and Go clips
   edit/               FFmpeg editing tricks
-  readme/             GIFs and posters used in this README
+  readme/             GIFs, posters and SVG art (art/) used in this README
 site/
   site.css, site.js   page styles and wiring
   learn/              the Learn section demos
@@ -740,8 +857,10 @@ source/
   edit/               editing trick scripts
   scratch/            Rust and Go programs written from scratch for the Built from scratch clips
   libs/               source of the bundled Three.js demo
-scripts/              catalog build, site check, README generation
+scripts/              catalog build, site check, README generation and art
 ```
+
+</details>
 
 ## Credits and licenses
 
@@ -764,3 +883,5 @@ This repository is proprietary. It is public so you can read it, but no license 
 Third-party parts keep their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 To ask for permission, contact d5shacham@gmail.com.
+
+<p align="center"><img src="media/readme/art/footer.svg" width="100%" alt="Out point: every frame from code. Motion Studio, (c) 2026 Dor5hacham, all rights reserved."></p>

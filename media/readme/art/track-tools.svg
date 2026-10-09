@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved. SPDX-License-Identifier: Proprietary -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 64" width="1280" height="64" role="img" aria-labelledby="t d">
+<title id="t">Track 05, ease-out</title>
+<desc id="d">Chapter strip: a playhead sweeps the track with ease-out motion and lights keyframes for browser, GPU, Blender, Unreal, FFmpeg, Python, Rust and Go.</desc>
+<style>
+text{font-family:'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace}.d{font-family:Bahnschrift, 'Segoe UI', Helvetica, Arial, sans-serif}
+.nar{display:none}
+@media (max-width:600px){.wide{display:none}.nar{display:inline}}
+.k{transform-box:fill-box;transform-origin:center}
+.ph{animation:ph 8s linear infinite both}
+@keyframes ph{0%{transform:translate(228px,0);animation-timing-function:cubic-bezier(0,0,0.58,1)}20%,100%{transform:translate(1140px,0)}}
+.ph2{animation:ph2 8s linear infinite both}
+@keyframes ph2{0%{transform:translate(300px,0);animation-timing-function:cubic-bezier(0,0,0.58,1)}20%,100%{transform:translate(1160px,0)}}
+.k0{animation:k0 8s ease-out infinite both}@keyframes k0{0%,0.36%{opacity:0;transform:scale(1.9)}2.86%,100%{opacity:1;transform:scale(1)}}
+.k1{animation:k1 8s ease-out infinite both}@keyframes k1{0%,2.25%{opacity:0;transform:scale(1.9)}4.75%,100%{opacity:1;transform:scale(1)}}
+.k2{animation:k2 8s ease-out infinite both}@keyframes k2{0%,3.64%{opacity:0;transform:scale(1.9)}6.14%,100%{opacity:1;transform:scale(1)}}
+.k3{animation:k3 8s ease-out infinite both}@keyframes k3{0%,5.79%{opacity:0;transform:scale(1.9)}8.29%,100%{opacity:1;transform:scale(1)}}
+.k4{animation:k4 8s ease-out infinite both}@keyframes k4{0%,7.97%{opacity:0;transform:scale(1.9)}10.47%,100%{opacity:1;transform:scale(1)}}
+.k5{animation:k5 8s ease-out infinite both}@keyframes k5{0%,10.41%{opacity:0;transform:scale(1.9)}12.91%,100%{opacity:1;transform:scale(1)}}
+.k6{animation:k6 8s ease-out infinite both}@keyframes k6{0%,13.34%{opacity:0;transform:scale(1.9)}15.84%,100%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<rect x=".5" y=".5" width="1279" height="63" rx="14" fill="#0b0b10" stroke="#2a2a38"/>
+<g class="wide">
+<rect x="18" y="14" width="4" height="38" rx="2" fill="#5fd38d"/>
+<text x="32" y="30" font-size="18" font-weight="700" letter-spacing=".12em" fill="#ece7de">TRACK 05</text>
+<text x="32" y="52" font-size="16" fill="#a39e96">ease-out</text>
+<path d="M200.5,10V54" stroke="#2a2a38"/>
+<path d="M228,15v-7M250.8,15v-3M273.6,15v-3M296.4,15v-3M319.2,15v-3M342,15v-3M364.8,15v-3M387.6,15v-3M410.4,15v-3M433.2,15v-3M456,15v-7M478.8,15v-3M501.6,15v-3M524.4,15v-3M547.2,15v-3M570,15v-3M592.8,15v-3M615.6,15v-3M638.4,15v-3M661.2,15v-3M684,15v-7M706.8,15v-3M729.6,15v-3M752.4,15v-3M775.2,15v-3M798,15v-3M820.8,15v-3M843.6,15v-3M866.4,15v-3M889.2,15v-3M912,15v-7M934.8,15v-3M957.6,15v-3M980.4,15v-3M1003.2,15v-3M1026,15v-3M1048.8,15v-3M1071.6,15v-3M1094.4,15v-3M1117.2,15v-3M1140,15v-7" stroke="#a39e96" stroke-opacity="0.55"/>
+<circle cx="228" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="409.1" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="572.9" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="721" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="852.4" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="964.9" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="1054.8" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="1116.3" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/><circle cx="1140" cy="7" r="2.4" fill="#0b0b10" stroke="#5fd38d" stroke-width="1.1"/>
+<text x="1256" y="46" font-size="15" text-anchor="end" fill="#a39e96">1.6 s</text>
+<rect x="228" y="22" width="912" height="36" rx="6" fill="#5fd38d" fill-opacity=".12" stroke="#5fd38d" stroke-opacity=".45"/><rect x="228" y="22" width="3" height="36" rx="1.5" fill="#5fd38d"/>
+<path d="M255.4,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k0" d="M255.4,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="267.9" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">browser</text>
+<path d="M391.4,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k1" d="M391.4,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="403.9" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">GPU</text>
+<path d="M485.2,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k2" d="M485.2,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="497.7" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">Blender</text>
+<path d="M621.2,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k3" d="M621.2,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="633.7" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">Unreal</text>
+<path d="M746.6,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k4" d="M746.6,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="759.1" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">FFmpeg</text>
+<path d="M872.1,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k5" d="M872.1,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="884.6" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">Python</text>
+<path d="M997.6,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#0b0b10" stroke="#5fd38d" stroke-opacity=".6"/><path class="k k6" d="M997.6,33.5l6.5,6.5-6.5,6.5-6.5,-6.5z" fill="#5fd38d" stroke="#0b0b10"/>
+<text x="1010.1" y="46" font-size="17" fill="#ece7de" fill-opacity=".9">Rust and Go</text>
+<g class="ph" transform="translate(1140,0)"><line x1="0" y1="11" x2="0" y2="61" stroke="#ff5a36" stroke-width="5" stroke-opacity=".22"/><line x1="0" y1="11" x2="0" y2="61" stroke="#ff5a36" stroke-width="1.6"/><path d="M-6,3h12v7l-6,6-6,-6z" fill="#ff5a36"/></g>
+</g>
+<g class="nar">
+<rect x="20" y="10" width="8" height="44" rx="4" fill="#5fd38d"/>
+<text x="44" y="47" font-size="40" font-weight="700" letter-spacing=".1em" fill="#ece7de">TRACK 05</text>
+<rect x="300" y="8" width="860" height="48" rx="8" fill="#5fd38d" fill-opacity=".12" stroke="#5fd38d" stroke-opacity=".5" stroke-width="2"/>
+<text x="324" y="46" font-size="36" fill="#a39e96">ease-out</text>
+<g class="ph2" transform="translate(1160,0)"><path d="M0,14V62" stroke="#ff5a36" stroke-width="5"/><path d="M-13,2h26v12l-13,11-13,-11z" fill="#ff5a36"/></g>
+</g>
+</svg>

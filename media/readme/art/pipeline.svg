@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved. SPDX-License-Identifier: Proprietary -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 240" width="1280" height="240" role="img" aria-labelledby="t d">
+<title id="t">How a video gets made</title>
+<desc id="d">A node graph: you describe it (length, look, timing), Claude writes code (shaders, Canvas, React, Python, Blender scripts), a renderer draws every frame (Chrome on the GPU, Blender, Remotion), and FFmpeg makes the MP4 (H.264, WebM, GIF, ProRes). Frame tiles flow along the wires.</desc>
+<style>
+text{font-family:'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace}.d{font-family:Bahnschrift, 'Segoe UI', Helvetica, Arial, sans-serif}
+.tile{animation:tile 4s linear infinite both}@keyframes tile{0%{transform:translate(0,0);opacity:0}12%{opacity:1}85%{opacity:1}100%{transform:translate(54px,0);opacity:0}}
+.cnt{animation:cnt 4s linear infinite both}@keyframes cnt{0%{transform:translate(0,0);animation-timing-function:steps(8,end)}90%,100%{transform:translate(0,-128px)}}
+.bar{transform-box:fill-box;transform-origin:0 50%;animation:bar 4s linear infinite both}@keyframes bar{0%{transform:scaleX(0)}90%,100%{transform:scaleX(1)}}
+.chip{animation:chip 4s ease-out infinite both}@keyframes chip{0%,70%{opacity:.25}78%,100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<defs><clipPath id="fc"><rect x="0" y="-12" width="34.4" height="16"/></clipPath></defs>
+<rect x=".5" y=".5" width="1279" height="239" rx="14" fill="#0b0b10" stroke="#2a2a38"/>
+<text x="24" y="31" font-size="12" font-weight="700" letter-spacing=".14em" fill="#a39e96">PIPELINE</text>
+<text x="1256" y="31" font-size="12" text-anchor="end" fill="#a39e96">prompt &gt; code &gt; frames &gt; MP4</text>
+<path d="M276,92H364" stroke="#ff5a36" stroke-opacity=".55" stroke-width="2"/>
+<g transform="translate(286,87)"><g class="tile" style="animation-delay:-4s" transform="translate(8.1,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#ff5a36"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#ff5a36" fill-opacity=".8"/></g></g>
+<g transform="translate(286,87)"><g class="tile" style="animation-delay:-2.667s" transform="translate(27,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#ff5a36"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#ff5a36" fill-opacity=".8"/></g></g>
+<g transform="translate(286,87)"><g class="tile" style="animation-delay:-1.333s" transform="translate(45.9,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#ff5a36"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#ff5a36" fill-opacity=".8"/></g></g>
+<path d="M596,92H684" stroke="#7a5cff" stroke-opacity=".55" stroke-width="2"/>
+<g transform="translate(606,87)"><g class="tile" style="animation-delay:-4.4s" transform="translate(8.1,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#7a5cff"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#7a5cff" fill-opacity=".8"/></g></g>
+<g transform="translate(606,87)"><g class="tile" style="animation-delay:-3.067s" transform="translate(27,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#7a5cff"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#7a5cff" fill-opacity=".8"/></g></g>
+<g transform="translate(606,87)"><g class="tile" style="animation-delay:-1.733s" transform="translate(45.9,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#7a5cff"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#7a5cff" fill-opacity=".8"/></g></g>
+<path d="M916,92H1004" stroke="#2bc4e6" stroke-opacity=".55" stroke-width="2"/>
+<g transform="translate(926,87)"><g class="tile" style="animation-delay:-4.8s" transform="translate(8.1,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#2bc4e6"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#2bc4e6" fill-opacity=".8"/></g></g>
+<g transform="translate(926,87)"><g class="tile" style="animation-delay:-3.467s" transform="translate(27,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#2bc4e6"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#2bc4e6" fill-opacity=".8"/></g></g>
+<g transform="translate(926,87)"><g class="tile" style="animation-delay:-2.133s" transform="translate(45.9,0)"><rect width="14" height="10" rx="2" fill="#14141c" stroke="#2bc4e6"/><rect x="3" y="3" width="8" height="4" rx="1" fill="#2bc4e6" fill-opacity=".8"/></g></g>
+<rect x="44" y="52" width="232" height="168" rx="10" fill="#14141c" stroke="#2a2a38"/>
+<path d="M54,53.5h212" stroke="#ff5a36" stroke-width="3" stroke-linecap="round"/>
+<text x="58" y="76" font-size="12" font-weight="700" letter-spacing=".12em" fill="#ff5a36">01  INPUT</text>
+<text class="d" x="58" y="99" font-size="15" font-weight="600" textLength="99.2" lengthAdjust="spacingAndGlyphs" fill="#ece7de">You describe it</text>
+<path d="M45,112h230" stroke="#2a2a38"/>
+<circle cx="276" cy="92" r="5" fill="#ff5a36"/>
+<circle cx="62" cy="138" r="4" fill="none" stroke="#ff5a36" stroke-width="1.5"/>
+<text x="74" y="142" font-size="12" fill="#ece7de">length</text><text x="262" y="142" font-size="12" text-anchor="end" fill="#a39e96">60 s</text>
+<circle cx="62" cy="166" r="4" fill="none" stroke="#ff5a36" stroke-width="1.5"/>
+<text x="74" y="170" font-size="12" fill="#ece7de">look</text><text x="262" y="170" font-size="12" text-anchor="end" fill="#a39e96">dark, warm</text>
+<circle cx="62" cy="194" r="4" fill="none" stroke="#ff5a36" stroke-width="1.5"/>
+<text x="74" y="198" font-size="12" fill="#ece7de">timing</text><text x="262" y="198" font-size="12" text-anchor="end" fill="#a39e96">on the beat</text>
+<rect x="364" y="52" width="232" height="168" rx="10" fill="#14141c" stroke="#2a2a38"/>
+<path d="M374,53.5h212" stroke="#7a5cff" stroke-width="3" stroke-linecap="round"/>
+<text x="378" y="76" font-size="12" font-weight="700" letter-spacing=".12em" fill="#7a5cff">02  CODE</text>
+<text class="d" x="378" y="99" font-size="15" font-weight="600" textLength="128.6" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Claude writes code</text>
+<path d="M365,112h230" stroke="#2a2a38"/>
+<circle cx="364" cy="92" r="5" fill="#0b0b10" stroke="#ff5a36" stroke-width="2"/>
+<circle cx="596" cy="92" r="5" fill="#7a5cff"/>
+<rect x="378" y="124" width="63.8" height="20" rx="10" fill="#7a5cff" fill-opacity=".12" stroke="#7a5cff" stroke-opacity=".5"/><text x="409.9" y="138" font-size="12" text-anchor="middle" fill="#ece7de">shaders</text>
+<rect x="447.8" y="124" width="56.4" height="20" rx="10" fill="#7a5cff" fill-opacity=".12" stroke="#7a5cff" stroke-opacity=".5"/><text x="476" y="138" font-size="12" text-anchor="middle" fill="#ece7de">Canvas</text>
+<rect x="510.2" y="124" width="49" height="20" rx="10" fill="#7a5cff" fill-opacity=".12" stroke="#7a5cff" stroke-opacity=".5"/><text x="534.7" y="138" font-size="12" text-anchor="middle" fill="#ece7de">React</text>
+<rect x="378" y="152" width="56.4" height="20" rx="10" fill="#7a5cff" fill-opacity=".12" stroke="#7a5cff" stroke-opacity=".5"/><text x="406.2" y="166" font-size="12" text-anchor="middle" fill="#ece7de">Python</text>
+<rect x="440.4" y="152" width="123" height="20" rx="10" fill="#7a5cff" fill-opacity=".12" stroke="#7a5cff" stroke-opacity=".5"/><text x="501.9" y="166" font-size="12" text-anchor="middle" fill="#ece7de">Blender scripts</text>
+<text x="378" y="206" font-size="12" fill="#a39e96">one file per shot</text>
+<rect x="684" y="52" width="232" height="168" rx="10" fill="#14141c" stroke="#2a2a38"/>
+<path d="M694,53.5h212" stroke="#2bc4e6" stroke-width="3" stroke-linecap="round"/>
+<text x="698" y="76" font-size="12" font-weight="700" letter-spacing=".12em" fill="#2bc4e6">03  RENDER</text>
+<text class="d" x="698" y="99" font-size="15" font-weight="600" textLength="205.4" lengthAdjust="spacingAndGlyphs" fill="#ece7de">A renderer draws every frame</text>
+<path d="M685,112h230" stroke="#2a2a38"/>
+<circle cx="684" cy="92" r="5" fill="#0b0b10" stroke="#7a5cff" stroke-width="2"/>
+<circle cx="916" cy="92" r="5" fill="#2bc4e6"/>
+<rect x="698" y="124" width="137.8" height="20" rx="10" fill="#2bc4e6" fill-opacity=".12" stroke="#2bc4e6" stroke-opacity=".5"/><text x="766.9" y="138" font-size="12" text-anchor="middle" fill="#ece7de">Chrome on the GPU</text>
+<rect x="841.8" y="124" width="63.8" height="20" rx="10" fill="#2bc4e6" fill-opacity=".12" stroke="#2bc4e6" stroke-opacity=".5"/><text x="873.7" y="138" font-size="12" text-anchor="middle" fill="#ece7de">Blender</text>
+<rect x="698" y="152" width="71.2" height="20" rx="10" fill="#2bc4e6" fill-opacity=".12" stroke="#2bc4e6" stroke-opacity=".5"/><text x="733.6" y="166" font-size="12" text-anchor="middle" fill="#ece7de">Remotion</text>
+<text x="815.6" y="166" font-size="12" text-anchor="end" fill="#a39e96">frame</text>
+<g transform="translate(821.6,166)" clip-path="url(#fc)"><g class="cnt" transform="translate(0,-128)" font-weight="700" fill="#ece7de" text-anchor="middle"><text x="4.3 12.9 21.5 30.1" y="0">0001</text><text x="4.3 12.9 21.5 30.1" y="16">0450</text><text x="4.3 12.9 21.5 30.1" y="32">0900</text><text x="4.3 12.9 21.5 30.1" y="48">1350</text><text x="4.3 12.9 21.5 30.1" y="64">1800</text><text x="4.3 12.9 21.5 30.1" y="80">2250</text><text x="4.3 12.9 21.5 30.1" y="96">2700</text><text x="4.3 12.9 21.5 30.1" y="112">3150</text><text x="4.3 12.9 21.5 30.1" y="128">3600</text></g></g>
+<text x="860" y="166" font-size="12" fill="#a39e96">/3600</text>
+<rect x="698" y="186" width="204" height="4" rx="2" fill="#2a2a38"/><rect class="bar" x="698" y="186" width="204" height="4" rx="2" fill="#2bc4e6"/>
+<text x="698" y="210" font-size="12" fill="#a39e96">60 fps, 1920x1080</text>
+<rect x="1004" y="52" width="232" height="168" rx="10" fill="#14141c" stroke="#2a2a38"/>
+<path d="M1014,53.5h212" stroke="#ffb020" stroke-width="3" stroke-linecap="round"/>
+<text x="1018" y="76" font-size="12" font-weight="700" letter-spacing=".12em" fill="#ffb020">04  ENCODE</text>
+<text class="d" x="1018" y="99" font-size="15" font-weight="600" textLength="162" lengthAdjust="spacingAndGlyphs" fill="#ece7de">FFmpeg makes the MP4</text>
+<path d="M1005,112h230" stroke="#2a2a38"/>
+<circle cx="1004" cy="92" r="5" fill="#0b0b10" stroke="#2bc4e6" stroke-width="2"/>
+<g class="chip" style="animation-delay:0s"><rect x="1018" y="124" width="49" height="20" rx="10" fill="#ffb020" fill-opacity=".12" stroke="#ffb020" stroke-opacity=".5"/><text x="1042.5" y="138" font-size="12" text-anchor="middle" fill="#ece7de">H.264</text></g>
+<g class="chip" style="animation-delay:0.25s"><rect x="1073" y="124" width="41.6" height="20" rx="10" fill="#ffb020" fill-opacity=".12" stroke="#ffb020" stroke-opacity=".5"/><text x="1093.8" y="138" font-size="12" text-anchor="middle" fill="#ece7de">WebM</text></g>
+<g class="chip" style="animation-delay:0.5s"><rect x="1120.6" y="124" width="34.2" height="20" rx="10" fill="#ffb020" fill-opacity=".12" stroke="#ffb020" stroke-opacity=".5"/><text x="1137.7" y="138" font-size="12" text-anchor="middle" fill="#ece7de">GIF</text></g>
+<g class="chip" style="animation-delay:0.75s"><rect x="1160.8" y="124" width="56.4" height="20" rx="10" fill="#ffb020" fill-opacity=".12" stroke="#ffb020" stroke-opacity=".5"/><text x="1189" y="138" font-size="12" text-anchor="middle" fill="#ece7de">ProRes</text></g>
+<text x="1018" y="166" font-size="12" fill="#a39e96">ffmpeg -i f/%04d.png</text>
+<text x="1018" y="186" font-size="12" fill="#a39e96">-c:v libx264 out.mp4</text>
+<text x="1018" y="210" font-size="12" fill="#a39e96">one command per format</text>
+</svg>

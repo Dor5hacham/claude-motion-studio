@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved. SPDX-License-Identifier: Proprietary -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 140" width="1280" height="140" role="img" aria-labelledby="t d">
+<title id="t">Out point</title>
+<desc id="d">The out point of the timeline: the playhead stops on OUT after a fade to black. Every frame from code. Motion Studio, (c) 2026 Dor5hacham, all rights reserved.</desc>
+<style>
+text{font-family:'Cascadia Mono', Consolas, 'SF Mono', Menlo, monospace}.d{font-family:Bahnschrift, 'Segoe UI', Helvetica, Arial, sans-serif}
+.ph{animation:ph 10s linear infinite both}@keyframes ph{0%{transform:translate(660px,0);animation-timing-function:cubic-bezier(0,0,0.58,1)}24%,100%{transform:translate(1196px,0)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+<defs><linearGradient id="fade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".92"/></linearGradient></defs>
+<rect x=".5" y=".5" width="1279" height="139" rx="14" fill="#0b0b10" stroke="#2a2a38"/>
+<text class="d" x="40" y="72" font-size="36" font-weight="600" textLength="379.4" lengthAdjust="spacingAndGlyphs" fill="#ece7de">Every frame from code.</text>
+<text x="42" y="102" font-size="12" fill="#a39e96">Motion Studio / (c) 2026 Dor5hacham / All rights reserved.</text>
+<path d="M660,40v-9M677.9,40v-3M695.7,40v-3M713.6,40v-3M731.5,40v-3M749.3,40v-3M767.2,40v-3M785.1,40v-3M802.9,40v-3M820.8,40v-3M838.7,40v-9M856.5,40v-3M874.4,40v-3M892.3,40v-3M910.1,40v-3M928,40v-3M945.9,40v-3M963.7,40v-3M981.6,40v-3M999.5,40v-3M1017.3,40v-9M1035.2,40v-3M1053.1,40v-3M1070.9,40v-3M1088.8,40v-3M1106.7,40v-3M1124.5,40v-3M1142.4,40v-3M1160.3,40v-3M1178.1,40v-3M1196,40v-9" stroke="#a39e96" stroke-opacity="0.55"/>
+<text x="664" y="30" font-size="11" fill="#a39e96">00:57</text>
+<text x="842.7" y="30" font-size="11" fill="#a39e96">00:58</text>
+<text x="1021.3" y="30" font-size="11" fill="#a39e96">00:59</text>
+<path d="M1196,40V122" stroke="#ff5a36" stroke-dasharray="3 3" stroke-opacity=".7"/>
+<path d="M1196,18h-34v15h34z" fill="#ff5a36"/><text x="1179" y="30" font-size="11" font-weight="700" text-anchor="middle" fill="#0b0b10">OUT</text>
+<text x="1204" y="30" font-size="11" fill="#ff5a36">01:00</text>
+<rect x="660" y="56" width="536" height="34" rx="5" fill="#ff5a36" fill-opacity=".16" stroke="#ff5a36" stroke-opacity=".55"/>
+<rect x="928" y="56" width="268" height="34" rx="5" fill="url(#fade)"/>
+<rect x="660" y="56" width="3" height="34" rx="1.5" fill="#ff5a36"/><text x="672" y="81" font-size="12" font-weight="600" fill="#ff5a36">end card</text>
+<path d="M664,62H928L1194,86" fill="none" stroke="#ffb020" stroke-width="1.6"/>
+<path d="M928,57l5,5-5,5-5,-5zM1194,81l5,5-5,5-5,-5z" fill="#ffb020" stroke="#0b0b10"/>
+<text x="928" y="108" font-size="12" fill="#a39e96">opacity 100% to 0%: fade to black</text>
+<g class="ph" transform="translate(1196,0)"><line x1="0" y1="52" x2="0" y2="126" stroke="#ff5a36" stroke-width="5" stroke-opacity=".22"/><line x1="0" y1="52" x2="0" y2="126" stroke="#ff5a36" stroke-width="1.6"/><path d="M-6,44h12v7l-6,6-6,-6z" fill="#ff5a36"/></g>
+</svg>
