@@ -52,7 +52,6 @@ Thumbs.db
 desktop.ini
 .vscode/
 .idea/
-# local Claude Code settings and project notes (they hold machine paths)
+# local Claude Code settings (they hold machine paths)
 .claude/
 CLAUDE.local.md
-/CLAUDE.md
