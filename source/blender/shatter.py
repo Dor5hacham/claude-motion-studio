@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a slow-motion destruction shot: a chrome ball smashes an obsidian monolith that was
 # pre-fractured into Voronoi cells (bmesh bisect planes, no add-on). The cells are rigid bodies
 # held kinematic until impact, then a force-field pulse and gravity throw them apart. The inner

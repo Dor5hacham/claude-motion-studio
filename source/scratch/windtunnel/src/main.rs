@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Lattice Boltzmann wind tunnel written from scratch with the Rust standard library only.
 // A NACA 2412 airfoil pitches up until it stalls; smoke streaklines and vorticity show the flow.
 //

@@ -1,0 +1,23 @@
+p5.js 2.3.4
+
+File in this folder: p5.min.js, an unmodified copy of lib/p5.min.js from the
+p5 npm package, version 2.3.4 (https://www.npmjs.com/package/p5/v/2.3.4).
+
+License: GNU Lesser General Public License, version 2.1 (LGPL-2.1).
+The full license text is in p5.LICENSE.txt, next to this file.
+
+The complete corresponding source code for this version is available at:
+https://github.com/processing/p5.js/tree/v2.3.4
+
+p5.min.js is a separate file that index.html loads with its own <script> tag.
+It is not merged with any other code. As the LGPL allows, it can be replaced
+with another build of p5.js, modified or not.
+
+p5.min.js also contains code from these libraries, with their own licenses:
+acorn and acorn-walk (MIT), colorjs.io (MIT), escodegen (BSD-2-Clause) with
+estraverse and esutils (BSD-2-Clause) and source-map (BSD-3-Clause), gifenc
+(MIT), omggif (MIT), i18next and i18next-browser-languagedetector (MIT),
+libtess (SGI Free Software License B 2.0), pako (MIT and Zlib), Typr.js (MIT),
+@davepagurek/bezier-path (MIT), @japont/unicode-range (MIT), and the webgl-noise
+GLSL code by Stefan Gustavson (MIT). See THIRD_PARTY_NOTICES.md at the root of
+this repository.

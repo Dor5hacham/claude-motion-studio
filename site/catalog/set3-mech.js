@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Mechanisms in motion, solved by real kinematics (Canvas 2D, CPU).
 (function () {
   const { C } = EX;

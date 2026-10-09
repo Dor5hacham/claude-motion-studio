@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds and renders the 3D light painting in a running Unreal Editor, only through the Unreal MCP.
 # Five Niagara ribbon emitters (one system each, colored per palette) fly along 3D Lissajous paths
 # keyed in Sequencer; every emitter leaves a glowing additive ribbon in world space, so the trails

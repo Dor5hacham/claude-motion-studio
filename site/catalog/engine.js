@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Registers every rendered clip from the generated catalog (catalog/clips.js) as a video card.
 // Clips with "audio": true in clips-meta.json get a Sound button; all clips start muted.
 (function () {

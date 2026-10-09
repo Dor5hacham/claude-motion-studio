@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Disney principles the Learn section does not cover yet: staging, exaggeration, straight ahead versus pose to pose.
 // Each card plays the same short action twice in one stage: "without" on the left half, "with" on the right half.
 (function () {

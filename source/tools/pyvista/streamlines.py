@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # streamlines.py - Flow past a sphere, as growing streamline tubes (PyVista / VTK).
 #
 # The velocity field is ideal (potential) flow past a sphere of radius A, plus a

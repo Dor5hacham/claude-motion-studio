@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Library demos, second set (ids l2-*): each card shows a different strength of one vendored library:
 // D3, Matter.js, anime.js, Rough.js, p5.js, Motion, Lottie, GSAP, PixiJS and Three.js.
 // Loads after vendor/ and libs.js. Library globals are read inside setup(), and every card is driven by the shared frame(t, dt) loop.

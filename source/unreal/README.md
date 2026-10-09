@@ -5,7 +5,7 @@
 | File | What it is |
 |---|---|
 | `MotionStudio/MotionStudio.uproject` | Blank project with no C++. Enables the Unreal MCP (`ModelContextProtocol`), the toolsets it serves (`EditorToolset`, `NiagaraToolsets`, `AnimationAssistantToolset`), Niagara, Python, Sequencer scripting and Movie Render Queue |
-| `MotionStudio/Config/DefaultEditorPerProjectUserSettings.ini` | Starts the MCP server with the editor on `http://127.0.0.1:8000/mcp`, with tool search on, and keeps the editor at full speed in the background |
+| `MotionStudio/Config/DefaultEditorPerProjectUserSettings.ini` | Starts the MCP server with the editor on `http://127.0.0.1:8000/mcp` (no authentication, see [The MCP server is open while the editor runs](#the-mcp-server-is-open-while-the-editor-runs)), with tool search on, and keeps the editor at full speed in the background |
 | `MotionStudio/Config/DefaultEngine.ini` | Lumen global illumination and reflections, virtual shadow maps, DX12 SM6 |
 | `MotionStudio/Content/Python/motion_studio/tools.py` | A project MCP toolset: `render_sequence`, `render_status`, `cancel_render` (Movie Render Queue). The built-in toolsets have no render tool |
 | `mcp_client.py` | Small Python client for the MCP (Streamable HTTP, JSON-RPC): `initialize`, `tools/list`, `list_toolsets`, `describe_toolset`, `call_tool` |
@@ -18,17 +18,24 @@
 
 ## Run it
 
-The project folder holds only sources. Copy it to a work folder, because Unreal writes `Saved/`, `Intermediate/` and `DerivedDataCache/` next to the `.uproject`:
+The project folder holds only sources. Copy it to a work folder, because Unreal writes `Saved/`, `Intermediate/` and `DerivedDataCache/` next to the `.uproject`. Set `UNREAL_EDITOR` to the editor executable of your Unreal Engine 5.8 install (`Engine/Binaries/Win64/UnrealEditor.exe` inside the engine folder). Run these from this folder (`source/unreal`) in Git Bash:
 
 ```
+mkdir -p ../../_work/unreal
 cp -r MotionStudio ../../_work/unreal/
-"B:/Program Files/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor.exe" "<repo>/_work/unreal/MotionStudio/MotionStudio.uproject" -log -nosplash &
+"$UNREAL_EDITOR" "$(cd ../../_work/unreal/MotionStudio && pwd -W)/MotionStudio.uproject" -log -nosplash &
 python mcp_client.py wait 540          # prints MCP READY once the server answers
 python build_scene.py                  # all stages; or name some: level materials niagara actors sequence save
 python render.py ../../_work/unreal/frames ../../media/engine/unreal-niagara.mp4
 ```
 
 Then close the editor. The first launch on a new machine compiles shaders and can take much longer than the minute it took here with a warm shader cache. The build takes about a minute, and the render about 8 minutes on a Radeon RX 9070 XT: 150 frames at 1280x720, 8 temporal samples per frame (that is also the motion blur), and 60 warm-up frames so the vortex is already full on frame 0. `python render.py <dir> x.mp4 75 76` renders one test frame.
+
+## The MCP server is open while the editor runs
+
+Opening this project starts the Unreal MCP server on `127.0.0.1:8000` (`bAutoStartServer=True` in `MotionStudio/Config/DefaultEditorPerProjectUserSettings.ini`). The server has no authentication. While the editor is open, any program on the computer that can reach that port can call its tools and change the open project. Closing the editor stops the server.
+
+To turn it off, set `bAutoStartServer=False` in `Config/DefaultEditorPerProjectUserSettings.ini` of your work copy before you open it. The build and render scripts need the server, so keep it on only for the copy you build with, and close the editor as soon as the build and render are done.
 
 ## What went through the MCP
 

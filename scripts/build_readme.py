@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Fills the generated parts of README.md from scripts/catalog.json (made by export_catalog.mjs):
 # the section counts and one table per catalog section, between the CATALOG markers.
 # Usage: python scripts/build_readme.py   (run from the repository root)

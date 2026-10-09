@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Synthesizes an 8-second drum-and-bass loop in numpy (180 BPM, kick, snare, hats, a crash and
 # a detuned sub bass), writes it to <out_dir>/beat.wav, then drives a speaker scene from it:
 # the cone pumps on every kick, 120 glossy beads and dice hop off the cone with each kick and

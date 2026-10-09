@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Built from scratch: engines with no library and no engine behind them. Each card holds its
 // whole renderer, physics or synth in one setup() so it can be read top to bottom.
 (function () {

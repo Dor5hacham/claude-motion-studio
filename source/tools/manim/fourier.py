@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 """Fourier series: a sine wave becomes a square wave, one odd harmonic at a time.
 
 Render: uv run --python 3.12 --with manim manim -qm fourier.py FourierSquare

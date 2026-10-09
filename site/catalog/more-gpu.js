@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // More GPU shader demos for Motion Examples.html (shared WebGL2 context).
 (function () {
   const G = EX.G; if (!G.gl) return; const gl = G.gl;

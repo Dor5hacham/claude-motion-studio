@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // 2D spectral light tracer written from scratch with the Rust standard library only.
 // Newton's prism experiment: a white beam splits in a turning prism and a lens bends the spectrum onto a screen.
 // Every ray is drawn as an anti-aliased line, so the picture is the light itself moving through the plane.

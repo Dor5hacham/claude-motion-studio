@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds and renders the neon light installation in a running Unreal Editor, only through the Unreal MCP.
 # A white gallery corner with no light actors at all: six emissive tubes draw themselves along the
 # edges one after another, and Lumen lights the room only from those glowing meshes (manual exposure,

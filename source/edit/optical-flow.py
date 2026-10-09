@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # optical-flow.py - Dense optical flow, shown three ways.
 #
 # Source: the Three.js clip (orbit camera, spinning glass knot, orbiting

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # speed-ramp.py - Speed ramp with optical-flow slow motion.
 #
 # Takes the Blender wall-smash shot from the 60 fps master reel and remaps time:

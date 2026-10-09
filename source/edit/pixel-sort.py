@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # pixel-sort.py - Pixel sorting with an animated brightness threshold.
 #
 # Source: the Blender ocean clip (sunset, buoy). Pixels whose brightness falls

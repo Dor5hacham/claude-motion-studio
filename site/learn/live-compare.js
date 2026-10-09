@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Live "without vs with" comparisons for the Motion Guide vocabulary, plus the easing race
 // and the frames/fps demo. Uses addLoop, EASES, clamp01, lerp from the guide's inline script.
 (function () {

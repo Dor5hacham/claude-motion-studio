@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Synthesizes the 60 s soundtrack for the motion reel, synced to the visual timeline.
 # Usage: uv run --with numpy --with scipy audio.py <out.wav>
 import sys

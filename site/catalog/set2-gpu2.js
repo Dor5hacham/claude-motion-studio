@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // GPU simulations and stylized looks, second set (shared WebGL2 context EX.G, see gpu.js).
 (function () {
   const G = EX.G; if (!G.gl) return;

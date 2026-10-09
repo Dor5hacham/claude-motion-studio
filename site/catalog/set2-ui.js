@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // App and web UI motion, set 2: glass, morphing pills, gestures, button states, CSS scroll timelines.
 // Every card plays a demo loop on its own and hands control to the mouse while the user interacts.
 (function () {
@@ -338,7 +343,7 @@ ${i === 1 ? '<div style="position:absolute;left:-40px;top:20px;width:320px;heigh
 .u2b-cur{position:absolute;left:0;top:0;z-index:5;pointer-events:none}
 </style><div class="u2b-bg"></div>
 <div class="u2b-sl"><div style="color:#8a87a0;font:600 11px Segoe UI;letter-spacing:2px;height:26px">STATE</div>${['idle', 'pressed', 'loading', 'success', 'error'].map(s => `<div><i></i>${s}</div>`).join('')}</div>
-<div class="u2b-card"><h4>Create account</h4><div class="u2b-lb" style="top:62px">Email</div><div class="u2b-in" style="top:80px">alex@motion.studio</div>
+<div class="u2b-card"><h4>Create account</h4><div class="u2b-lb" style="top:62px">Email</div><div class="u2b-in" style="top:80px">alex@example.com</div>
 <div class="u2b-lb" style="top:126px">Password</div><div class="u2b-in u2b-pw" style="top:144px">&#8226;&#8226;&#8226;&#8226;&#8226;</div>
 <div class="u2b-err">Use at least 8 characters</div></div>
 <div class="u2b-btn"><span class="u2b-l0">Create account</span><span class="u2b-l1"></span>
@@ -1564,7 +1569,7 @@ ${[0, 1, 2, 3, 5].map((k, i) => `<div class="u2r-row"><div class="u2r-n">${i + 1
 .u2e-ring{position:absolute;right:2px;bottom:6px}
 </style><div class="u2e-bg"></div><div class="u2e-pn"><h4>Create your profile</h4>
 ${F.map(([l, ty], i) => `<div class="u2e-f" style="top:${52 + i * 70}px"><input type="${ty}" spellcheck="false" autocomplete="off"><div class="u2e-lb">${l}</div><div class="u2e-ln"></div><div class="u2e-ul"></div>
-${i === 1 ? '<div class="u2e-msg">Enter a valid email, like name@site.com</div><svg class="u2e-ok" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#5fd38d"/><path d="M5.5 10.5l3 3 6-6.5" fill="none" stroke="#0b0b10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="14"/></svg>' : ''}
+${i === 1 ? '<div class="u2e-msg">Enter a valid email, like name@example.com</div><svg class="u2e-ok" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="9" fill="#5fd38d"/><path d="M5.5 10.5l3 3 6-6.5" fill="none" stroke="#0b0b10" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14" stroke-dashoffset="14"/></svg>' : ''}
 ${i === 2 ? '<div class="u2e-bars"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div><div class="u2e-st"></div>' : ''}
 ${i === 3 ? '<svg class="u2e-ring" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#2a2940" stroke-width="3"/><circle class="u2e-rg" cx="12" cy="12" r="9" fill="none" stroke="#2bc4e6" stroke-width="3" stroke-linecap="round" stroke-dasharray="56.5" stroke-dashoffset="56.5" transform="rotate(-90 12 12)"/></svg>' : ''}</div>`).join('')}</div>`;
       const fs = Array.from(st.querySelectorAll('.u2e-f')).map(e => { const el = /** @type {HTMLElement} */ (e); return { el, inp: /** @type {HTMLInputElement} */ (el.querySelector('input')), lb: /** @type {HTMLElement} */ (el.querySelector('.u2e-lb')), ul: /** @type {HTMLElement} */ (el.querySelector('.u2e-ul')), fl: sp(0), u: sp(0), ox: 0.5, shakeAt: -99, wasErr: false }; });
@@ -1574,7 +1579,7 @@ ${i === 3 ? '<svg class="u2e-ring" width="24" height="24" viewBox="0 0 24 24"><c
       let now = 0, userAt = -99, vf = -1, autoT0 = -1, lastLt = 0;
       fs.forEach((f, i) => { f.inp.onpointerdown = e => { userAt = now; const r = f.el.getBoundingClientRect(); f.ox = clamp01((e.clientX - r.left) / r.width); }; f.inp.oninput = () => { userAt = now; }; f.inp.onfocus = () => { userAt = now; vf = i; }; f.inp.onblur = () => { if (vf === i) vf = -1; }; });
       const validEmail = v => /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(v);
-      const SCRIPT = [[0.4, 'f', 0, 0.3], [0.7, 't', 0, 'Alex Rivera'], [1.9, 'f', 1, 0.6], [2.1, 't', 1, 'alex@studio'], [3.1, 'f', 2, 0.2], [3.3, 't', 2, 'motion'], [4.1, 't', 2, 'motion-Kit-26!'], [5.4, 'f', 1, 0.8], [5.6, 't', 1, 'alex@studio.dev'], [6.4, 'f', 3, 0.4], [6.6, 't', 3, 'I make interfaces that move with care, and a little bounce.'], [9.6, 'f', -1, 0]];
+      const SCRIPT = [[0.4, 'f', 0, 0.3], [0.7, 't', 0, 'Alex Rivera'], [1.9, 'f', 1, 0.6], [2.1, 't', 1, 'alex@example'], [3.1, 'f', 2, 0.2], [3.3, 't', 2, 'motion'], [4.1, 't', 2, 'motion-Kit-26!'], [5.4, 'f', 1, 0.8], [5.6, 't', 1, 'alex@example.com'], [6.4, 'f', 3, 0.4], [6.6, 't', 3, 'I make interfaces that move with care, and a little bounce.'], [9.6, 'f', -1, 0]];
       let typing = null;
       return (t, dt) => {
         now = t;

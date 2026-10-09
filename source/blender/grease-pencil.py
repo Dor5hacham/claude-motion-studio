@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a hand-drawn Grease Pencil (v3) animation in a flat orthographic view on cream paper.
 # A navy pen line loops in from the left (already entering on frame 1), its tail chasing the
 # head, and wraps into a circle; then a coral hatched sun, navy waves, coral rays, an underline

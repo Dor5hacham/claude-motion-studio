@@ -18,9 +18,9 @@ A 2D liquid solver and a liquid renderer in one Go file, standard library only. 
 - The glass, the end caps and the pillars are shaded analytically, with a highlight that stays with the light as the glass turns.
 
 ## Render
+Needs Go 1.25 or later and FFmpeg. Run these from this folder (`source/scratch/flip`). The same two commands work on Windows, macOS and Linux. `go run` builds the program in Go's own cache, so no binary is written into the repo, and the frames and the clip go to the git-ignored `_work/` folder at the repository root.
 ```
-go build -o flip.exe .
-./flip.exe frames 240 8
-ffmpeg -framerate 30 -i frames/f_%04d.ppm -c:v libx264 -crf 20 -preset slow -pix_fmt yuv420p -movflags +faststart -threads 8 go-flip-hourglass.mp4
+go run . ../../../_work/flip/frames 240 8
+ffmpeg -framerate 30 -i ../../../_work/flip/frames/f_%04d.ppm -c:v libx264 -crf 20 -preset slow -pix_fmt yuv420p -movflags +faststart -threads 8 ../../../_work/flip/go-flip-hourglass.mp4
 ```
-Arguments: output folder, frame count, render threads. The simulation is sequential, so frames come out in order. The full run takes about 30 s on a Ryzen 9 9950X.
+Arguments: output folder, frame count, render threads. The simulation is sequential, so frames come out in order. The full run takes about 30 s on a Ryzen 9 9950X. To update the page, copy `_work/flip/go-flip-hourglass.mp4` over `media/tools/go-flip-hourglass.mp4`, then delete `_work/flip/`.

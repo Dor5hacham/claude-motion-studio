@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # match-cut.py - Auto match cuts: one circle carried through seven different shots.
 #
 # Each shot has a round subject: the sun, the O of a 3D logo, a chrome sphere,

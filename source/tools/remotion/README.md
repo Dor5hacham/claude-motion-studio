@@ -10,6 +10,9 @@ Scenes: kinetic title (masked word springs), three stat cards (spring entry,
 count-up numbers, SVG sparkline drawn with strokeDashoffset, spring bars,
 progress ring), outro, and a gradient progress bar plus timecode.
 
+Remotion is not open source. Companies of 4 or more people need a Remotion
+company license to use it (https://remotion.dev/license).
+
 ## Install
 
     npm install

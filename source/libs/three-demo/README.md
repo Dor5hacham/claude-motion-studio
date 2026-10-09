@@ -19,7 +19,9 @@ npm run build
 ```
 
 The build overwrites `../../../site/vendor/three-demo.js`.
-Afterwards, delete `node_modules` and `package-lock.json` so that no install stays in `source/reel`.
+esbuild keeps the three.js MIT notice (`--legal-comments=eof`), so it ends up at
+the end of the rebuilt bundle instead of the top.
+Afterwards, delete `node_modules` and `package-lock.json` so that no install stays in `source/libs/three-demo`.
 
 ## Versions
 

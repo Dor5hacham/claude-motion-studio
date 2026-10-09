@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Live WebGPU compute demos. Each card owns a 'webgpu' canvas context (separate from the shared WebGL2 EX.G),
 // moves its particles with WGSL compute shaders and draws them with a compute rasterizer (atomic adds into a pixel buffer).
 (function () {

@@ -1,15 +1,24 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Headless render driver for a Motion Canvas project.
 // Starts the Vite dev server, opens the editor in headless Chrome, clicks the
 // editor's RENDER button (exporter and settings come from src/project.meta),
 // and waits until the FFmpeg exporter has finished writing output/project.mp4.
 //
 // Usage: node render.mjs [chromePath]
+// Chrome binary: the argument, else CHROME_PATH, else the standard install path for this OS.
 import {spawn} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
 
-const CHROME = process.argv[2] ?? 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const CHROME = process.argv[2] ?? (process.env.CHROME_PATH || ({
+  win32: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  darwin: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+})[process.platform] || '/usr/bin/google-chrome');
 const PORT = 9123;
 const OUT = path.resolve('output/project.mp4');
 

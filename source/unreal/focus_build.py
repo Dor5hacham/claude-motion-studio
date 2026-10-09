@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds and renders the rack focus in a running Unreal Editor, only through the Unreal MCP.
 # Four strands of glowing bulbs hang at depths from 1.6 to 11 m in a black void (a dark floor sits below the frame).
 # A 75 mm cine camera at f/1.4 tracks an invisible target point for focus; Sequencer moves that point,

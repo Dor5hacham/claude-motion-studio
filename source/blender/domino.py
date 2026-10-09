@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a domino chain reaction in Eevee: a few hundred lacquered dominoes stand on an inward
 # spiral, coloured coral to amber to cream to cyan to violet along the chain. The first one is
 # tipped by a kinematic nudge and Bullet rigid bodies carry the wave to the centre. The camera

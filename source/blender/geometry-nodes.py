@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a procedural Geometry Nodes field: a 90x90 grid of beveled columns (8,100) whose
 # height and color ripple with a radial wave plus animated 4D noise (scene time),
 # rendered with Eevee under a slow camera orbit.

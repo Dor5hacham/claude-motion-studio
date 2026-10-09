@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // FLIP liquid solver and liquid renderer written from scratch in Go (standard library only).
 // A glass hourglass full of two-tone liquid turns over twice; the liquid pours through the neck and marbles.
 //

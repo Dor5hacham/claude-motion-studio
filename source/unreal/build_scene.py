@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds the Motion Studio Niagara scene in a running Unreal Editor, only through the Unreal MCP
 # (every step below is an MCP tools/call; nothing runs Python inside the editor directly).
 # Stages, in order: level, materials, niagara, actors, sequence, save. Run all of them on a fresh

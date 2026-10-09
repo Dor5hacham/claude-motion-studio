@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Second set of 2D motion-graphics demos (Canvas 2D, CPU): procedural walk cycle and more.
 (function () {
   const { C, lerp, ease, noise } = EX;

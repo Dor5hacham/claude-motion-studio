@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Live scene demos for the Motion Guide: camera rig, transition player, post-FX stack,
 // mood previews, the prompt playground and the live logo-reveal example.
 // Uses addLoop, addDemo, redraw, EASES, clamp01, lerp from learn/guide-core.js.

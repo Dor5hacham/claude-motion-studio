@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a Mantaflow FLIP liquid shot: a glossy coral stream pours onto a cream sphere,
 # coats it and spills across a dark studio floor. Bakes the fluid, then path traces it in Cycles
 # on the GPU (HIP when available) with motion blur: the domain caches mesh speed vectors, which

@@ -1,6 +1,8 @@
 {
   "name": "mc-code-explainer",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Dor5hacham",
   "scripts": {
     "start": "vite",
     "serve": "vite",

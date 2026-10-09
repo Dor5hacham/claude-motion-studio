@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a CNC engraving shot in Eevee: a spinning V-bit traces the outlines of the word MOTION
 # into a coral anodized aluminium block, and the cut shows bright bare metal. The carving is
 # Geometry Nodes on a dense grid: the toolpath is an edge mesh whose points store the frame the

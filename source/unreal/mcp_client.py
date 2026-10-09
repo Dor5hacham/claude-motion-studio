@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Minimal client for the Unreal MCP (Epic's ModelContextProtocol plugin) over Streamable HTTP.
 # Import it (UnrealMCP().call(toolset, tool, args)) or use it from the command line:
 #   python mcp_client.py wait [seconds]                    wait until the server answers

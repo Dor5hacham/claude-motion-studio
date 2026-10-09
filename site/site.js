@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Page wiring for index.html: builds catalog cards, the technique index, search and catalog filters,
 // folded catalog sections, sidebar counts, chapter tabs and banners, the current-section highlight,
 // the mobile menu, back-to-top and the prompt-anatomy hover.

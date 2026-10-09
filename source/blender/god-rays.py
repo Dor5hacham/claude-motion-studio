@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a dim room where low sun pours through venetian blinds: the slats tilt open over the
 # shot, so thin light blades widen into broad shafts that cut through dusty air and paint
 # stripes across a plank floor, a chair and a plant. The haze is a Principled Volume box with

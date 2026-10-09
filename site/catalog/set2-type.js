@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Second set of typography-in-motion demos (Canvas 2D, plus one shader on the shared EX.G).
 (function () {
   const { C, seg, ease, clamp01 } = EX;

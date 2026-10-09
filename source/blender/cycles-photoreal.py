@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a product-style turntable for Cycles path tracing: a clear glass sphere, a
 # brushed (anisotropic) metal ring and a coral ceramic pill on a stone pedestal, lit by
 # studio softboxes in a seamless cyc, with MNEE shadow caustics and shallow depth of field.

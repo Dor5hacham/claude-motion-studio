@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a skipping-stone shot at dusk in Eevee. A flat stone skims across a still pond, touching
 # the water seven times with shorter and shorter hops before it sinks. The ripples come from a
 # height-field wave equation solved in NumPy: every touch sends out a short train of rings that

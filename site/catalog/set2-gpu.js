@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Ray-marched 3D worlds for Motion Examples.html (shared WebGL2 context EX.G).
 (function () {
   const G = EX.G; if (!G.gl) return; const gl = G.gl;

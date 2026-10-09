@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a stylized sunset ocean, path traced in Cycles on the GPU (HIP when available): an Ocean
 # modifier surface (FFT waves, choppiness, foam attribute) animated by keyframing its time, under a
 # procedural sunset sky with a low sun. A coral-and-cream navigation buoy with a blinking amber

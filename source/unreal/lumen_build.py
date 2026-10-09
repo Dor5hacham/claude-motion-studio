@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds and renders the Lumen time-lapse in a running Unreal Editor, only through the Unreal MCP.
 # A concrete room with a perforated screen wall: the sun sweeps from dawn to dusk in 8 s, the grid
 # of light squares crawls over the floor and walls, and Lumen bounces it around the room (warm and

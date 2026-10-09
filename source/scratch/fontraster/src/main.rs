@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // TrueType rasterizer written from scratch with the Rust standard library only.
 // Reads a font file, decodes a glyph's quadratic outline and animates how it becomes pixels:
 // points, curves, a scanline fill with crossings, then anti-aliased coverage at text size.

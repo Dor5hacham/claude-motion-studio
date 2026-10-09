@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # slit-scan.py - Slit-scan time displacement: every pixel shows a different
 # moment of the clip, so motion bends into elastic shapes.
 #

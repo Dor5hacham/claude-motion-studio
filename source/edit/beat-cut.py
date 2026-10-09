@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # beat-cut.py - Beat-synced auto edit: the cuts come from beats detected in the audio.
 #
 # 1. A 9 s drum-and-bass loop at 120 BPM is synthesized with NumPy (kick on

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # optimizers.py - SGD, momentum and Adam race down the Rosenbrock valley.
 #
 # A Matplotlib animation (FuncAnimation saved with FFMpegWriter):

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # datamosh.py - Real datamosh (I-frame removal + P-frame bloom).
 #
 # Shot A (shapes on cream paper) cuts to shot B (instanced cube ocean with a

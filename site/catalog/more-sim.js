@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // More simulation and generative demos for Motion Examples.html (Canvas 2D, CPU).
 (function () {
   const { C, PAL, seg, lerp, ease, rng } = EX;

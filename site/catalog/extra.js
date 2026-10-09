@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Extra demos for Motion Examples.html: particle text, CSS 3D card flip, parallax, motion path.
 (function () {
   const { C, PAL, seg, lerp, ease, rng, noise } = EX;

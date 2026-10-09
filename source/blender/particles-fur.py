@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a fluffy fur-ball character with a particle hair system: guide hairs plus interpolated
 # children, clumping and roughness, a root-to-tip color gradient (Hair Info node) and hair
 # dynamics so the fur lags, swings and settles. The ball drops in, bounces with squash and

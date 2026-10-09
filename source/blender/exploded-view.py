@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds an exploded product view of a mechanical keyboard switch in Eevee. Seven parts made from
 # primitives (bmesh, curves, Solidify and Bevel modifiers) fly apart along clean axes with a
 # staggered QUINT ease, call-out labels draw on while the camera orbits the exploded stack, then

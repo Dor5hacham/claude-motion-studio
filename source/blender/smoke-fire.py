@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a Mantaflow gas shot: a ring of fire burns on a dark torus and rolls up into smoke,
 # rendered as volumetrics in Eevee. Light grey smoke is lit from behind by a volume-only back
 # light and stands out against a faint backdrop glow. Bakes the gas sim, then renders.

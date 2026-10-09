@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Loads index.html and writes every catalog card (live demos and clips) to scripts/catalog.json,
 // so the README tables are generated from the same registry the site uses.
 // Usage: node scripts/export_catalog.mjs
@@ -7,7 +12,11 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--use-angle=d3d11', '--enable-gpu'] });
+// Chrome binary: CHROME_PATH if set, else the standard install path for this OS. ANGLE on D3D11 is Windows-only.
+const CHROME = process.env.CHROME_PATH || ({ win32: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  darwin: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' })[process.platform] || '/usr/bin/google-chrome';
+const ANGLE = process.platform === 'win32' ? ['--use-angle=d3d11'] : [];
+const browser = await chromium.launch({ executablePath: CHROME, args: [...ANGLE, '--enable-gpu'] });
 const page = await browser.newPage();
 await page.goto(pathToFileURL(path.join(ROOT, 'index.html')).href);
 await page.waitForTimeout(500);

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a cloth-simulation shot: a coral silk napkin falls in light wind and drapes over a
 # glossy violet sphere on a dark studio floor. The sheet is small enough to cap the sphere and
 # leave its lower half showing, so the viewer sees what is under it. Bakes the cloth, renders

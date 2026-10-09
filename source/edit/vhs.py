@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # vhs.py - VHS tape look, built from the defects of analog video one by one.
 #
 # Source: the Blender fur-ball clip, as a 4:3 "home video". The tape plays,

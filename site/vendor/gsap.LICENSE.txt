@@ -1,4 +1,17 @@
 GSAP 3.15.0
-License: Standard 'no charge' license: https://gsap.com/standard-license.
-GSAP is free to use under the GreenSock Standard License. Full text: https://gsap.com/standard-license
-Files: gsap.min.js, SplitText.min.js, MorphSVGPlugin.min.js (copied unchanged from the gsap npm package).
+
+Files in this folder:
+- gsap.min.js (GSAP core 3.15.0, from dist/gsap.min.js)
+- SplitText.min.js (SplitText 3.15.0, from dist/SplitText.min.js)
+- MorphSVGPlugin.min.js (MorphSVGPlugin 3.15.0, from dist/MorphSVGPlugin.min.js)
+
+These files are unmodified copies from the gsap npm package, version 3.15.0
+(https://www.npmjs.com/package/gsap/v/3.15.0).
+
+Copyright 2026, GreenSock. All rights reserved.
+
+License: GSAP Standard "No Charge" License, https://gsap.com/standard-license
+This is a proprietary license from GreenSock (Webflow), not an open source
+license. The terms of this repository's LICENSE file do not cover these files.
+Anyone who copies or forks these files must accept the GSAP Standard License
+terms on their own.

@@ -1,4 +1,9 @@
-// Animation library demos for Motion Examples.html: one card per open-source library.
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
+// Animation library demos for index.html: one card per third-party library.
 // The libraries load from vendor/ as classic scripts. Every demo is driven by the shared
 // frame(t, dt) loop, so library timelines stay paused and are seeked by time.
 (function () {

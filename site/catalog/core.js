@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Shared runtime for Motion Examples.html.
 // EX.add({...}) registers a demo card. Each demo's setup(stage) returns frame(t, dt),
 // which the loop calls only while the card is on screen. GPU demos share one WebGL2

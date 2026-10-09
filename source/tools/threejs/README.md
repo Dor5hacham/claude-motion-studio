@@ -22,8 +22,10 @@ frame.
 
     npm install
 
-Chrome must be installed at `C:/Program Files/Google/Chrome/Application/chrome.exe`
-(edit `executablePath` in render.mjs for another path).
+render.mjs needs Google Chrome. It uses `CHROME_PATH` if that is set, else the
+standard install path for the OS (on Windows,
+`C:/Program Files/Google/Chrome/Application/chrome.exe`). For another path, set
+`CHROME_PATH` to your Chrome executable before you render.
 
 ## Render
 

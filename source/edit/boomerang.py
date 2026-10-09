@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # boomerang.py - Boomerang, stutter edit and freeze-frame with a flash.
 #
 # The "MOTION REEL" title build from the master reel:

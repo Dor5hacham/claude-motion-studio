@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Grows ivy over a glazed navy vase with a Geometry Nodes simulation zone built in Python.
 # 30 growing tips start around the foot of the vase. Every frame the zone moves each tip along
 # the surface (an upward pull, a per-tip spiral and 4D noise, projected onto the tangent plane, snapped back

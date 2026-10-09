@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # split-screen.py - 2x2 split-screen montage that animates in, then one tile
 # expands to full screen.
 #

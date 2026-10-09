@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds an anime-style floating island above a sea of clouds: a cottage, a windmill with
 # turning sails, round trees, a pond that spills into a waterfall and small rocks that bob.
 # Every surface uses a toon material (Diffuse BSDF -> Shader to RGB -> constant color ramp),

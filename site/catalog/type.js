@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Text motion demos for Motion Examples.html (Canvas 2D).
 (function () {
   const { C, seg, lerp, ease, clamp01 } = EX;

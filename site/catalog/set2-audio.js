@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Sound and motion, set 2: the picture and the sound read one clock, so every flash lands on its note.
 (function () {
   const { C } = EX;

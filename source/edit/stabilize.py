@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # stabilize.py - Video stabilization, before and after, with the camera path.
 #
 # Two shots (the jelly cubes and the 3D logo) get a synthetic handheld shake:

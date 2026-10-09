@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Visual math proofs in a calm explainer style (Canvas 2D, CPU).
 (function () {
   const { C, seg, ease } = EX;

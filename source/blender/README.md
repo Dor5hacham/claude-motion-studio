@@ -24,13 +24,15 @@ Each script builds one scene from nothing, bakes its simulation if it has one, a
 | `domino.py` | `domino.mp4` | 241 dominoes fall along a spiral to the center | Bullet rigid bodies that start deactivated, kinematic nudge, wave front read from the bake to aim the camera |
 | `skipping-stone.py` | `skipping-stone.mp4` | Stone skips seven times across a dusk pond, rings interfere | Wave equation solved in NumPy, frame-change handler writes the mesh, procedural sky and tree line in the world shader |
 
+Blender is licensed under the GNU GPL. These scripts only drive Blender through its Python API; the frames and clips Blender renders are not covered by the GPL.
+
 ## Run one
 
-From this folder, with Blender 5.2 (change the path to yours):
+From this folder, with Blender 5.2. Set `BLENDER` to the path of your Blender 5.2 executable first, for example `export BLENDER="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"` for the default Windows install:
 
 ```
-"/b/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P cloth.py -- "C:/temp/cloth"          # all frames
-"/b/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P cloth.py -- "C:/temp/cloth" 60       # one test frame
+"$BLENDER" -b -P cloth.py -- "C:/temp/cloth"          # all frames
+"$BLENDER" -b -P cloth.py -- "C:/temp/cloth" 60       # one test frame
 ffmpeg -framerate 30 -i "C:/temp/cloth/f_%04d.png" -c:v libx264 -crf 22 -preset slow -pix_fmt yuv420p -movflags +faststart ../../media/engine/cloth.mp4
 ```
 

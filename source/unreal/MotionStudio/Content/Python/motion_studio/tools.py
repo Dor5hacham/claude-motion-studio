@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # pyright: reportAttributeAccessIssue=false
 # (the `unreal` module exists only inside the Unreal Editor, so its members are unknown to the checker)
 # Project toolset for the Unreal MCP: renders a Level Sequence with Movie Render Queue.

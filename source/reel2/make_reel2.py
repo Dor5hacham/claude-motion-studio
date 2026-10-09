@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds "Reel 2": a 120 BPM beat-synced showreel of the second set of clips.
 # Usage (from the repo root): uv run --with numpy --with scipy source/reel2/make_reel2.py [work_dir]
 # Writes media/reel/claude-motion-reel-2.mp4. Needs ffmpeg on PATH. Temp files go in work_dir

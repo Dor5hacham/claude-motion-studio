@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Fourier optics written from scratch with the Rust standard library only.
 // The far-field (Fraunhofer) diffraction pattern of an aperture is the squared magnitude of its 2D
 // Fourier transform. The aperture morphs from a circle to an iris, a square, a triangle and a grating;

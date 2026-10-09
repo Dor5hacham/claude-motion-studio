@@ -8,19 +8,37 @@ This repository is a complete, hands-on resource for motion design with Claude. 
 2. **Motion Studio (`index.html`)**: one offline page that teaches the vocabulary of motion with live side-by-side demos, and runs every technique in a searchable catalog you can filter by kind (live, with sliders, clips) and by what it runs on. Most cards have sliders, and their prompt text updates as you move them.
 3. **This README**: the tutorial and the cheat sheet in one place.
 
-No stock footage, no templates and no AI video model were used. Every frame comes from code that Claude wrote, and all of that code is in this repository.
+Created by Dor Shacham (Dor5hacham) with Claude Code (Opus 5.5). No stock footage, no downloaded assets and no AI video model were used, and the only templates are the ones built into Blender and Unreal Engine. Every frame comes from code written in Claude Code, and all of that code is in this repository. The only outside parts are the third-party libraries and the map data listed under [Credits and licenses](#credits-and-licenses).
+
+This repository is public so you can read it, but it is not open source: all rights are reserved. See [License](#license).
 
 ## Quick start
 
 | I want to | Do this |
 |---|---|
 | See everything live | Open `index.html` in Chrome or Edge (works offline, no install) |
-| Watch the reel | `media/reel/claude-motion-reel.mp4` (full-quality master: see Releases) |
+| Watch the reel | `media/reel/claude-motion-reel.mp4` (full-quality master: [Release v1.0](https://github.com/Dor5hacham/claude-motion-studio/releases/tag/v1.0)) |
 | Watch the second reel | `media/reel/claude-motion-reel-2.mp4` (how it was cut: `source/reel2/README.md`) |
 | Learn the words | Read the [tutorial](#tutorial) below, then the Learn part of `index.html` |
 | Copy a prompt | Find the technique in the [catalog](#catalog) and copy its prompt |
 | Write my own prompt | Use the [template](#cheat-sheet) or the Prompt builder in `index.html` |
 | Rebuild anything | See [Reproduce](#reproduce) |
+
+## Requirements
+
+To view the page you need only a Chromium browser. Chrome or Edge 113 or later runs every card, including the WebGPU ones. `index.html` opens from disk, with no install and no server.
+
+To rebuild clips, install only the tools for the part you rebuild:
+
+| To rebuild | You need |
+|---|---|
+| Site checks, catalog and README generation | Node 24, Python with uv |
+| Encoding and the editing tricks | FFmpeg |
+| Blender clips and the reel's physics shot | Blender 5.2 |
+| Unreal clips | Unreal Engine 5.8 |
+| Built-from-scratch clips | Rust (cargo) and Go |
+
+The clone is about 350 MB, mostly video. `git clone --depth 1 https://github.com/Dor5hacham/claude-motion-studio.git` skips the history and downloads less. The 494 MB full-quality reel master is not in the repository; download it from [Release v1.0](https://github.com/Dor5hacham/claude-motion-studio/releases/tag/v1.0).
 
 ## Tutorial
 
@@ -652,7 +670,7 @@ Show me test frames as a contact sheet before the full render.
 
 ## Tools used here
 
-Every tool below made something in the catalog on one Windows 11 PC (Ryzen 9 9950X, Radeon RX 9070 XT, no NVIDIA GPU).
+Every tool below made something in the catalog on the reference machine (Ryzen 9 9950X, Radeon RX 9070 XT), a Windows 11 PC with no NVIDIA GPU.
 
 | Tool | What it is | Used for |
 |---|---|---|
@@ -683,7 +701,7 @@ Unreal Engine 5.8 was driven through its built-in MCP server (the experimental U
 |---|---|
 | The reel | `source/reel/README.md`: render the Blender shot, render 3,600 web frames, synthesize audio, encode |
 | The second reel | `uv run --with numpy --with scipy source/reel2/make_reel2.py` (cuts the finished clips to its synthesized track; see `source/reel2/README.md`) |
-| Blender clips | `blender -b -P source/blender/<name>.py -- <out_dir>` (each script has a usage line) |
+| Blender clips | `"$BLENDER" -b -P source/blender/<name>.py -- <out_dir>`, with `BLENDER` set to the path of your Blender 5.2 executable (each script has a usage line) |
 | Unreal clips | `source/unreal/README.md`: open the project in the editor, wait for the MCP, then run the build script of the scene (`build_scene.py`, `lumen_build.py`, `neon_build.py`, `ribbons_build.py`, `focus_build.py`) and render it |
 | Tool clips | `source/tools/<tool>/README.md` |
 | Editing tricks | `source/edit/<trick>` scripts, rerunnable from that folder |
@@ -698,6 +716,8 @@ Unreal Engine 5.8 was driven through its built-in MCP server (the experimental U
 ```
 index.html            Motion Studio: the whole resource in one offline page
 README.md             this tutorial and cheat sheet
+LICENSE               proprietary license: all rights reserved
+THIRD_PARTY_NOTICES.md  third-party libraries and data, with their licenses
 media/
   reel/               the two reels (web versions; the full-quality master of the first is a Release asset)
   clips/              scenes cut from the reel
@@ -725,4 +745,22 @@ scripts/              catalog build, site check, README generation
 
 ## Credits and licenses
 
-Everything in this repository was written and rendered by Claude (Opus 5.5) in Claude Code. The third-party libraries in `site/vendor/` (Three.js, PixiJS, p5.js, GSAP, Motion, anime.js, lottie-web, D3, Matter.js, Rough.js, Tone.js) keep their own licenses; each license file sits next to its library. The land shapes of the dotted globe come from Natural Earth, which is in the public domain.
+Created by Dor Shacham (Dor5hacham) with Claude Code (Opus 5.5). Claude Code wrote the code, and that code rendered every frame.
+
+No stock footage and no downloaded assets (models, textures, HDRIs, music or sound) were used. The third-party parts are listed, with their licenses, in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md):
+
+- The libraries in `site/vendor/` (Three.js, PixiJS, p5.js, GSAP with SplitText and MorphSVGPlugin, Motion, anime.js, lottie-web, D3, Matter.js, Rough.js, Tone.js). Each one keeps its own license, and its license file sits next to it.
+- The land of the dotted globe: Natural Earth data (public domain), taken from the world-atlas `land-110m` file.
+- Templates and basic content built into the engines only, such as Unreal Engine's default template level, its Niagara emitter templates and its engine cubes and spheres. The build scripts use them inside the engine; none of them are stored in this repository.
+
+Motion Studio is an independent project. It is not affiliated with or endorsed by Anthropic. Claude and Claude Code are trademarks of Anthropic, PBC. Unreal Engine is a trademark of Epic Games, Inc.
+
+## License
+
+Copyright (c) 2026 Dor5hacham. All rights reserved.
+
+This repository is proprietary. It is public so you can read it, but no license is granted: you may not use, copy, modify or distribute any part of it without written permission from the copyright holder. The full terms are in [LICENSE](LICENSE).
+
+Third-party parts keep their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+To ask for permission, contact d5shacham@gmail.com.

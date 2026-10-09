@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a soft-body jelly shot: four translucent gummy cubes in the reel palette drop one after
 # another onto a dark studio floor and squash and wobble; a fifth, cream cube drops late (its cloth
 # cache starts at LATE_START), so something is still bouncing near the end. Bakes the simulation,

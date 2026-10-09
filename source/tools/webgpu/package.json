@@ -1,6 +1,8 @@
 {
   "name": "webgpu-million-particles",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Dor5hacham",
   "type": "module",
   "dependencies": {
     "playwright-core": "^1.63.0"

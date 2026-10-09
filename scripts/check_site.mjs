@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Checks index.html end to end in headless Chrome on the GPU:
 //  - every script file in site/catalog and site/learn is loaded by the page (nothing created but hidden),
 //    every vendor file is used and every file the page references exists
@@ -48,7 +53,11 @@ for (const f of fs.readdirSync(path.join(ROOT, 'site/vendor')).filter(f => f.end
 for (const m of html.matchAll(/src="([^"]+)"/g)) if (!m[1].startsWith('http') && !fs.existsSync(path.join(ROOT, decodeURIComponent(m[1])))) problems.push('missing file referenced by index.html: ' + m[1]);
 for (const m of libsSrc.matchAll(/VENDOR \+ '([^']+)'/g)) if (!fs.existsSync(path.join(ROOT, 'site/vendor', m[1]))) problems.push('libs.js loads a missing vendor file: ' + m[1]);
 
-const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe', args: ['--use-angle=d3d11', '--enable-gpu', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
+// Chrome binary: CHROME_PATH if set, else the standard install path for this OS. ANGLE on D3D11 is Windows-only.
+const CHROME = process.env.CHROME_PATH || ({ win32: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
+  darwin: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' })[process.platform] || '/usr/bin/google-chrome';
+const ANGLE = process.platform === 'win32' ? ['--use-angle=d3d11'] : [];
+const browser = await chromium.launch({ executablePath: CHROME, args: [...ANGLE, '--enable-gpu', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'] });
 // Opens index.html in a new page of the given width. Console and page errors become problems, tagged with the label.
 async function open(width, label, init, hash = '') {
   const page = await browser.newPage({ viewport: { width, height: 1000 } });

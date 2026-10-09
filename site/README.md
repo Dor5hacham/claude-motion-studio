@@ -17,7 +17,7 @@
 | `catalog/clips-meta.json` | Descriptions of every rendered clip in `media/` |
 | `catalog/clips.js` | Generated from `clips-meta.json` by `scripts/build_catalog.py` |
 | `catalog/engine.js` | Turns every entry of `clips.js` into a video card |
-| `catalog/libs.js` + `vendor/` | Demos built on third-party libraries (each library keeps its license file in `vendor/`) |
+| `catalog/libs.js` + `vendor/` | Demos built on third-party libraries (each library keeps its license file in `vendor/`; a new library also needs an entry in `THIRD_PARTY_NOTICES.md`) |
 
 ## Add a live demo
 

@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a 3D text logo reveal in Eevee: the word "MOTION" in Segoe UI Bold, extruded, converted
 # to mesh and beveled with a Bevel modifier (no spikes on sharp corners), one object per letter.
 # Letters rise out of a glossy floor with a staggered overshoot (BACK easing); the first letter

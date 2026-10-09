@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # vfx-comp.py - A fire element composited behind 3D letters, with a breakdown.
 #
 # Plate: the Blender 3D-logo clip ("MOTION" letters), slowed to about half speed.

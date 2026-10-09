@@ -1,4 +1,9 @@
 <!doctype html>
+<!--
+  Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+  SPDX-License-Identifier: Proprietary
+-->
+
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -227,8 +232,8 @@
 <section class="sec cat" id="sim"><h2><span class="n">11</span>Simulation and generative art</h2><p class="lead">Motion from rules instead of keyframes: physics, flocking, growth, particles, noise and math.</p><div class="gal" id="cat-sim"></div></section>
 <section class="sec cat" id="gpu"><h2><span class="n">12</span>GPU shaders</h2><p class="lead">A <b>shader</b> is a small program that runs on the graphics card for every pixel or point, every frame. A <b>vertex shader</b> places points; a <b>fragment shader</b> colors pixels. <b>GLSL</b> is their language and <b>WebGL2</b> is how a browser reaches the GPU.</p><div class="gal" id="cat-gpu"></div></section>
 <section class="sec cat" id="audio"><h2><span class="n">13</span>Sound and motion</h2><p class="lead">Motion driven by audio. For a video, Claude analyzes your track the same way and syncs cuts and effects to it, or synthesizes music in Python as it did for the reel (kick, bass, pads and risers from sine waves and noise, with hits on every cut).</p><div class="gal" id="cat-audio"></div></section>
-<section class="sec cat" id="libs"><h2><span class="n">14</span>Animation libraries</h2><p class="lead">The same kinds of motion made with popular open-source libraries. Name the library in your prompt when you want code you can keep using in your own project.</p><div class="gal" id="cat-libs"></div></section>
-<section class="sec cat" id="engine"><h2><span class="n">15</span>3D engines (Blender, Unreal)</h2><p class="lead">What a browser cannot simulate well: cloth, liquid, fire, shattering, photoreal light, huge particle counts. Each Blender clip was built by a Python script and rendered headless in Blender 5.2 on this PC; the scripts are in <code>source/blender</code>. Two renderers: <b>Eevee</b> is fast (about half a second per frame here) and <b>Cycles</b> traces real light paths for glass, caustics, reflections and soft bounce light (several seconds per frame). Ask for Cycles when you want photoreal. The Unreal clips (the <a href="#ex-clip-unreal-niagara">Niagara vortex</a>, the <a href="#ex-clip-unreal-lumen">Lumen time-lapse</a> and three more) come from Unreal Engine 5.8: Claude opened the editor, waited until its MCP server was connected, then built each scene and rendered it through MCP tool calls (<code>source/unreal</code>).</p><div class="gal" id="cat-engine"></div></section>
+<section class="sec cat" id="libs"><h2><span class="n">14</span>Animation libraries</h2><p class="lead">The same kinds of motion made with popular third-party libraries. Name the library in your prompt when you want code you can keep using in your own project.</p><div class="gal" id="cat-libs"></div></section>
+<section class="sec cat" id="engine"><h2><span class="n">15</span>3D engines (Blender, Unreal)</h2><p class="lead">What a browser cannot simulate well: cloth, liquid, fire, shattering, photoreal light, huge particle counts. Each Blender clip was built by a Python script and rendered headless in Blender 5.2 on the reference machine (Ryzen 9 9950X, Radeon RX 9070 XT); the scripts are in <code>source/blender</code>. Two renderers: <b>Eevee</b> is fast (about half a second per frame here) and <b>Cycles</b> traces real light paths for glass, caustics, reflections and soft bounce light (several seconds per frame). Ask for Cycles when you want photoreal. The Unreal clips (the <a href="#ex-clip-unreal-niagara">Niagara vortex</a>, the <a href="#ex-clip-unreal-lumen">Lumen time-lapse</a> and three more) come from Unreal Engine 5.8: Claude opened the editor, waited until its MCP server was connected, then built each scene and rendered it through MCP tool calls (<code>source/unreal</code>).</p><div class="gal" id="cat-engine"></div></section>
 <section class="sec cat" id="tools"><h2><span class="n">16</span>Code-to-video tools</h2><p class="lead">Tools that turn code into finished video files: React (Remotion), HTML (HyperFrames), Python (Manim, Matplotlib, PyVista, and Taichi on the GPU), TypeScript (Motion Canvas), one FFmpeg filter graph, and Three.js or WebGPU scenes rendered frame by frame. Sources are in <code>source/tools</code>.</p><div class="gal" id="cat-tools"></div></section>
 <section class="sec cat" id="edit"><h2><span class="n">17</span>Editing and post-production tricks</h2><p class="lead">What Claude can do to footage you already have, with FFmpeg, Python and OpenCV. Scripts are in <code>source/edit</code>.</p><div class="gal" id="cat-edit"></div></section>
 <section class="sec cat" id="scratch"><h2><span class="n">18</span>Built from scratch</h2><p class="lead">No engine and no library: Claude writes the renderer, the physics or the synth itself. Each one is a single readable file, so you can see how the engines in the other sections work inside, and ask for a custom one when no tool fits. The live cards run in this page; the clips come from native Rust and Go programs written from scratch (<code>source/scratch</code>).</p><div class="gal" id="cat-scratch"></div></section>
@@ -237,7 +242,7 @@
 <div class="part" id="part-make" data-grp="MAKE"><span class="pn">PART 4 OF 5</span><b>Make</b><p>Turn what you saw into a prompt: which tool makes what, how a good prompt is built, a builder and worked examples.</p><div class="jump"></div></div>
 <section class="sec" id="toolsmap">
   <h2><span class="n">19</span>Tools and what they produce</h2>
-  <p class="lead">Every tool here was used on this PC to make something in the catalog; the last column links to it.</p>
+  <p class="lead">Every tool here was used on the reference machine to make something in the catalog; the last column links to it.</p>
   <table>
     <tr><th>Tool</th><th>What it is</th><th>Runs on</th><th>Best for</th><th>Output</th><th>See it</th></tr>
     <tr><td><b>Canvas 2D</b></td><td>Browser 2D drawing</td><td>CPU</td><td>Type, shapes, UI, diagrams, 2D physics</td><td>Live page, frames</td><td><a href="#type">Text</a>, <a href="#sim">Simulation</a></td></tr>
@@ -551,7 +556,7 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
 
 <section class="sec" id="reel">
   <h2><span class="n">25</span>How the reel was made</h2>
-  <p class="lead">The source is in <code>source/reel</code>. Times are from the actual run on this PC.</p>
+  <p class="lead">The source is in <code>source/reel</code>. Times are from the actual run on the reference machine.</p>
   <table>
     <tr><th>Time</th><th>Scene</th><th>Technique</th><th>Tool</th><th>Card</th></tr>
     <tr><td>0-6 s</td><td>Intro</td><td>Kinetic typography</td><td>Canvas 2D in <code>reel.html</code></td><td><a href="#ex-clip-reel-kinetic">open</a></td></tr>
@@ -571,7 +576,7 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
   </div>
   <h3 style="margin-top:30px">The second reel</h3>
   <p class="dim" style="max-width:1080px">The second reel took no new rendering. One Python script (<code>source/reel2/make_reel2.py</code>) synthesizes a 120 BPM track with NumPy, picks a 2 s section of 29 finished clips, places every cut on an exact beat frame, adds title cards, flashes and zoom punches with FFmpeg filters, and encodes 1080p H.264 with AAC. It runs in about 30 seconds on the CPU.</p>
-  <footer>Made by Claude (Opus 5.5) in Claude Code. Works offline: open <code>index.html</code> in Chrome or Edge.</footer>
+  <footer>Created by Dor Shacham (Dor5hacham) with Claude Code (Opus 5.5). Copyright (c) 2026 Dor5hacham. All rights reserved. Source: <a href="https://github.com/Dor5hacham/claude-motion-studio">github.com/Dor5hacham/claude-motion-studio</a>. Works offline: open <code>index.html</code> in Chrome or Edge.<br>An independent project, not affiliated with or endorsed by Anthropic.</footer>
 </section>
 </main>
 

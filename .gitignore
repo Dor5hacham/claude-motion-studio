@@ -8,8 +8,19 @@ media/reel/master/
 source/reel/frames/
 source/reel/blender/
 source/reel/test/
-# Python bytecode
+# tool renders written in place (each folder's README has the render commands)
+source/tools/threejs/frames/
+source/tools/threejs/test/
+source/tools/webgpu/frames/
+source/tools/webgpu/test/
+source/tools/motion-canvas/output/
+source/tools/hyperframes/renders/
+source/tools/manim/media/
+source/tools/*/*.mp4
+# Python bytecode and environments
 __pycache__/
+*.pyc
+.venv/
 # native builds and renders inside source/scratch (each README builds and renders in place)
 source/scratch/*/target/
 source/scratch/*/frames/
@@ -17,3 +28,31 @@ source/scratch/*/*.exe
 source/scratch/*/*.mp4
 # lint cache
 .ruff_cache/
+# Blender scenes and backups (the scripts in source/blender build every scene)
+*.blend
+*.blend1
+# Unreal per-machine and build folders
+source/unreal/**/Saved/
+source/unreal/**/Intermediate/
+source/unreal/**/DerivedDataCache/
+source/unreal/**/Binaries/
+# secrets and keys
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+# logs
+*.log
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+# local Claude Code settings and project notes (they hold machine paths)
+.claude/
+CLAUDE.local.md
+/CLAUDE.md

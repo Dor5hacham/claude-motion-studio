@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # track-callout.py - Motion tracking with a pinned callout.
 #
 # Source: the Blender shatter clip, slowed to half speed with optical-flow

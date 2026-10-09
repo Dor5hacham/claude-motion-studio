@@ -1,6 +1,8 @@
 {
   "name": "threejs-glass-field",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Dor5hacham",
   "type": "module",
   "dependencies": {
     "playwright-core": "^1.63.0",

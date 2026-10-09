@@ -1,7 +1,8 @@
 # Taichi example: water, jelly and snow (MPM)
 
 Taichi is a Python package that compiles decorated functions (`@ti.kernel`) to
-GPU code. On this PC it runs on the Radeon through the Vulkan backend
+GPU code. On the reference machine (Ryzen 9 9950X, Radeon RX 9070 XT) it
+runs on the Radeon through the Vulkan backend
 (`ti.init(arch=ti.vulkan)`); the same script also runs on CUDA, Metal or the CPU.
 
 `mpm.py` is a 2D MLS-MPM (moving least squares material point method) solver.

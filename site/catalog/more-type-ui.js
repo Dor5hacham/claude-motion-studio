@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // More text and UI demos for Motion Examples.html.
 (function () {
   const { C, PAL, seg, lerp, ease, clamp01 } = EX;

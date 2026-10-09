@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # mpm.py - Water, jelly and snow colliding: a 2D MLS-MPM simulation in Taichi,
 # simulated and rendered on the GPU through Taichi's Vulkan backend.
 #

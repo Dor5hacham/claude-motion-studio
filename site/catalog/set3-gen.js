@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Generative-art classics for the catalog (Canvas 2D, CPU): the paper-folding dragon curve.
 (function () {
   const { C } = EX;

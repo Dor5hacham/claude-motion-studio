@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Catalog cards that started as live demos in the Motion Guide: masked letter reveal,
 // trim paths, shape morph and live GPU particles (own WebGL2 context).
 (function () {

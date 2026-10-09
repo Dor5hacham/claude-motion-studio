@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Spectral path tracer written from scratch with the Rust standard library only.
 // Renders the "glass, gold and light" shot as PPM frames that FFmpeg turns into a video.
 //

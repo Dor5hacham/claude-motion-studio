@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # photomosaic.py - A zoom out from one playing clip to a mosaic of 1,600 playing
 # clips that together form a picture.
 #

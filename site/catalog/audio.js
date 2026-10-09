@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Audio-reactive demo for Motion Examples.html: a Web Audio synth beat drives the visuals.
 (function () {
   const { C, PAL, lerp } = EX;

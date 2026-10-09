@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Builds a rigid-body wall-smash scene, bakes Bullet physics and renders with Eevee.
 # Usage: blender -b -P blender_scene.py -- <out_dir> [test_frame]
 import bpy, sys, math, random

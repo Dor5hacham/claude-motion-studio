@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Three.js demo for the "Animation libraries" section (card id three-configurator).
 // Bundled with esbuild into site/vendor/three-demo.js (classic script, works from file://).
 // Exposes window.LIBS_THREE.setup(stage, L) for a kind:'dom' card; it returns frame(t, dt).

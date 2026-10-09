@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # Renders the Motion Studio sequence through the Unreal MCP: calls the project's own toolset
 # (MotionStudio/Content/Python/motion_studio/tools.py, Movie Render Queue with 8 temporal samples
 # per frame and 60 warm-up frames), waits until the frames are written, then encodes the MP4.

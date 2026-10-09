@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # video-wall.py - A curved 3D wall of playing clips; the camera glides along it
 # and flies into one card until it fills the frame.
 #

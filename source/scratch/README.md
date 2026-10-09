@@ -1,6 +1,6 @@
 # Built from scratch: native renderers
 
-Native programs that render a clip with no engine, no graphics API and no crates or modules beyond the language's standard library. Build folders stay outside the repo (`CARGO_TARGET_DIR`, `go build -o`).
+Native programs that render a clip with no engine, no graphics API and no crates or modules beyond the language's standard library. Build folders stay outside the repo (`CARGO_TARGET_DIR` for Rust, Go's own build cache through `go run` for Go).
 
 | Folder | Language | What it is | Clip |
 |---|---|---|---|

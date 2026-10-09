@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Shared helpers and the vocabulary demos for the Motion Studio page:
 // easing playground, stagger, squash and stretch, anticipation, prompt builder, copy buttons.
 // addLoop(el, fn) runs fn(t) every frame only while el is on screen and returns the loop L.

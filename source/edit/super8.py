@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+# SPDX-License-Identifier: Proprietary
+
 # super8.py - Super 8 film emulation, built from the parts of the look.
 #
 # Source: the Blender ocean sunset, slowed to 0.63x. What makes it read as film:

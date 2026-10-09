@@ -1,9 +1,11 @@
 {
   "name": "three-demo",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Dor5hacham",
   "description": "Source of site/vendor/three-demo.js (the three-configurator card).",
   "scripts": {
-    "build": "esbuild three-entry.js --bundle --format=iife --minify --legal-comments=none --outfile=../../../site/vendor/three-demo.js"
+    "build": "esbuild three-entry.js --bundle --format=iife --minify --legal-comments=eof --outfile=../../../site/vendor/three-demo.js"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

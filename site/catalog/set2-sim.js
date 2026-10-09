@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Set 2 simulation and generative demos: chaos, attractors and growth (Canvas 2D, CPU).
 (function () {
   const { C, seg, lerp, ease, rng } = EX;

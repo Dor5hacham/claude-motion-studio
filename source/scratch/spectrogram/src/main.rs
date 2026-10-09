@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // A word hidden in sound, written from scratch with the Rust standard library only.
 // The program rasterizes "MOTION" from a TrueType font, turns every pixel row into a sine tone
 // (additive synthesis) and writes a WAV. Then its own FFT analyzes the WAV and draws the scrolling

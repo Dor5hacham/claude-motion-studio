@@ -1,6 +1,8 @@
 {
   "name": "remotion-stat-reel",
   "private": true,
+  "license": "UNLICENSED",
+  "author": "Dor5hacham",
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
     "render": "remotion render src/index.ts StatReel out.mp4 --codec=h264 --crf=16"

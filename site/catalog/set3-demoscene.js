@@ -1,3 +1,8 @@
+/**
+ * Copyright (c) 2026 Dor5hacham d5shacham@gmail.com. All rights reserved.
+ * SPDX-License-Identifier: Proprietary
+ */
+
 // Demoscene effects written from scratch: 1990s screen tricks, each a pixel loop into a low-res
 // ImageData that is scaled up crisp. Every card keeps its whole effect in one setup().
 (function () {

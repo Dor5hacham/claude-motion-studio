@@ -42,6 +42,6 @@ uv run --with numpy --with pillow --with opencv-python-headless super8.py
 uv run --with numpy --with pillow --with opencv-python-headless match-cut.py
 ```
 
-Input: `media/reel/master/claude-motion-reel-master.mp4` (60 fps). It is not in git because it is 494 MB; download it from the repository's Releases into `media/reel/master/` first. Temporary files go to `_work/` at the repository root and are deleted at the end of each run.
+Input: `media/reel/master/claude-motion-reel-master.mp4` (60 fps). It is not in git because it is 494 MB; download it from [Release v1.0](https://github.com/Dor5hacham/claude-motion-studio/releases/tag/v1.0) into `media/reel/master/` first. Temporary files go to `_work/` at the repository root and are deleted at the end of each run.
 
 The newer scripts (from `slit-scan.py` on) read the clips that are already in `media/` instead, so they run without the master download.
