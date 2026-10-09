@@ -14,7 +14,8 @@ await page.waitForTimeout(500);
 const cards = await page.evaluate(() => EX.cards.filter(c => document.getElementById('cat-' + c.cat)).map(c => ({
   id: 'ex-' + c.id, cat: c.cat, title: c.title, aka: c.aka, tool: c.tool, runs: c.runs,
   kind: c.kind === 'video' ? 'clip' : 'live', sliders: (c.params || []).length, src: c.src || null,
-  prompt: c.prompt.replace(/\{(\w+)\}/g, (m, k) => { const p = (c.params || []).find(x => x.key === k); return p ? String(p.value) + (p.unit || '') : m; }),
+  // Same rule as fill() in site/catalog/core.js: the value at its default, with dec (or the step's) decimals, plus the unit.
+  prompt: c.prompt.replace(/\{(\w+)\}/g, (m, k) => { const p = (c.params || []).find(x => x.key === k); if (!p) return m; const dec = p.dec !== undefined ? p.dec : (String(p.step).split('.')[1] || '').length; return (+p.value).toFixed(dec) + (p.unit || ''); }),
 })));
 fs.writeFileSync(path.join(ROOT, 'scripts', 'catalog.json'), JSON.stringify(cards, null, 1));
 console.log(`exported ${cards.length} cards to scripts/catalog.json`);

@@ -463,7 +463,7 @@ ${[['Night ferry to Naxos', '9 min read', '#2bc4e6'], ['Fog over the Golden Gate
       let userAt = -99, now = 0, drag = null;
       sc.onwheel = () => { userAt = now; };
       sc.onpointerdown = e => { userAt = now; drag = { y: e.clientY, s: sc.scrollTop }; sc.setPointerCapture(e.pointerId); sc.style.cursor = 'grabbing'; };
-      sc.onpointermove = e => { if (!drag) return; userAt = now; sc.scrollTop = drag.s - (e.clientY - drag.y); };
+      sc.onpointermove = e => { if (!drag) return; userAt = now; sc.scrollTop = drag.s - (e.clientY - drag.y) * 640 / st.getBoundingClientRect().width; };
       sc.onpointerup = () => { drag = null; sc.style.cursor = 'grab'; };
       // The only script: an automatic reader that scrolls down, pauses, and scrolls back up.
       return t => {
@@ -1215,7 +1215,7 @@ ${[[30, 220, '#3a3858'], [52, 300, '#7a5cff66'], [74, 180, '#2bc4e655'], [96, 34
     cat: 'ui', id: 'ui2-chat', kind: 'dom', title: 'Chat send and reply', aka: 'message send animation, typing indicator, bubble pop, tapback reaction', tool: 'DOM + JavaScript (FLIP from input to bubble, springs)', runs: 'WEB',
     notice: 'A sent message leaves the text field and flies into the thread: the bubble starts where the typed text was and eases into its place, while older bubbles spring upward to make room. Then three dots wave while the other person types, the reply pops from its corner with an overshoot, and a heart tapback lands on it. Click the field, type, and press Enter: you get a reply.',
     use: 'messaging and support chat, comment threads, AI assistants, any conversational UI',
-    params: [{ key: 'fly', label: 'Send flight time', min: 0.15, max: 1.2, step: 0.05, value: 0.42, unit: ' s' }],
+    params: [{ key: 'fly', label: 'Send flight time', min: 0.15, max: 1.2, step: 0.01, value: 0.42, unit: ' s' }],
     prompt: 'Chat UI motion: when a message is sent, the new bubble starts at the text field position and size (FLIP) and eases into the thread over {fly} with ease-out, older bubbles spring up by its height; status changes Delivered to Read; a typing indicator with three dots in a sine wave appears, then the reply bubble scales in from its bottom-left corner with a spring (overshoot); a heart tapback pops onto the reply. Bubbles have a tail on the latest message of each run.',
     setup(st, L) {
       st.innerHTML = `<style>

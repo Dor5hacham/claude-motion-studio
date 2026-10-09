@@ -1,12 +1,14 @@
 // Live scene demos for the Motion Guide: camera rig, transition player, post-FX stack,
 // mood previews, the prompt playground and the live logo-reveal example.
-// Uses addLoop, EASES, clamp01, lerp from the guide's inline script.
+// Uses addLoop, addDemo, redraw, EASES, clamp01, lerp from learn/guide-core.js.
 (function () {
   const CORAL = '#ff5a36', AMBER = '#ffb020', CYAN = '#2bc4e6', VIOLET = '#7a5cff', CREAM = '#ece7de', DIM = '#6d6a76', NAVY = '#1d1b3a';
   const PALS = { warm: ['#0b0b10', CORAL, AMBER, CYAN, CREAM], paper: ['#efe8dc', CORAL, NAVY, '#2bb8a0', '#1d1b3a'], neon: ['#07040f', '#ff2bd6', '#00e5ff', '#b6ff3b', '#ffffff'], mono: ['#0e0e0e', '#ffffff', '#9a9a9a', '#ff3b30', '#ffffff'] };
   const seg = (t, a, b) => clamp01((t - a) / (b - a));
   const E = k => EASES[k][0];
-  function mount(id, draw) { const cv = /** @type {HTMLCanvasElement} */ (document.getElementById(id)); if (!cv) return; const g = cv.getContext('2d'); addLoop(cv, t => { g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; draw(g, t, cv.width, cv.height); }); }
+  // mount(id, draw, narrow) runs a scene through addDemo in design units: the canvas attributes, or narrow [W, H] on phones.
+  // Blur, shadow and canvas-copy sizes are in bitmap pixels, so scenes multiply them by g.getTransform().a.
+  function mount(id, draw, narrow) { const cv = /** @type {HTMLCanvasElement} */ (document.getElementById(id)); if (!cv) return; const W = cv.width, H = cv.height; addDemo(cv, n => (n && narrow ? narrow : [W, H]), draw); }
   function buttons(hostId, items, onPick, initial) {
     const host = document.getElementById(hostId); if (!host) return;
     items.forEach(([key, label]) => { const b = document.createElement('button'); b.textContent = label; b.dataset.k = key; if (key === initial) b.classList.add('on'); b.onclick = () => { host.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); onPick(key); }; host.appendChild(b); });
@@ -35,7 +37,7 @@
   const objs = []; for (let i = -3; i <= 3; i++) for (let j = -2; j <= 4; j++) { if (i === 0 && j === 0) continue; if ((i * 7 + j * 3) % 3 === 0) objs.push({ x: i * 2.2, z: j * 2.2, h: 0.8 + ((i * i + j) % 4) * 0.5, c: [CORAL, AMBER, CYAN, VIOLET][(i + j + 8) % 4] }); }
   objs.push({ x: -1.4, z: -2.6, h: 1.2, c: CREAM, near: true });
   mount('cam-rig', (g, _t, W, H) => {
-    const t = ((performance.now() - camT0) / 1000) % 4.5, k = E('ease-in-out')(seg(t, 0.4, 3.6));
+    const res = g.getTransform().a, t = ((performance.now() - camT0) / 1000) % 4.5, k = E('ease-in-out')(seg(t, 0.4, 3.6));
     let eye = [0, 2.2, -9], look = [0, 0.8, 0], fov = 1.0, blurNear = 0, blurFar = 0, shake = [0, 0], whip = 0;
     if (camMove === 'push') eye = [0, 2, lerp(-12, -4.5, k)];
     if (camMove === 'pull') eye = [0, lerp(1.6, 4, k), lerp(-4.5, -14, k)];
@@ -57,13 +59,13 @@
       for (let i = -12; i <= 12; i++) { const a = proj([i, 0, -12]), b = proj([i, 0, 12]), c = proj([-12, 0, i]), d = proj([12, 0, i]); if (a && b) { g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.stroke(); } if (c && d) { g.beginPath(); g.moveTo(c[0], c[1]); g.lineTo(d[0], d[1]); g.stroke(); } }
       const all = objs.map(o => ({ o, p: proj([o.x, o.h / 2, o.z]) })).filter(e => e.p).sort((a, b) => b.p[2] - a.p[2]);
       const hero = proj([0, 1, 0]);
-      const items = [...all.map(e => ({ z: e.p[2], fn: () => { const o = e.o, top = proj([o.x, o.h, o.z]), bot = proj([o.x, 0, o.z]); if (!top || !bot) return; const w = 0.7 * f / e.p[2]; g.filter = o.near ? `blur(${blurNear}px)` : (Math.abs(e.p[2] - (hero ? hero[2] : 9)) > 3 ? `blur(${blurFar * 0.6}px)` : 'none'); g.fillStyle = o.c; g.fillRect(top[0] - w / 2, top[1], w, bot[1] - top[1]); g.filter = 'none'; } })),
+      const items = [...all.map(e => ({ z: e.p[2], fn: () => { const o = e.o, top = proj([o.x, o.h, o.z]), bot = proj([o.x, 0, o.z]); if (!top || !bot) return; const w = 0.7 * f / e.p[2]; g.filter = o.near ? `blur(${blurNear * res}px)` : (Math.abs(e.p[2] - (hero ? hero[2] : 9)) > 3 ? `blur(${blurFar * 0.6 * res}px)` : 'none'); g.fillStyle = o.c; g.fillRect(top[0] - w / 2, top[1], w, bot[1] - top[1]); g.filter = 'none'; } })),
         ...(hero ? [{ z: hero[2], fn: () => { const r = 1 * f / hero[2]; const gr = g.createRadialGradient(hero[0] - r * 0.3, hero[1] - r * 0.3, r * 0.1, hero[0], hero[1], r); gr.addColorStop(0, '#fff'); gr.addColorStop(0.4, CORAL); gr.addColorStop(1, '#5a1a10'); g.fillStyle = gr; g.beginPath(); g.arc(hero[0], hero[1], r, 0, 7); g.fill(); } }] : [])].sort((a, b) => b.z - a.z);
       items.forEach(i => i.fn()); void pass;
     };
     if (whip > 0.05) { for (let s = 0; s < 6; s++) { g.globalAlpha = 0.22; g.save(); g.translate((s - 3) * whip * 40, 0); draws(s); g.restore(); } g.globalAlpha = 1; } else draws(0);
-    g.font = '600 13px Consolas'; g.fillStyle = CREAM; g.fillText(CAM[camMove][0].toUpperCase(), 16, 24);
-  });
+    g.font = `600 ${W < 900 ? 15 : 13}px Consolas`; g.fillStyle = CREAM; g.fillText(CAM[camMove][0].toUpperCase(), 16, 24);
+  }, [480, 420]);
 
   // =============== Transition player ===============
   const TR = {
@@ -75,32 +77,37 @@
   let trKind = 'iris', trT0 = performance.now();
   buttons('tr-btns', Object.entries(TR).map(([k, v]) => [k, v[0]]), k => { trKind = k; trT0 = performance.now(); const d = document.getElementById('tr-desc'); if (d) d.textContent = TR[k][1]; const s = document.getElementById('tr-say'); if (s) s.textContent = `${TR[k][0].toLowerCase()} from scene A to scene B, 0.6 s`; }, trKind);
   const sceneA = (g, W, H, t) => { g.fillStyle = '#2a0f0a'; g.fillRect(0, 0, W, H); g.fillStyle = CORAL; g.beginPath(); g.arc(W * 0.3, H / 2, 70 + 6 * Math.sin(t * 3), 0, 7); g.fill(); g.font = '700 54px Bahnschrift'; g.fillStyle = CREAM; g.fillText('SCENE A', W * 0.48, H / 2 + 18); };
-  const sceneB = (g, W, H, t) => { g.fillStyle = '#0d1430'; g.fillRect(0, 0, W, H); for (let i = 0; i < 5; i++) { g.fillStyle = [CYAN, VIOLET][i % 2]; g.fillRect(W * 0.58 + i * 46, H / 2 - 30 + Math.sin(t * 3 + i) * 20, 34, 60); } g.fillStyle = CYAN; g.beginPath(); g.arc(W * 0.3, H / 2, 70, 0, 7); g.fill(); g.font = '700 54px Bahnschrift'; g.fillStyle = CREAM; g.fillText('SCENE B', W * 0.06, 70); };
+  const sceneB = (g, W, H, t) => { g.fillStyle = '#0d1430'; g.fillRect(0, 0, W, H); for (let i = 0; i < 5; i++) { g.fillStyle = [CYAN, VIOLET][i % 2]; g.fillRect(W * (0.58 + i * 0.048), H / 2 - 30 + Math.sin(t * 3 + i) * 20, W * 0.035, 60); } g.fillStyle = CYAN; g.beginPath(); g.arc(W * 0.3, H / 2, 70, 0, 7); g.fill(); g.font = '700 54px Bahnschrift'; g.fillStyle = CREAM; g.fillText('SCENE B', W * 0.06, 70); };
   const off = document.createElement('canvas'), off2 = document.createElement('canvas');
   mount('tr-player', (g, _t, W, H) => {
-    off.width = off2.width = W; off.height = off2.height = H; const a = off.getContext('2d'), b = off2.getContext('2d');
+    // The two scenes render off screen at the bitmap resolution; put() draws a part of one (design units) at x, y.
+    const res = g.getTransform().a, bw = Math.round(W * res), bh = Math.round(H * res);
+    if (off.width !== bw || off.height !== bh) { off.width = off2.width = bw; off.height = off2.height = bh; }
+    const a = off.getContext('2d'), b = off2.getContext('2d'); a.setTransform(res, 0, 0, res, 0, 0); b.setTransform(res, 0, 0, res, 0, 0);
+    const put = (c, x = 0, y = 0, sx = 0, sy = 0, sw = W, sh = H) => g.drawImage(c, sx * res, sy * res, sw * res, sh * res, x, y, sw, sh);
     const t = ((performance.now() - trT0) / 1000) % 4, raw = seg(t, 1.4, 2.0), p = E('ease-in-out')(raw);
     sceneA(a, W, H, t); sceneB(b, W, H, t);
-    const both = (alphaB) => { g.drawImage(off, 0, 0); g.globalAlpha = alphaB; g.drawImage(off2, 0, 0); g.globalAlpha = 1; };
-    if (t > 3.4) { g.drawImage(off2, 0, 0); }
-    else if (trKind === 'cut') g.drawImage(raw >= 0.5 ? off2 : off, 0, 0);
+    const both = (alphaB) => { put(off); g.globalAlpha = alphaB; put(off2); g.globalAlpha = 1; };
+    if (t > 3.4) { put(off2); }
+    else if (trKind === 'cut') put(raw >= 0.5 ? off2 : off);
     else if (trKind === 'fade') both(p);
-    else if (trKind === 'dip') { g.drawImage(p < 0.5 ? off : off2, 0, 0); g.fillStyle = `rgba(0,0,0,${1 - Math.abs(p - 0.5) * 2})`; g.fillRect(0, 0, W, H); }
-    else if (trKind === 'wipe') { g.drawImage(off, 0, 0); g.drawImage(off2, 0, 0, W * p, H, 0, 0, W * p, H); g.fillStyle = CREAM; if (p > 0 && p < 1) g.fillRect(W * p - 2, 0, 4, H); }
-    else if (trKind === 'iris') { g.drawImage(off, 0, 0); g.save(); g.beginPath(); g.arc(W / 2, H / 2, p * Math.hypot(W, H) / 2, 0, 7); g.clip(); g.drawImage(off2, 0, 0); g.restore(); }
-    else if (trKind === 'push') { g.drawImage(off, -W * p, 0); g.drawImage(off2, W * (1 - p), 0); }
-    else if (trKind === 'zoom') { if (p < 0.5) { const s = 1 + p * 6; g.save(); g.translate(W * 0.3, H / 2); g.scale(s, s); g.translate(-W * 0.3, -H / 2); g.drawImage(off, 0, 0); g.restore(); g.fillStyle = `rgba(255,255,255,${p * 1.6})`; g.fillRect(0, 0, W, H); } else { const s = 1 + (1 - p) * 3; g.save(); g.translate(W / 2, H / 2); g.scale(s, s); g.translate(-W / 2, -H / 2); g.drawImage(off2, 0, 0); g.restore(); g.fillStyle = `rgba(255,255,255,${(1 - p) * 1.6})`; g.fillRect(0, 0, W, H); } }
-    else if (trKind === 'whip') { const x = -W * p; for (let s = 0; s < 8; s++) { g.globalAlpha = 0.18; g.drawImage(off, x + s * 30 * Math.sin(p * Math.PI), 0); g.drawImage(off2, x + W + s * 30 * Math.sin(p * Math.PI), 0); } g.globalAlpha = 1; }
-    else if (trKind === 'glitch') { const src = raw < 0.5 ? off : off2; g.drawImage(src, 0, 0); const k = Math.sin(raw * Math.PI); for (let i = 0; i < 18; i++) { if (Math.random() > k) continue; const y = Math.random() * H, h = 4 + Math.random() * 24, dx = (Math.random() - 0.5) * 120 * k; g.drawImage(Math.random() < 0.5 ? off : off2, 0, y, W, h, dx, y, W, h); } if (k > 0.2) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.35 * k; g.drawImage(src, 8 * k, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; } }
-    else if (trKind === 'blinds') { g.drawImage(off, 0, 0); for (let i = 0; i < 10; i++) { const q = clamp01((raw - i * 0.05) / 0.55), w = W / 10; g.drawImage(off2, i * w, 0, w, H * E('ease-in-out')(q), i * w, 0, w, H * E('ease-in-out')(q)); } }
-    else if (trKind === 'match') { g.drawImage(raw < 0.5 ? off : off2, 0, 0); const r = 70 + 40 * Math.sin(raw * Math.PI); g.fillStyle = raw < 0.5 ? CORAL : CYAN; g.beginPath(); g.arc(W * 0.3, H / 2, r, 0, 7); g.fill(); }
+    else if (trKind === 'dip') { put(p < 0.5 ? off : off2); g.fillStyle = `rgba(0,0,0,${1 - Math.abs(p - 0.5) * 2})`; g.fillRect(0, 0, W, H); }
+    else if (trKind === 'wipe') { put(off); put(off2, 0, 0, 0, 0, W * p, H); g.fillStyle = CREAM; if (p > 0 && p < 1) g.fillRect(W * p - 2, 0, 4, H); }
+    else if (trKind === 'iris') { put(off); g.save(); g.beginPath(); g.arc(W / 2, H / 2, p * Math.hypot(W, H) / 2, 0, 7); g.clip(); put(off2); g.restore(); }
+    else if (trKind === 'push') { put(off, -W * p, 0); put(off2, W * (1 - p), 0); }
+    else if (trKind === 'zoom') { if (p < 0.5) { const s = 1 + p * 6; g.save(); g.translate(W * 0.3, H / 2); g.scale(s, s); g.translate(-W * 0.3, -H / 2); put(off); g.restore(); g.fillStyle = `rgba(255,255,255,${p * 1.6})`; g.fillRect(0, 0, W, H); } else { const s = 1 + (1 - p) * 3; g.save(); g.translate(W / 2, H / 2); g.scale(s, s); g.translate(-W / 2, -H / 2); put(off2); g.restore(); g.fillStyle = `rgba(255,255,255,${(1 - p) * 1.6})`; g.fillRect(0, 0, W, H); } }
+    else if (trKind === 'whip') { const x = -W * p; for (let s = 0; s < 8; s++) { g.globalAlpha = 0.18; put(off, x + s * 30 * Math.sin(p * Math.PI), 0); put(off2, x + W + s * 30 * Math.sin(p * Math.PI), 0); } g.globalAlpha = 1; }
+    else if (trKind === 'glitch') { const src = raw < 0.5 ? off : off2; put(src); const k = Math.sin(raw * Math.PI); for (let i = 0; i < 18; i++) { if (Math.random() > k) continue; const y = Math.random() * H, h = 4 + Math.random() * 24, dx = (Math.random() - 0.5) * 120 * k; put(Math.random() < 0.5 ? off : off2, dx, y, 0, y, W, h); } if (k > 0.2) { g.globalCompositeOperation = 'lighter'; g.globalAlpha = 0.35 * k; put(src, 8 * k, 0); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1; } }
+    else if (trKind === 'blinds') { put(off); for (let i = 0; i < 10; i++) { const q = clamp01((raw - i * 0.05) / 0.55), w = W / 10; put(off2, i * w, 0, i * w, 0, w, H * E('ease-in-out')(q)); } }
+    else if (trKind === 'match') { put(raw < 0.5 ? off : off2); const r = 70 + 40 * Math.sin(raw * Math.PI); g.fillStyle = raw < 0.5 ? CORAL : CYAN; g.beginPath(); g.arc(W * 0.3, H / 2, r, 0, 7); g.fill(); }
     const x0 = 20, tw = W - 40; g.fillStyle = 'rgba(0,0,0,0.5)'; g.fillRect(x0, H - 22, tw, 8); g.fillStyle = AMBER; g.fillRect(x0 + tw * 1.4 / 4, H - 22, tw * 0.6 / 4, 8); g.fillStyle = '#fff'; g.fillRect(x0 + tw * t / 4 - 1, H - 28, 2, 20);
-    g.font = '600 12px Consolas'; g.fillStyle = CREAM; g.fillText(TR[trKind][0].toUpperCase() + '   (amber = transition)', 20, H - 32);
-  });
+    g.font = `600 ${W < 900 ? 14 : 12}px Consolas`; g.fillStyle = CREAM; g.fillText(TR[trKind][0].toUpperCase() + '   (amber = transition)', 20, H - 32);
+  }, [480, 420]);
 
   // =============== Post-FX stack (WebGL on a reel still) ===============
   (function () {
     const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('fx-stack')); if (!cv || !window.FX_SOURCE) return; const gl = cv.getContext('webgl2'); if (!gl) return;
+    const AR = cv.height / cv.width;
     const vs = `#version 300 es
 const vec2 P[3]=vec2[](vec2(-1,-1),vec2(3,-1),vec2(-1,3)); out vec2 v; void main(){v=P[gl_VertexID]*.5+.5;gl_Position=vec4(P[gl_VertexID],0,1);}`;
     const fs = `#version 300 es
@@ -128,13 +135,16 @@ void main(){vec2 u=v; vec3 c;
     FX.forEach(([k, s]) => { const b = document.createElement('button'); b.textContent = { Bloom: 'Bloom', Grain: 'Film grain', Vig: 'Vignette', CA: 'Chromatic aberration', Grade: 'Color grade', DOF: 'Depth of field', Letter: 'Letterbox', Scan: 'Scanlines' }[k]; b.classList.toggle('on', !!on[k]); b.onclick = () => { on[k] = !on[k]; b.classList.toggle('on', on[k]); upd(); }; host.appendChild(b); void s; });
     const sb = document.createElement('button'); sb.textContent = 'Before / after split'; sb.style.marginLeft = '12px'; sb.onclick = () => { split = !split; sb.classList.toggle('on', split); }; host.appendChild(sb); upd();
     const vao = gl.createVertexArray(); const U = n => gl.getUniformLocation(P, n);
-    addLoop(cv, t => { if (!ready) return; gl.viewport(0, 0, cv.width, cv.height); gl.useProgram(P); gl.bindVertexArray(vao); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex); gl.uniform1i(U('uI'), 0); gl.uniform1f(U('uT'), t); gl.uniform2f(U('uR'), cv.width, cv.height); FX.forEach(([k]) => gl.uniform1f(U('f' + k), on[k] ? 1 : 0)); gl.uniform1f(U('fSplit'), split ? 1 : 0); gl.drawArrays(gl.TRIANGLES, 0, 3); });
+    const L = addLoop(cv, t => { if (!ready) return; gl.viewport(0, 0, cv.width, cv.height); gl.useProgram(P); gl.bindVertexArray(vao); gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tex); gl.uniform1i(U('uI'), 0); gl.uniform1f(U('uT'), t); gl.uniform2f(U('uR'), cv.width, cv.height); FX.forEach(([k]) => gl.uniform1f(U('f' + k), on[k] ? 1 : 0)); gl.uniform1f(U('fSplit'), split ? 1 : 0); gl.drawArrays(gl.TRIANGLES, 0, 3); });
+    // The bitmap follows the shown size times devicePixelRatio, as in addDemo, so the still stays sharp.
+    // A resize clears it before paint, so it redraws at once.
+    new ResizeObserver(() => { const w = Math.round(cv.clientWidth * devicePixelRatio); if (w && cv.width !== w) { cv.width = w; cv.height = Math.round(w * AR); redraw(L); } }).observe(cv);
   })();
 
   // =============== Shared title scene, used by moods, playground and logo reveal ===============
   // cfg: dur (s per move), ease (EASES key), stagger (s), pattern, entrance, camera, palette, grain, glow, glitch, text
   function titleScene(g, W, H, t, cfg) {
-    const pal = PALS[cfg.palette] || PALS.warm, cyc = t % cfg.loop, inStart = 0.3;
+    const pal = PALS[cfg.palette] || PALS.warm, cyc = t % cfg.loop, inStart = 0.3, res = g.getTransform().a;
     let sx = 0, sy = 0, sc = 1, rot = 0;
     if (cfg.camera === 'push') sc = 1 + 0.08 * (cyc / cfg.loop);
     if (cfg.camera === 'sway') { rot = Math.sin(t * 0.8) * 0.02; sx = Math.sin(t * 0.6) * 10; }
@@ -146,7 +156,7 @@ void main(){vec2 u=v; vec3 c;
     const order = i => cfg.pattern === 'center' ? Math.abs(i - (n - 1) / 2) : cfg.pattern === 'random' ? ((i * 7) % n) : cfg.pattern === 'none' ? 0 : i;
     const fs = Math.min(110, (W * 0.8) / (n * 0.62)); g.font = `700 ${fs}px Bahnschrift`; g.textBaseline = 'alphabetic';
     const widths = [...text].map(c => g.measureText(c).width), total = widths.reduce((a, b) => a + b, 0) + (n - 1) * 4; let x = W / 2 - total / 2;
-    if (cfg.glow) { g.shadowColor = pal[1]; g.shadowBlur = 24; }
+    if (cfg.glow) { g.shadowColor = pal[1]; g.shadowBlur = 24 * res; }
     [...text].forEach((ch, i) => {
       const d = order(i) * cfg.stagger, k = f(seg(cyc, inStart + d, inStart + d + cfg.dur)), out = E('ease-in')(seg(cyc, outAt + d * 0.5, outAt + d * 0.5 + Math.min(0.5, cfg.dur)));
       let dy = 0, s = 1, a = 1, blur = 0, clip = false;
@@ -154,7 +164,7 @@ void main(){vec2 u=v; vec3 c;
       if (cfg.entrance === 'pop') { s = k; } if (cfg.entrance === 'mask') { dy = (1 - k) * fs; clip = true; } if (cfg.entrance === 'blur') { a = k; blur = (1 - k) * 14; }
       a *= 1 - out; dy -= out * 40;
       g.save(); if (clip) { g.beginPath(); g.rect(0, H / 2 - fs * 0.85, W, fs * 1.05); g.clip(); }
-      g.globalAlpha = Math.max(0, a); if (blur > 0.3) g.filter = `blur(${blur}px)`;
+      g.globalAlpha = Math.max(0, a); if (blur > 0.3) g.filter = `blur(${blur * res}px)`;
       g.translate(x + widths[i] / 2, H / 2 + fs * 0.12 + dy); g.scale(s, s); g.fillStyle = i % 4 === 3 ? pal[1] : pal[4]; g.textAlign = 'center'; g.fillText(ch, 0, 0); g.restore();
       x += widths[i] + 4;
     });
@@ -165,7 +175,7 @@ void main(){vec2 u=v; vec3 c;
       g.globalAlpha = 1 - out; g.fillStyle = pal[1 + (i % 3)]; g.save(); g.translate(bx, by + (1 - k) * 30); g.scale(k, k); g.beginPath(); g.roundRect(-14, -14, 28, 28, i % 2 ? 14 : 5); g.fill(); g.restore();
     }
     g.globalAlpha = 1; g.restore();
-    if (cfg.glitch) { const gk = Math.exp(-Math.abs(cyc - landT) * 10); for (let i = 0; i < 8 * gk; i++) { const y = Math.random() * H, hh = 3 + Math.random() * 14; g.drawImage(g.canvas, 0, y, W, hh, (Math.random() - 0.5) * 50 * gk, y, W, hh); } }
+    if (cfg.glitch) { const gk = Math.exp(-Math.abs(cyc - landT) * 10); for (let i = 0; i < 8 * gk; i++) { const y = Math.random() * H, hh = 3 + Math.random() * 14; g.drawImage(g.canvas, 0, y * res, W * res, hh * res, (Math.random() - 0.5) * 50 * gk, y, W, hh); } }
     if (cfg.grain) { g.globalAlpha = 0.06; for (let i = 0; i < 300; i++) { g.fillStyle = Math.random() < 0.5 ? '#fff' : '#000'; g.fillRect(Math.random() * W, Math.random() * H, 2, 2); } g.globalAlpha = 1; }
   }
   window.MG_titleScene = titleScene;
@@ -211,8 +221,11 @@ void main(){vec2 u=v; vec3 c;
   mount('pg-preview', (g, t, W, H) => titleScene(g, W, H, t, pgCfg()));
 
   // =============== Logo reveal example, played live ===============
-  mount('logo-live', (g, t, W, H) => {
-    const T = t % 8.6, cx = W / 2, cy = H / 2;
+  // Under 580 css px the 640-wide design would shrink the timeline labels below 10 px, so a narrower
+  // design puts them on three rows with bigger text.
+  const logo = /** @type {HTMLCanvasElement} */ (document.getElementById('logo-live'));
+  if (logo) addDemo(logo, (_n, cw) => (cw < 580 ? [480, 400] : [640, 360]), (g, t, W, H) => {
+    const rows = W < 640, T = t % 8.6, bar = rows ? 80 : 40, cx = W / 2, cy = (H - bar) / 2 + 20;
     g.fillStyle = '#0b0b10'; g.fillRect(0, 0, W, H);
     const pop = E('back-out')(seg(T, 0.1, 0.9)), stretch = E('ease-in-out')(seg(T, 1.0, 1.7)), open = E('expo-out')(seg(T, 1.7, 2.3)), exit = E('ease-in')(seg(T, 6.5, 7.3)), fade = seg(T, 7.4, 8.0);
     const lw = lerp(24, 420, stretch) * (1 - exit), lh = lerp(24, 5, stretch) * pop, gap = 70 * open * (1 - exit);
@@ -225,8 +238,9 @@ void main(){vec2 u=v; vec3 c;
     const sub = 'Launching March 3', n = Math.floor(seg(T, 4.0, 5.2) * sub.length); g.font = '400 20px Consolas'; g.textAlign = 'center'; g.fillStyle = `rgba(236,231,222,${1 - exit})`; g.fillText(sub.slice(0, n), cx, cy + gap + 40); g.textAlign = 'left';
     g.fillStyle = `rgba(0,0,0,${fade})`; g.fillRect(0, 0, W, H);
     const marks = /** @type {[number, string][]} */ ([[0, 'dot pops'], [1.0, 'line + split'], [2.0, '"NOVA" rises'], [4.0, 'hold, tracking, subtitle'], [6.5, 'exit'], [7.4, 'fade']]);
-    g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(0, H - 40, W, 40); marks.forEach(([m, lab], i) => { const xx = 16 + m / 8 * (W - 32); g.fillStyle = T >= m && (i === marks.length - 1 || T < marks[i + 1][0]) ? AMBER : DIM; g.font = '11px Consolas'; g.fillText(lab, xx, H - 14); g.fillRect(xx, H - 36, 2, 8); });
-    g.fillStyle = '#fff'; g.fillRect(16 + Math.min(T, 8) / 8 * (W - 32) - 1, H - 40, 2, 14);
+    g.fillStyle = 'rgba(0,0,0,0.55)'; g.fillRect(0, H - bar, W, bar); g.font = (rows ? 16 : 11) + 'px Consolas';
+    marks.forEach(([m, lab], i) => { const xx = 16 + m / 8 * (W - 32); g.fillStyle = T >= m && (i === marks.length - 1 || T < marks[i + 1][0]) ? AMBER : DIM; g.fillText(lab, xx, rows ? H - 52 + (i % 3) * 20 : H - 14); g.fillRect(xx, H - bar + 4, 2, 8); });
+    g.fillStyle = '#fff'; g.fillRect(16 + Math.min(T, 8) / 8 * (W - 32) - 1, H - bar, 2, 14);
   });
   void VIOLET; void NAVY;
 })();

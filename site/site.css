@@ -6,7 +6,12 @@
   --nav:250px;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:70px}
+html{scroll-behavior:smooth}
+/* Scroll and focus targets land below the sticky header. A margin on the content, not padding on the root:
+   root padding makes Chrome treat the header's own controls as covered and scroll on every focus or keystroke.
+   site.js sets --pad0 (header without its filter row) and --pad (with it); --pad applies where the row shows. */
+main,main *{scroll-margin-top:var(--pad0,70px)}
+#part-catalog,#part-catalog~section.cat,#part-catalog~section.cat *,body.narrowed main,body.narrowed main *{scroll-margin-top:var(--pad,110px)}
 body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--ui)}
 a{color:var(--cyan)}
 code,kbd{font-family:var(--mono);font-size:.88em;background:var(--panel2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
@@ -22,9 +27,11 @@ nav.side .sub{color:var(--dim);font-size:12.5px;margin:4px 0 14px;line-height:1.
 nav.side a{display:flex;justify-content:space-between;gap:8px;color:var(--dim);text-decoration:none;padding:5px 10px;border-radius:6px;font-size:14.5px}
 nav.side a:hover,nav.side a.cur{background:var(--panel2);color:var(--text)}
 nav.side a .c{font:600 11px var(--mono);color:#6d6a76}
+/* A section with no card that matches the search or filters (site.js view()). */
+nav.side a.none,.part .jump a.none{opacity:.45}
 nav.side .grp{font:600 11px var(--mono);letter-spacing:2px;color:#6d6a76;margin:16px 10px 4px}
-header.top{position:sticky;top:0;z-index:5;margin-left:var(--nav);background:rgba(11,11,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 34px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-header.top .crumb{font:600 13px var(--mono);color:var(--dim);letter-spacing:1px}
+header.top{position:sticky;top:0;z-index:5;margin-left:var(--nav);background:rgba(11,11,16,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 84px 10px 34px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+header.top .crumb{font:600 13px var(--mono);color:var(--dim);letter-spacing:1px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .search{background:#0f0f16;border:1px solid var(--line);border-radius:999px;color:var(--text);font:14px var(--ui);padding:7px 14px;width:300px;margin-left:auto}
 .search-hint{font:12px var(--mono);color:#6d6a76}
 main{margin-left:var(--nav);padding:0 34px 120px}
@@ -36,7 +43,17 @@ h2{font:700 38px/1.15 var(--display);letter-spacing:.5px;margin:0 0 10px}
 h2 .n{font:600 14px var(--mono);color:var(--coral);display:block;letter-spacing:3px;margin-bottom:8px}
 h2 .count{font:600 13px var(--mono);color:var(--dim);margin-left:14px;letter-spacing:1px;vertical-align:middle}
 h3{font:600 21px/1.3 var(--ui);margin:0 0 6px}
-.part{font:700 13px var(--mono);letter-spacing:4px;color:var(--cyan);margin:80px 0 -30px;padding-top:10px;border-top:1px solid var(--line)}
+/* Chapter banner at the start of each sidebar group; site.js fills .jump with links to its sections. */
+.part{margin:96px 0 0;padding:28px 30px 26px 34px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,#1c1420 0%,#13131b 55%,#0f151a 100%);max-width:1304px;position:relative;overflow:hidden}
+.part::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(var(--coral),var(--amber))}
+.part .pn,.hero .pn{font:600 12px var(--mono);letter-spacing:3px;color:var(--coral)}
+.hero .pn{display:block;margin-bottom:6px}
+.part b{display:block;font:700 44px/1.1 var(--display);margin:6px 0}
+.part p{margin:0 0 16px;color:#d6d0c6;font-size:17px;max-width:820px}
+.part .jump{display:flex;flex-wrap:wrap;gap:8px}
+.part .jump a{font:14px var(--ui);color:var(--text);text-decoration:none;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:5px 13px}
+.part .jump a:hover{border-color:var(--coral)}
+.part .jump a span{font:600 11px var(--mono);color:#8a8794;margin-left:7px}
 p.lead{font-size:19px;color:#d6d0c6;max-width:900px}
 .dim{color:var(--dim)}
 .hero{padding-top:56px}
@@ -73,11 +90,40 @@ p.lead{font-size:19px;color:#d6d0c6;max-width:900px}
 .terms div{border-left:3px solid var(--line);padding-left:14px}
 .terms b{color:var(--amber)}
 
+/* ---- header chapters, catalog filters, folding, back to top ---- */
+/* The filter row hangs under the header (absolute), so showing it never moves the page below mid-scroll. */
+header.top .menu{display:none}
+.chapters{display:flex;gap:4px}
+.chapters a{font:600 12px var(--mono);letter-spacing:1.5px;color:var(--dim);text-decoration:none;padding:6px 11px;border-radius:999px;border:1px solid transparent;white-space:nowrap}
+.chapters a:hover{color:var(--text);border-color:var(--line)}
+.chapters a.cur{color:#140806;background:var(--coral);border-color:var(--coral)}
+.progress{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:linear-gradient(90deg,var(--coral),var(--amber))}
+.filters{display:none;position:absolute;left:0;right:0;top:100%;padding:8px 84px 9px 34px;background:#0b0b10;border-bottom:1px solid var(--line);align-items:center;gap:10px;flex-wrap:wrap}
+/* Shown in the catalog, while a search or filter is on (body.narrowed), and while a filter button has focus. */
+body.in-catalog .filters,body.narrowed .filters,.filters:focus-within{display:flex}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent;color:var(--dim);padding:5px 12px;font-size:12px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--panel2);color:var(--amber);border-color:var(--line)}
+.fl{font:600 11px var(--mono);letter-spacing:2px;color:#8a8794;text-transform:uppercase}
+.fcount{font:12px var(--mono);color:var(--dim);margin-left:auto}
+article.ex.fold{display:none}
+section.cat.open article.ex.fold{display:flex}
+button.more{display:block;margin:22px 0 0;padding:12px 20px;width:100%;max-width:1304px;border-style:dashed;color:var(--amber);font-size:13px}
+button.more:hover{border-color:var(--amber)}
+button.more[hidden]{display:none}
+.empty{color:var(--dim);font:14px var(--mono);margin-top:14px}
+/* Back to top sits at the right end of the header row (header.top keeps room for it), so it never covers the page.
+   Hidden with visibility, so it also leaves the tab order until .show; visibility switches off after the fade. */
+.totop{position:fixed;top:12px;right:22px;z-index:7;opacity:0;visibility:hidden;transition:opacity .2s,visibility 0s .2s;border-radius:999px;padding:7px 12px}
+.totop.show{opacity:1;visibility:visible;transition:opacity .2s}
+nav.side .grp.cur{color:var(--coral)}
+
 /* ---- live demo frames in the learning sections ---- */
 .demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:18px 0;max-width:1080px}
 .demo .head{padding:16px 22px 6px}
 .demo .stage{background:#08080c;border-top:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;justify-content:center;align-items:center}
-.demo .stage canvas{display:block;max-width:100%;height:auto}
+.demo .stage canvas{display:block;width:100%;max-width:100%;height:auto}
 .demo .foot{padding:12px 22px 16px}
 .cmpgrid{display:grid;grid-template-columns:1fr;gap:18px;max-width:1080px}
 .moods{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:1080px;margin-top:16px}
@@ -97,7 +143,7 @@ p.lead{font-size:19px;color:#d6d0c6;max-width:900px}
 /* ---- tables, prompts, builder ---- */
 table{width:100%;border-collapse:collapse;font-size:15px;margin-top:16px;max-width:1280px}
 th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font:600 12px var(--mono);letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;background:var(--panel);position:sticky;top:52px}
+th{font:600 12px var(--mono);letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;background:var(--panel);position:sticky;top:calc(var(--hdr, 53px) - 1px)} /* --hdr: header height, set by site.js */
 td b{color:var(--text)}
 .yes{color:var(--green)}.no{color:#ff8a70}.maybe{color:var(--amber)}
 pre{font:14px/1.55 var(--mono);background:#0f0f16;border:1px solid var(--line);border-radius:10px;padding:16px 18px;white-space:pre-wrap;margin:10px 0;color:#ddd6ca;max-width:1080px}
@@ -133,7 +179,11 @@ article.ex.hide{display:none}
 article.ex:target{outline:3px solid var(--amber);outline-offset:3px}
 .stagewrap{width:640px;height:360px;background:#000;position:relative;overflow:hidden}
 .stagewrap canvas,.stagewrap video{display:block;width:640px;height:360px}
+/* Under 1100 px a card can be narrower than 640 px, so canvas and video stages scale down to the card width at 16:9. */
+@media (max-width:1100px){.stagewrap{width:auto;max-width:640px;height:auto}.stagewrap>canvas,.stagewrap>video{width:100%;height:auto;aspect-ratio:16/9}}
 .domstage{width:640px;height:360px;position:relative;overflow:hidden;background:#101018}
+/* A DOM stage keeps its 640 x 360 layout; under 1100 px core.js sets --k on it so it scales to the card width. */
+@media (max-width:1100px){.stagewrap:has(>.domstage){aspect-ratio:16/9}.stagewrap>.domstage{transform:scale(var(--k,1));transform-origin:0 0}}
 .ctl{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px 0}
 .ctl button{font-size:12px;padding:6px 10px}
 .info{padding:14px 18px 18px}
@@ -155,10 +205,13 @@ article.ex:target{outline:3px solid var(--amber);outline-offset:3px}
 .tb-speed input{width:90px;accent-color:var(--coral)}
 .tb-speed b{color:var(--text);min-width:34px}
 .tweakpanel{margin:10px 16px 0;padding:12px 14px;background:#101018;border:1px solid #3a2d10;border-radius:10px;display:grid;gap:6px}
-.tweakpanel label{display:grid;grid-template-columns:150px 1fr 76px;align-items:center;gap:10px;font:13px var(--ui);color:#d8d2c8}
-.tweakpanel input{accent-color:var(--amber)}
+.tweakpanel[hidden]{display:none}
+.tweakpanel label{display:grid;grid-template-columns:150px minmax(0,1fr) 76px;align-items:center;gap:10px;font:13px var(--ui);color:#d8d2c8}
+.tweakpanel input{accent-color:var(--amber);min-width:0}
 .tweakpanel b{font:600 12px var(--mono);color:var(--amber);text-align:right}
 .tweakpanel button{justify-self:start;margin-top:4px}
+/* Under 700 px the three columns do not fit, so the name and value share the first row and the slider spans the second. */
+@media (max-width:700px){.tweakpanel label{grid-template-columns:minmax(0,1fr) auto;row-gap:2px}.tweakpanel b{grid-row:1;grid-column:2}.tweakpanel input{grid-row:2;grid-column:1/-1;width:100%;margin:0}}
 
 /* ---- UI demo internals (loaders, menu, skeleton) ---- */
 .ld-grid{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;height:100%;padding:20px}
@@ -195,4 +248,12 @@ article.ex:target{outline:3px solid var(--amber);outline-offset:3px}
 .sk-real{position:absolute;inset:0;padding:16px;display:flex;gap:14px;align-items:center;opacity:0}
 .sk-real b{display:block;font:600 16px var(--ui)}.sk-real span{color:#8a8794;font-size:13px}
 
-@media (max-width:1100px){nav.side{display:none}header.top,main{margin-left:0}main{padding:0 18px 80px}.grid2,.grid3,.builder,.anatomy,.pg,.moods,.hub{grid-template-columns:1fr}.hl{grid-template-columns:1fr 1fr}.gloss{columns:1}.gal{grid-template-columns:1fr}article.ex{width:100%}}
+@media (max-width:1400px){.search{width:220px}header.top .crumb{display:none}}
+/* Under 1100 px the sidebar is a drawer below the header (hidden from Tab while closed), the chapter tabs and the
+   filter row scroll sideways in one row. */
+@media (max-width:1100px){nav.side{top:var(--hdr,0px);transform:translateX(-100%);visibility:hidden;transition:transform .2s,visibility 0s .2s;box-shadow:0 0 40px #000}nav.side.open{transform:none;visibility:visible;transition:transform .2s}header.top .menu{display:inline-block}.chapters{flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}.search{width:auto;flex:1 1 160px;min-width:0;max-width:300px}.filters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:8px 18px}.filters>*{flex:none}header.top{padding:10px 76px 10px 18px}.totop{right:18px}header.top,main{margin-left:0}.part{padding:22px 20px 20px 24px}.part b{font-size:34px}main{padding:0 18px 80px}.grid2,.grid3,.builder,.anatomy,.pg,.moods,.hub{grid-template-columns:1fr}.hl{grid-template-columns:1fr 1fr}.gloss{columns:1}.gal{grid-template-columns:1fr}article.ex{width:100%;max-width:640px}}
+/* Phones: the search box gets its own header row, and tables use fixed columns so long words break instead of
+   widening the page. */
+@media (max-width:700px){header.top{padding-top:8px;padding-bottom:8px;row-gap:8px}.totop{top:8px}.chapters{flex:1 1 0}.search{flex-basis:100%;max-width:none}.chapters a{padding:6px 8px;letter-spacing:.5px}
+  table{table-layout:fixed;font-size:12.5px}th,td{padding:7px 4px;overflow-wrap:anywhere}th{letter-spacing:.5px;font-size:10.5px}td .tag{letter-spacing:0;padding:1px 4px;font-size:10.5px}
+  #tech-index th:nth-child(1){width:27%}#tech-index th:nth-child(2){width:19%}#tech-index th:nth-child(3){width:23%}#tech-index th:nth-child(4){width:56px}}

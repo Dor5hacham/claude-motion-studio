@@ -787,7 +787,7 @@
     cat: 'type', id: 't2-crawl', title: 'Perspective text crawl', aka: 'opening crawl, receding text, scrolling credits in perspective, floor text', tool: 'Canvas 2D (row-by-row perspective resampling)', runs: 'CPU',
     notice: 'The text is set once, justified, on a tall hidden canvas. Each screen row then copies one thin slice of it: rows near the horizon read from far down the page and draw it narrow, rows near the bottom read nearby text and draw it wide, which is exactly a plane tilted away from the camera. Scrolling only moves the start of that lookup, so the crawl runs forever and fades into the distance.',
     use: 'story openers, credits, manifesto and mission videos, playful presentations',
-    params: [{ key: 'tilt', label: 'Tilt (flatness)', min: 0.2, max: 1, step: 0.05, value: 0.5 }, { key: 'speed', label: 'Scroll speed', min: 10, max: 120, step: 5, value: 46, unit: ' px/s' }],
+    params: [{ key: 'tilt', label: 'Tilt (flatness)', min: 0.2, max: 1, step: 0.05, value: 0.5 }, { key: 'speed', label: 'Scroll speed', min: 10, max: 120, step: 1, value: 46, unit: ' px/s' }],
     prompt: 'Perspective text crawl: a justified amber paragraph block with a title ("CHAPTER SEVEN / A LONG SCROLL") recedes on a tilted plane toward the horizon at {speed}, plane flatness {tilt}, letters shrink and fade into the distance, built row by row from a flat text canvas, slow twinkling starfield behind, seamless endless loop.',
     setup(cv, L) {
       const g = cv.getContext('2d'); const TW = 560, PAD = 30;

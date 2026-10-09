@@ -192,7 +192,7 @@
     tool: 'PixiJS (MeshRope, DisplacementFilter, BlurFilter, TilingSprite)', w: 640, h: 360,
     notice: 'Each fish is a picture bent along a MeshRope, so a sine wave down its spine makes it swim. A DisplacementFilter pushes the whole pond around with a moving noise image, which looks like water. Turn the filters off to see the same scene without them. Click the pond to drop food.',
     use: 'game scenes, playful landing pages, ambient backgrounds, interactive banners',
-    prompt: 'Using PixiJS v8, make a top-down koi pond: {fish} koi made from generated textures on MeshRope with a swimming sine wave, blurred drop shadows, a DisplacementFilter (scale {wobble}) over the water, scrolling caustic light, lily pads, and fish that swim to where I click.',
+    prompt: 'Using PixiJS v8, make a top-down koi pond: {fish} koi made from generated textures on MeshRope with a swimming sine wave at {speed} speed, blurred drop shadows, a DisplacementFilter (scale {wobble}) over the water, scrolling caustic light, lily pads, and fish that swim to where I click.',
     params: [
       { key: 'fish', label: 'Fish', min: 3, max: 20, step: 1, value: 9, restart: true },
       { key: 'wobble', label: 'Water wobble', min: 0, max: 40, step: 1, value: 16 },
@@ -227,7 +227,7 @@
     tool: 'p5.js (instance mode, arc, rotate, noise, lerpColor)',
     notice: 'Every square holds two quarter circles. Turn a square 90 degrees and the pipes connect in a new way, so the whole pattern rewires itself. Every wave flips a random group of tiles, spreading out from one point, and p5 noise picks the colors.',
     use: 'generative posters, backgrounds, loading screens, pattern design',
-    prompt: 'Using p5.js in instance mode, draw a grid of Truchet tiles ({cell} px cells) made of two quarter-circle arcs. Every {every} s flip {flip}% of the tiles by 90 degrees with an eased rotation that spreads out from a random tile. Color the strokes with noise() and lerpColor between coral, amber, cyan and violet on near-black.',
+    prompt: 'Using p5.js in instance mode, draw a grid of Truchet tiles ({cell} cells) made of two quarter-circle arcs. Every {every} s flip {flip}% of the tiles by 90 degrees with an eased rotation that spreads out from a random tile. Color the strokes with noise() and lerpColor between coral, amber, cyan and violet on near-black.',
     params: [
       { key: 'cell', label: 'Tile size', min: 24, max: 72, step: 4, value: 40, unit: ' px', restart: true },
       { key: 'flip', label: 'Tiles per wave', min: 5, max: 80, step: 5, value: 35, unit: '' },
@@ -602,7 +602,7 @@
     tool: 'D3 (d3-force simulation, data join, scales, axis)',
     notice: 'Ninety dots are pushed around by forces instead of keyframes. Links pull connected dots together and every dot pushes the others away, which makes a network. Swap the forces and the same dots move into group clusters, or into a beeswarm sorted by value along an axis. The label at the top names the active forces.',
     use: 'data stories, network maps, dashboards, explainer graphics',
-    prompt: 'Using D3 v7, draw 90 nodes in 5 colored groups with links. Run a d3.forceSimulation with forceLink (distance {dist}), forceManyBody (strength {charge}) and forceCollide. Every {every} s switch the forces: network, clusters pulled to group centers with forceX and forceY, then a beeswarm placed by value on an axis. Fade the links out in the beeswarm.',
+    prompt: 'Using D3 v7, draw 90 nodes in 5 colored groups with links. Run a d3.forceSimulation with forceLink (distance {dist}), forceManyBody (strength {charge}) and forceCollide. Every {every} switch the forces: network, clusters pulled to group centers with forceX and forceY, then a beeswarm placed by value on an axis. Fade the links out in the beeswarm.',
     params: [
       { key: 'charge', label: 'Charge', min: -80, max: -5, step: 1, value: -30, unit: '' },
       { key: 'dist', label: 'Link distance', min: 10, max: 60, step: 1, value: 24, unit: '' },
@@ -847,7 +847,7 @@
     params: [
       { key: 'bpm', label: 'BPM', min: 70, max: 170, step: 1, value: 112, unit: '' },
       { key: 'swing', label: 'Swing', min: 0, max: 0.7, step: 0.05, value: 0.15 },
-      { key: 'fb', label: 'Delay feedback', min: 0, max: 0.8, step: 0.05, value: 0.32 },
+      { key: 'fb', label: 'Delay feedback', min: 0, max: 0.8, step: 0.01, value: 0.32 },
     ],
     controls: [
       { label: 'Play sound', group: false, fn: L => L.state.play() },

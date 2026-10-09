@@ -111,6 +111,8 @@ vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
   EX.tweak = function (id, params, prompt) { const d = EX.cards.find(c => c.id === id); if (!d) { console.warn('EX.tweak: no card', id); return; } d.params = params; if (prompt) d.prompt = prompt; };
   // Fills {key} placeholders in a prompt with the current tweak values.
   const fill = (txt, d, p) => txt.replace(/\{(\w+)\}/g, (m, k) => { const q = (d.params || []).find(x => x.key === k); if (!q || p[k] === undefined) return m; const dec = q.dec !== undefined ? q.dec : (String(q.step).split('.')[1] || '').length; return (+p[k]).toFixed(dec) + (q.unit || ''); });
+  // DOM stages are laid out at 640 x 360; --k scales one down to its card width (site.css, under 1100 px).
+  const fitDom = new ResizeObserver(es => es.forEach(e => /** @type {HTMLElement} */ (e.target.firstElementChild).style.setProperty('--k', String(Math.min(1, e.contentRect.width / 640)))));
   EX.build = function () {
     for (const d of EX.cards) {
       const host = document.getElementById('cat-' + d.cat); if (!host) continue;
@@ -120,7 +122,7 @@ vec3 pal(float t,vec3 a,vec3 b,vec3 c,vec3 d){return a+b*cos(6.28318*(c*t+d));}
       if (d.kind === 'dom') { stage = document.createElement('div'); stage.className = 'domstage'; }
       else if (d.kind === 'video') { stage = document.createElement('video'); stage.muted = true; stage.loop = true; stage.playsInline = true; stage.dataset.src = d.src; }
       else { stage = document.createElement('canvas'); stage.width = w; stage.height = h; }
-      const sw = document.createElement('div'); sw.className = 'stagewrap'; sw.appendChild(stage); card.appendChild(sw);
+      const sw = document.createElement('div'); sw.className = 'stagewrap'; sw.appendChild(stage); card.appendChild(sw); if (d.kind === 'dom') fitDom.observe(sw);
       const L = { el: stage, vis: false, t: 0, started: false, d, frame: null, speed: 1, paused: false, acc: 0, p: {} };
       (d.params || []).forEach(q => { L.p[q.key] = q.value; });
       // Playback bar: pause, replay, speed; plus a Tweak toggle when the demo has its own parameters.

@@ -95,7 +95,7 @@
         <div class="mg-btn" style="padding:18px 34px;border-radius:999px;border:2px solid #ece7de;color:#ece7de">See work</div></div>
         <div class="mg-cur" style="position:absolute;left:0;top:0;width:24px;height:24px;margin:-12px 0 0 -12px;border-radius:50%;background:#fff;mix-blend-mode:difference;pointer-events:none"></div>`;
       const btns = [...st.querySelectorAll('.mg-btn')], cur = st.querySelector('.mg-cur'); let mouse = null;
-      st.addEventListener('pointermove', e => { const r = st.getBoundingClientRect(); mouse = { x: e.clientX - r.left, y: e.clientY - r.top, t: performance.now() }; });
+      st.addEventListener('pointermove', e => { const r = st.getBoundingClientRect(); mouse = { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height, t: performance.now() }; });
       const c = { x: W / 2, y: H / 2, s: 24 }; const bo = btns.map(() => ({ x: 0, y: 0 }));
       return t => {
         const auto = !mouse || performance.now() - mouse.t > 2000;
@@ -103,8 +103,8 @@
         c.x = lerp(c.x, px, 0.18); c.y = lerp(c.y, py, 0.18);
         let hover = false;
         btns.forEach((b, i) => {
-          const r = b.getBoundingClientRect(), sr = st.getBoundingClientRect(); const bx = r.left - sr.left + r.width / 2 - bo[i].x, by = r.top - sr.top + r.height / 2 - bo[i].y;
-          const dx = px - bx, dy = py - by, d = Math.hypot(dx / (r.width / 2 + 60), dy / (r.height / 2 + 60));
+          const sr = st.getBoundingClientRect(), k = W / sr.width, r = b.getBoundingClientRect(), bw = r.width * k, bh = r.height * k; const bx = (r.left - sr.left) * k + bw / 2 - bo[i].x, by = (r.top - sr.top) * k + bh / 2 - bo[i].y;
+          const dx = px - bx, dy = py - by, d = Math.hypot(dx / (bw / 2 + 60), dy / (bh / 2 + 60));
           const pull = d < 1 ? L.p.pull : 0; if (d < 1) hover = true;
           bo[i].x = lerp(bo[i].x, dx * pull, 0.15); bo[i].y = lerp(bo[i].y, dy * pull, 0.15);
           b.style.transform = `translate(${bo[i].x}px,${bo[i].y}px)`;

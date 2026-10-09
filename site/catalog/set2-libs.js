@@ -282,7 +282,7 @@
     tool: 'Matter.js (Constraint rope, Bodies, Events collisionStart, engine.timing.timeScale)',
     notice: 'A heavy ball on a Matter.js Constraint rope swings into a tower of 70 bricks. A collisionStart event listener turns every hard hit into a puff of dust, and the first hit drops engine.timing.timeScale for a moment of slow motion before the physics speeds back up. The tower is rebuilt every 9 seconds.',
     use: 'game prototypes, launch teasers, playful error pages, physics explainers',
-    prompt: 'Using Matter.js on a canvas, hang a heavy ball (density 20 times the bricks) on a Constraint rope from a crane, pull it back 70 degrees, and release it into a running-bond tower of 70 bricks. Listen to Events collisionStart and spawn dust puffs where pairs hit harder than a threshold. Start the bricks asleep. On the first ball hit, ease engine.timing.timeScale down to {slow}, hold it {hold} s, then ease back to 1. Draw a dusk sky, the crane, the rope as chain links, and rebuild the tower every 9 s.',
+    prompt: 'Using Matter.js on a canvas, hang a heavy ball (density 20 times the bricks) on a Constraint rope from a crane, pull it back 70 degrees, and release it into a running-bond tower of 70 bricks. Listen to Events collisionStart and spawn dust puffs where pairs hit harder than a threshold. Start the bricks asleep. On the first ball hit, ease engine.timing.timeScale down to {slow}, hold it {hold}, then ease back to 1. Draw a dusk sky, the crane, the rope as chain links, and rebuild the tower every 9 s.',
     params: [
       { key: 'slow', label: 'Slow motion', min: 0.1, max: 1, step: 0.05, value: 0.25 },
       { key: 'hold', label: 'Slow-mo time', min: 0.3, max: 3, step: 0.1, value: 1.4, unit: ' s' },
@@ -765,9 +765,10 @@
         code.innerHTML = `Motion.inertia({ keyframes: [value], velocity: <b>${vel.toFixed(1)}</b>, power: <b>${p.power}</b>,
  timeConstant: <b>${p.tc}</b>, modifyTarget: Math.round${w.loop ? '' : ', min: 0, max: 1'} }).next(ms)`;
       };
+      // Drag deltas are in screen px; 640 / shown width turns them into stage px while --k scales the stage down.
       wheels.forEach(w => {
         w.el.onpointerdown = e => { w.drag = true; w.gen = null; w.ly = e.clientY; w.lt = performance.now(); w.vel = 0; w.el.setPointerCapture(e.pointerId); w.el.style.cursor = 'grabbing'; };
-        w.el.onpointermove = e => { if (!w.drag) return; const dy = e.clientY - w.ly, tn = performance.now(), dtm = Math.max(1, tn - w.lt); w.v -= dy / IH; w.vel = -dy / IH / dtm * 1000; w.ly = e.clientY; w.lt = tn; };
+        w.el.onpointermove = e => { if (!w.drag) return; const dy = (e.clientY - w.ly) * 640 / st.getBoundingClientRect().width, tn = performance.now(), dtm = Math.max(1, tn - w.lt); w.v -= dy / IH; w.vel = -dy / IH / dtm * 1000; w.ly = e.clientY; w.lt = tn; };
         w.el.onpointerup = w.el.onpointercancel = () => { if (!w.drag) return; w.drag = false; w.el.style.cursor = 'grab'; flick(w, w.vel, Object.assign({ power: 0.8, tc: 325 }, L.p)); };
       });
       let fl = -1;
@@ -943,7 +944,7 @@
       const setY = chars.map(c => gsap.quickSetter(c, 'y', 'px'));
       const S = { boost: 0, drag: false, lx: 0, flick: -1, vel: 0, shown: 0 };
       box.onpointerdown = e => { S.drag = true; S.lx = e.clientX; box.setPointerCapture(e.pointerId); box.style.cursor = 'grabbing'; };
-      box.onpointermove = e => { if (!S.drag) return; const dx = e.clientX - S.lx; S.lx = e.clientX; S.boost += dx * 0.12; };
+      box.onpointermove = e => { if (!S.drag) return; const dx = (e.clientX - S.lx) * 640 / st.getBoundingClientRect().width; S.lx = e.clientX; S.boost += dx * 0.12; };
       box.onpointerup = box.onpointercancel = () => { S.drag = false; box.style.cursor = 'grab'; };
       const clampSkew = (m, v) => gsap.utils.clamp(-m, m, v);
       return (t, dt) => {

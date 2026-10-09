@@ -40,30 +40,103 @@ fn tr(x: i32, y: i32) -> vec2f { return trail[u32(clamp(y, 0, 359)) * SW + u32(c
 }
 `;
 
-  // Draws a plain notice on the stage when WebGPU cannot start; the card then stays a still frame.
-  function say(stage, msg) {
-    const g = /** @type {CanvasRenderingContext2D} */ (stage.getContext('2d')); if (!g) return;
-    g.fillStyle = '#0b0b10'; g.fillRect(0, 0, SW, SH); g.textAlign = 'center';
-    g.fillStyle = '#f3ead8'; g.font = '22px Bahnschrift'; g.fillText(msg, SW / 2, SH / 2 - 8);
-    g.fillStyle = '#8b8aa3'; g.font = '14px Segoe UI'; g.fillText('This card needs WebGPU: Chrome or Edge 113 or newer on a supported GPU.', SW / 2, SH / 2 + 22);
+  // Asks for the default adapter, then for each power preference in turn; Chrome can refuse one and accept another.
+  // The default comes first because Chrome on Windows warns in the console whenever powerPreference is set.
+  async function getAdapter(gpu) {
+    for (const opt of [{}, { powerPreference: 'high-performance' }, { powerPreference: 'low-power' }]) {
+      try { const a = await gpu.requestAdapter(opt); if (a) return a; } catch (e) { /* try the next option */ }
+    }
+    return null;
   }
 
   // Starts a WebGPU card. make(dev, ctx, fmt) builds buffers and pipelines once and returns { reset(), frame(t, dt) };
   // the result is kept on L.wg, so Replay only resets the simulation instead of creating a second device.
-  function boot(stage, L, make) {
-    if (L.wg) { L.wg.reset(); return (t, dt) => L.wg.frame(t, dt); }
+  // A lost device is rebuilt up to 3 times, one rebuild at a time. With no WebGPU, fallback(stage, L, why) returns
+  // a CPU frame function with a reset() method that shows the same motion with fewer particles and a note that says why.
+  function boot(stage, L, make, fallback) {
+    if (L.cpu) { L.cpu.reset(); return L.cpu; }
+    if (L.wg) L.wg.reset();
+    if (L.wg || L.wgBusy) return (t, dt) => { if (L.wg) L.wg.frame(t, dt); };
     const gpu = /** @type {any} */ (navigator).gpu;
-    if (!gpu) { say(stage, 'WebGPU is not available in this browser'); return () => {}; }
-    if (!L.wgBusy) {
+    const toCpu = why => { L.wg = null; L.cpu = fallback(stage, L, why); L.frame = L.cpu; };
+    if (!gpu) { toCpu('this browser has no WebGPU'); return L.cpu; }
+    const start = () => {
       L.wgBusy = true;
-      gpu.requestAdapter().then(a => (a ? a.requestDevice() : null)).then(dev => {
-        if (!dev) { say(stage, 'No WebGPU adapter found'); return; }
-        const ctx = /** @type {any} */ (stage.getContext('webgpu')); const fmt = gpu.getPreferredCanvasFormat();
+      getAdapter(gpu).then(a => (a ? a.requestDevice() : null)).then(dev => {
+        L.wgBusy = false;
+        if (!dev) { toCpu('Chrome gave no WebGPU adapter, see chrome://gpu'); return; }
+        dev.lost.then(info => {
+          L.wg = null; if (info.reason === 'destroyed') return;
+          L.wgLost = (L.wgLost || 0) + 1;
+          if (L.wgLost <= 3) { L.wgBusy = true; setTimeout(start, 400); } else toCpu('the WebGPU device was lost');
+        });
+        const ctx = /** @type {any} */ (stage.getContext('webgpu'));
+        if (!ctx) { dev.destroy(); toCpu('the canvas could not get a WebGPU context'); return; }
+        const fmt = gpu.getPreferredCanvasFormat();
         ctx.configure({ device: dev, format: fmt, alphaMode: 'opaque' });
         L.wg = make(dev, ctx, fmt);
-      }).catch(() => say(stage, 'WebGPU could not start'));
-    }
+      }).catch(err => { L.wgBusy = false; console.warn('WebGPU start failed, using the CPU preview:', err); toCpu('WebGPU could not start'); });
+    };
+    start();
     return (t, dt) => { if (L.wg) L.wg.frame(t, dt); };
+  }
+
+  // CPU preview of the flow card: the same curl-noise field and trail resolve in plain JavaScript,
+  // with 4% of the particles (40,000 at the default million), drawn into an ImageData buffer. A note on the stage says why.
+  // The returned frame(t, dt) has reset(), which Replay calls to respawn the particles and clear the trails.
+  function flowFallback(stage, L, why) {
+    let g = /** @type {CanvasRenderingContext2D} */ (stage.getContext('2d'));
+    // After a lost device the stage keeps its 'webgpu' context and cannot give a 2D one, so draw on a 2D canvas laid over it.
+    if (!g) {
+      const over = document.createElement('canvas'); over.width = SW; over.height = SH; over.style.cssText = 'position:absolute;left:0;top:0';
+      stage.after(over); g = /** @type {CanvasRenderingContext2D} */ (over.getContext('2d'));
+    }
+    const img = g.createImageData(SW, SH), px = img.data, cnt = new Float32Array(SW * SH), hue = new Float32Array(SW * SH);
+    const MAX = 40000, P = new Float32Array(MAX * 4);
+    // Frame budget: cap shrinks while a frame averages over 6 ms and grows back under 4 ms, so slow machines stay responsive.
+    let cap = MAX, cost = 0;
+    // Palette channels in hue order, with the first color repeated at the end so hue 1 wraps to hue 0.
+    const PR = [255, 255, 82, 148, 255], PG = [89, 189, 209, 107, 89], PB = [54, 82, 242, 255, 54];
+    const EXP = new Float32Array(4097); for (let i = 0; i <= 4096; i++) EXP[i] = 1 - Math.exp(-i / 512);
+    const spawn = (i, first) => { P[i * 4] = Math.random() * 680 - 20; P[i * 4 + 1] = Math.random() * 400 - 20; P[i * 4 + 2] = first ? Math.random() * 5.5 : 1.5 + Math.random() * 4; };
+    const reset = () => { for (let i = 0; i < MAX; i++) spawn(i, true); cnt.fill(0); hue.fill(0); };
+    reset();
+    for (let j = 3; j < px.length; j += 4) px[j] = 255;
+    const frame = (t, dt) => {
+      dt = Math.min(dt, 1 / 20);
+      const t0 = performance.now(), n = Math.min(cap, Math.round(L.p.n * 40000)), s = L.p.scale, ga = L.p.gather, v = L.p.speed * 26, z = t * 0.09, u = s / 360;
+      // The potential is 0.5 sin(A) cos(B) + 0.25 sin(C) cos(D), with A..D linear in the pixel position.
+      // Its exact gradient needs cos(A)cos(B), sin(A)sin(B) and the same for C, D: four cosines of sums and differences.
+      const ax = 1.5 * u, a0 = 2 * z, by = 1.3 * u, b0 = -1.3 * z, cx = 2.32 * u, cy = 2.9 * u, c0 = 3.1 * z + 1.7, ex = 2.3 * u, ey = -1.38 * u, e0 = -2.2 * z;
+      for (let i = 0; i < n; i++) {
+        const o = i * 4; if (P[o + 2] <= 0) spawn(i, false);
+        const x = P[o], y = P[o + 1], A = ax * x + a0, B = by * y + b0, C = cx * x + cy * y + c0, D = ex * x + ey * y + e0;
+        const p = Math.cos(A - B), q = Math.cos(A + B), r = Math.cos(C - D), w = Math.cos(C + D);
+        const dx = s * (0.375 * (p + q) + 0.125 * (2.32 * (r + w) - 2.3 * (r - w))), dy = s * (-0.325 * (p - q) + 0.125 * (2.9 * (r + w) + 1.38 * (r - w)));
+        const vx = (dy - ga * dx) * v, vy = (-dx - ga * dy) * v;
+        P[o] = x + vx * dt; P[o + 1] = y + vy * dt; P[o + 2] -= dt;
+        const X = P[o] | 0, Y = P[o + 1] | 0;
+        if (X >= 0 && Y >= 0 && X < SW && Y < SH) { const k = Y * SW + X; cnt[k] += 1; hue[k] += Math.atan2(vy, vx) / 6.2831853 + 0.5; }
+      }
+      // One pass shades each pixel and fades its trail for the next frame. Pixels too faint to show get the background.
+      const gain = 0.02 * Math.sqrt(1e6 / Math.max(n, 1)), faint = 0.002 / gain, g512 = gain * 512;
+      for (let i = 0, j = 0; i < SW * SH; i++, j += 4) {
+        const c = cnt[i], hs = hue[i]; cnt[i] = c * 0.9; hue[i] = hs * 0.9;
+        if (c < faint) { px[j] = 11; px[j + 1] = 11; px[j + 2] = 16; continue; }
+        const e = c * g512, d = e < 4096 ? EXP[e | 0] : 1, k = Math.min(hs / c, 0.9999) * 4, a = k | 0, f = k - a, w = f * f * (3 - 2 * f), d2 = d * d, hot = d2 * d2 * d * 0.45, m = d * 0.85;
+        px[j] = 11 + (PR[a] + (PR[a + 1] - PR[a]) * w) * m + 255 * hot;
+        px[j + 1] = 11 + (PG[a] + (PG[a + 1] - PG[a]) * w) * m + 242 * hot;
+        px[j + 2] = 16 + (PB[a] + (PB[a + 1] - PB[a]) * w) * m + 219 * hot;
+      }
+      g.putImageData(img, 0, 0);
+      g.fillStyle = 'rgba(11,11,16,0.78)'; g.fillRect(0, SH - 30, SW, 30);
+      g.textAlign = 'left'; g.font = '12px Segoe UI'; g.fillStyle = '#ffb020';
+      g.fillText(`CPU preview, ${Math.round(n / 1000)}k particles: ${why}.`, 12, SH - 11);
+      cost = cost * 0.9 + (performance.now() - t0) * 0.1;
+      if (cost > 6) cap = Math.max(4000, Math.round(cap * 0.95)); else if (cost < 4) cap = Math.min(MAX, Math.round(cap * 1.02));
+    };
+    frame.reset = reset;
+    return frame;
   }
 
   // Builds the compute rasterizer around a particle buffer of `bytes` bytes and the card's WGSL `code`.
@@ -130,21 +203,21 @@ fn pot(p: vec2f) -> f32 { let z = u.t * .09; return gn(vec3f(p * u.p0, z)) + .45
 
   EX.add({
     cat: 'gpu', id: 'w2-flow-silk', title: 'WebGPU flow silk: a million particles', aka: 'compute shader particles, curl noise flow field, atomic splatting, compute rasterization', tool: 'WebGPU, WGSL compute shaders', runs: 'GPU',
-    notice: 'Up to a million particles ride a curl-noise flow, all moved by one WGSL compute shader each frame. They are drawn without triangles: each particle adds 1 to its pixel with an atomic add, and the counts fade into silky trails colored by flow direction. Raise Gather and the flow pulls them into bright filaments.',
+    notice: 'Up to a million particles ride a curl-noise flow, all moved by one WGSL compute shader each frame. They are drawn without triangles: each particle adds 1 to its pixel with an atomic add, and the counts fade into silky trails colored by flow direction. Raise Gather and the flow pulls them into bright filaments. Without WebGPU, a CPU preview runs the same flow with 4% of the particles and says why on the stage.',
     use: 'hero backgrounds, data-flow visuals, showing what WebGPU compute can do',
-    params: [{ key: 'n', label: 'Particles (thousands)', min: 50, max: 1000, step: 50, value: 1000 }, { key: 'scale', label: 'Noise scale', min: 0.8, max: 5, step: 0.1, value: 2.2, dec: 1 }, { key: 'speed', label: 'Flow speed', min: 0.2, max: 3, step: 0.1, value: 1.2, dec: 1 }, { key: 'gather', label: 'Gather into filaments', min: 0, max: 1.2, step: 0.05, value: 0.6, dec: 2 }],
-    prompt: 'Live WebGPU hero background: {n} thousand particles moved by a WGSL compute shader through 2D curl noise (scale {scale}, speed {speed}) plus a gather term of {gather} that pulls them into glowing filaments. Rasterize in compute with atomic adds into a pixel buffer, fade it into trails, color by flow direction in coral, amber, cyan and violet on near-black with a soft glow. Show a clear message when WebGPU is missing.',
+    params: [{ key: 'n', label: 'Particles (millions)', min: 0.05, max: 1, step: 0.05, value: 1, dec: 2 }, { key: 'scale', label: 'Noise scale', min: 0.8, max: 5, step: 0.1, value: 2.2, dec: 1 }, { key: 'speed', label: 'Flow speed', min: 0.2, max: 3, step: 0.1, value: 1.2, dec: 1 }, { key: 'gather', label: 'Gather into filaments', min: 0, max: 1.2, step: 0.05, value: 0.6, dec: 2 }],
+    prompt: 'Live WebGPU hero background: {n} million particles moved by a WGSL compute shader through 2D curl noise (scale {scale}, speed {speed}) plus a gather term of {gather} that pulls them into glowing filaments. Rasterize in compute with atomic adds into a pixel buffer, fade it into trails, color by flow direction in coral, amber, cyan and violet on near-black with a soft glow. When WebGPU is missing, fall back to a CPU preview of the same flow with fewer particles and a note on the stage that says why.',
     setup(stage, L) {
       return boot(stage, L, (dev, ctx, fmt) => {
         const run = rig(dev, ctx, fmt, 1000000 * 16, FLOW, ['step']); let frame = 0;
         return {
           reset() { frame = 0; },
           frame(t, dt) {
-            const n = Math.round(L.p.n) * 1000;
+            const n = Math.round(L.p.n * 1000) * 1000;
             run({ t, dt: Math.min(dt, 1 / 20), fade: frame ? 0.9 : 0, gain: 0.02 * Math.sqrt(1e6 / n), n, frame: frame++, p0: L.p.scale, p1: L.p.speed, p2: L.p.gather }, [['step', n]]);
           },
         };
-      });
+      }, flowFallback);
     },
   });
 

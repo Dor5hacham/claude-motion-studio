@@ -44,14 +44,26 @@
   <a href="#reel">How the reel was made</a>
 </nav>
 <header class="top">
+  <button class="menu" id="menu-btn" aria-controls="sidenav" aria-expanded="false">Menu</button>
   <span class="crumb" id="crumb">MOTION STUDIO</span>
+  <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
   <input class="search" id="q" type="search" placeholder="Search techniques, tools, words...">
   <span class="search-hint" id="qhint"></span>
+  <div class="filters" id="filters" role="group" aria-label="Catalog filters">
+    <span class="fl">Show</span>
+    <div class="seg" data-f="kind"><button data-v="" class="on">All</button><button data-v="live">Live</button><button data-v="sliders">With sliders</button><button data-v="clip">Clips</button></div>
+    <span class="fl">Runs on</span>
+    <div class="seg" data-f="runs"><button data-v="" class="on">Any</button><button data-v="CPU">CPU</button><button data-v="GPU">GPU</button><button data-v="WEB">WEB</button><button data-v="ENGINE">ENGINE</button></div>
+    <span class="fcount" id="fcount"></span>
+  </div>
+  <div class="progress" id="progress"></div>
 </header>
+<button class="totop" id="totop" aria-label="Back to top">Top</button>
 <main>
 
 <!-- ======================= START ======================= -->
 <section class="sec hero" id="overview">
+  <span class="pn">PART 1 OF 5: START</span>
   <h1>Motion with <span>Claude</span></h1>
   <p class="lead">This is one resource for motion design with Claude. It teaches the words motion designers use, shows each idea moving, and runs every technique Claude can make, from hand-written shaders to Blender, Three.js, Remotion and FFmpeg. Every example has a prompt you can copy, and most have sliders so you can see how each setting changes the result.</p>
   <div class="hub">
@@ -60,6 +72,7 @@
     <a href="#words"><b>Try</b><span>Click prompt words and watch the animation change.</span></a>
     <a href="#builder"><b>Ask</b><span>Build a full prompt and copy it into Claude Code.</span></a>
   </div>
+  <div class="note">How to use this page: read <b>Learn</b> once, browse the <b>Catalog</b> (use the search box and the filters at the top), then use <b>Ask</b> whenever you want something new. Every card has Pause, Replay and Speed; cards with a <b>Tweak</b> button have sliders, and their prompt text updates as you move them.</div>
   <div class="tags"><span class="tag gpu">GPU</span><span class="dim">graphics card</span><span class="tag cpu">CPU</span><span class="dim">processor</span><span class="tag web">WEB</span><span class="dim">browser UI: HTML, CSS, SVG</span><span class="tag engine">ENGINE</span><span class="dim">a 3D program like Blender</span></div>
   <h3 style="margin-top:26px">The reel that started this</h3>
   <p class="dim" style="max-width:1080px">60 seconds, 8 scenes, every pixel made with code. Each scene is also a card in the catalog below, and the last section explains how it was made.</p>
@@ -88,7 +101,6 @@
     <a href="#ex-clip-taichi-mpm"><img src="media/readme/clip-taichi-mpm.gif" alt="Taichi: water, jelly and snow" loading="lazy"><b>Taichi: water, jelly and snow</b><span>Taichi</span></a>
     <a href="#ex-clip-unreal-niagara"><img src="media/readme/clip-unreal-niagara.gif" alt="Niagara particle vortex" loading="lazy"><b>Niagara particle vortex</b><span>Unreal</span></a>
   </div>
-  <div class="note">How to use this page: read <b>Learn</b> once, browse the <b>Catalog</b> (use the search box at the top), then use <b>Ask</b> whenever you want something new. Every card has Pause, Replay and Speed; cards with a <b>Tweak</b> button have sliders, and their prompt text updates as you move them.</div>
 </section>
 
 <section class="sec cat" id="reelscenes"><h2><span class="n">00</span>The reel, scene by scene</h2><p class="lead">Each scene of the reel as its own clip, with the technique, the tool and a prompt to make something like it. The catalog below has live versions of these ideas that you can tweak.</p><div class="gal" id="cat-reel"></div></section>
@@ -121,7 +133,7 @@
 </section>
 
 <!-- ======================= LEARN ======================= -->
-<div class="part">LEARN</div>
+<div class="part" id="part-learn" data-grp="LEARN"><span class="pn">PART 2 OF 5</span><b>Learn</b><p>The words motion designers use, each one shown moving. Read this chapter once.</p><div class="jump"></div></div>
 <section class="sec" id="vocabulary">
   <h2><span class="n">02</span>Motion vocabulary</h2>
   <p class="lead">These words describe how things move. Use them in prompts and Claude knows exactly what you mean. Each one is live below.</p>
@@ -149,16 +161,16 @@
 
 <section class="sec" id="compare">
   <h2><span class="n">03</span>With vs without</h2>
-  <p class="lead">Each pair shows the same animation twice. Left: without the idea. Right: what changes when you put those words in your prompt. Four more principles have their own with-vs-without cards in the catalog: <a href="#ex-p2-staging">staging</a>, <a href="#ex-p2-exaggeration">exaggeration</a>, <a href="#ex-p2-pose-to-pose">pose to pose</a> and <a href="#ex-p2-solid-drawing">solid drawing</a>.</p>
+  <p class="lead">Each pair shows the same animation twice: WITHOUT the idea, and WITH the change you get when you put those words in your prompt. The labels on the canvas mark each half; on a phone the two halves stack, WITHOUT on top. Four more principles have their own with-vs-without cards in the catalog: <a href="#ex-p2-staging">staging</a>, <a href="#ex-p2-exaggeration">exaggeration</a>, <a href="#ex-p2-pose-to-pose">pose to pose</a> and <a href="#ex-p2-solid-drawing">solid drawing</a>.</p>
   <div class="cmpgrid">
     <div class="demo"><div class="head"><h3>Timing</h3><p class="dim">How long a move takes. Short feels snappy, long feels calm or heavy.</p></div><div class="stage"><canvas id="cmp-timing" width="960" height="240"></canvas></div><div class="foot"><div class="say">Snappy timing: 250 ms moves.</div></div></div>
     <div class="demo"><div class="head"><h3>Hold</h3><p class="dim">A pause where nothing moves, so people can read. Text needs about 1 second per 4 to 5 words. The bar shows in, hold and out.</p></div><div class="stage"><canvas id="cmp-hold" width="960" height="240"></canvas></div><div class="foot"><div class="say">Hold the title for 1.5 s before it exits.</div></div></div>
     <div class="demo"><div class="head"><h3>Follow-through and overlap</h3><p class="dim">Loose parts keep moving after the main body stops, and settle at different times.</p></div><div class="stage"><canvas id="cmp-follow" width="960" height="240"></canvas></div><div class="foot"><div class="say">Add follow-through to the ribbons when the logo stops.</div></div></div>
     <div class="demo"><div class="head"><h3>Secondary motion</h3><p class="dim">Small extra moves that support the main action: dust on landing, a wobble after impact.</p></div><div class="stage"><canvas id="cmp-secondary" width="960" height="240"></canvas></div><div class="foot"><div class="say">Add a small dust puff and a wobble when it lands.</div></div></div>
     <div class="demo"><div class="head"><h3>Arcs</h3><p class="dim">Natural motion follows curves. The dots are positions at equal time steps.</p></div><div class="stage"><canvas id="cmp-arcs" width="960" height="240"></canvas></div><div class="foot"><div class="say">Move the icon along an arc, not a straight line.</div></div></div>
-    <div class="demo"><div class="head"><h3>Rhythm and beat sync</h3><p class="dim">At 120 BPM a beat is 0.5 s. Left: changes land between beats (coral ticks). Right: every change lands on a beat. Turn on the click track to feel the difference.</p><div class="btns"><button id="beat-audio">Hear the beat</button></div></div><div class="stage"><canvas id="cmp-beat" width="960" height="240"></canvas></div><div class="foot"><div class="say">120 BPM, every cut and pop lands on the beat.</div></div></div>
-    <div class="demo"><div class="head"><h3>Seamless loop</h3><p class="dim">The last frame flows into the first. Left jumps back at the loop point; right never shows the seam.</p></div><div class="stage"><canvas id="cmp-loop" width="960" height="240"></canvas></div><div class="foot"><div class="say">Make it a seamless 2-second loop.</div></div></div>
-    <div class="demo"><div class="head"><h3>Parallax</h3><p class="dim">Near layers move faster than far layers. Left: all layers move together and the scene looks flat. Right: depth.</p></div><div class="stage"><canvas id="cmp-parallax" width="960" height="240"></canvas></div><div class="foot"><div class="say">Three-layer parallax as the camera slides right.</div></div></div>
+    <div class="demo"><div class="head"><h3>Rhythm and beat sync</h3><p class="dim">At 120 BPM a beat is 0.5 s. WITHOUT: changes land between beats (coral ticks). WITH: every change lands on a beat. Turn on the click track to feel the difference.</p><div class="btns"><button id="beat-audio">Hear the beat</button></div></div><div class="stage"><canvas id="cmp-beat" width="960" height="240"></canvas></div><div class="foot"><div class="say">120 BPM, every cut and pop lands on the beat.</div></div></div>
+    <div class="demo"><div class="head"><h3>Seamless loop</h3><p class="dim">The last frame flows into the first. WITHOUT jumps back at the loop point; WITH never shows the seam.</p></div><div class="stage"><canvas id="cmp-loop" width="960" height="240"></canvas></div><div class="foot"><div class="say">Make it a seamless 2-second loop.</div></div></div>
+    <div class="demo"><div class="head"><h3>Parallax</h3><p class="dim">Near layers move faster than far layers. WITHOUT: all layers move together and the scene looks flat. WITH: depth.</p></div><div class="stage"><canvas id="cmp-parallax" width="960" height="240"></canvas></div><div class="foot"><div class="say">Three-layer parallax as the camera slides right.</div></div></div>
   </div>
 </section>
 
@@ -200,7 +212,7 @@
 
 <section class="sec" id="words">
   <h2><span class="n">07</span>Your words, live</h2>
-  <p class="lead">Click words on the left. The animation on the right changes, and the prompt below it is rewritten. The part you just changed is highlighted.</p>
+  <p class="lead">Click words in the panel. The animation changes, and the prompt under it is rewritten. The part you just changed is highlighted.</p>
   <div class="pg">
     <div class="box"><div id="pg-controls"></div><div class="pg-row"><span>Text</span><input type="text" id="pg-text" value="LAUNCH" maxlength="12"></div></div>
     <div><canvas id="pg-preview" width="640" height="360" style="width:100%;border-radius:12px;border:1px solid var(--line);display:block"></canvas><div id="pg-prompt" style="margin-top:12px"></div></div>
@@ -208,7 +220,7 @@
 </section>
 
 <!-- ======================= CATALOG ======================= -->
-<div class="part">CATALOG</div>
+<div class="part" id="part-catalog" data-grp="CATALOG"><span class="pn">PART 3 OF 5</span><b>Catalog</b><p>Every technique, live or as a rendered clip, each with a prompt you can copy. Use the filters at the top to narrow it down.</p><div class="jump"></div></div>
 <section class="sec cat" id="type"><h2><span class="n">08</span>Text in motion</h2><p class="lead">Typography that moves. Usually Canvas 2D, CSS or Remotion, and cheap to render.</p><div class="gal" id="cat-type"></div></section>
 <section class="sec cat" id="mg"><h2><span class="n">09</span>2D motion graphics</h2><p class="lead">Shapes, lines, paths, depth layers and isometric scenes: the After Effects style of explainer videos and app promos.</p><div class="gal" id="cat-mg"></div></section>
 <section class="sec cat" id="ui"><h2><span class="n">10</span>App and web UI motion</h2><p class="lead">Small, fast animations inside interfaces, made with CSS, SVG and JavaScript, or libraries like Framer Motion and GSAP. These go into your app as code, not as video.</p><div class="gal" id="cat-ui"></div></section>
@@ -222,7 +234,7 @@
 <section class="sec cat" id="scratch"><h2><span class="n">18</span>Built from scratch</h2><p class="lead">No engine and no library: Claude writes the renderer, the physics or the synth itself. Each one is a single readable file, so you can see how the engines in the other sections work inside, and ask for a custom one when no tool fits. The live cards run in this page; the clips come from native Rust and Go programs written from scratch (<code>source/scratch</code>).</p><div class="gal" id="cat-scratch"></div></section>
 
 <!-- ======================= MAKE ======================= -->
-<div class="part">MAKE</div>
+<div class="part" id="part-make" data-grp="MAKE"><span class="pn">PART 4 OF 5</span><b>Make</b><p>Turn what you saw into a prompt: which tool makes what, how a good prompt is built, a builder and worked examples.</p><div class="jump"></div></div>
 <section class="sec" id="toolsmap">
   <h2><span class="n">19</span>Tools and what they produce</h2>
   <p class="lead">Every tool here was used on this PC to make something in the catalog; the last column links to it.</p>
@@ -312,7 +324,7 @@
 
 <section class="sec" id="builder">
   <h2><span class="n">21</span>Prompt builder</h2>
-  <p class="lead">Pick options on the left. The prompt on the right updates. Copy it into Claude Code and edit anything you like.</p>
+  <p class="lead">Pick options. The prompt updates as you change them. Copy it into Claude Code and edit anything you like.</p>
   <div class="builder box">
     <div>
       <label>What is it for</label><input type="text" id="b-purpose" value="a 20-second opener for my product launch video">
@@ -440,7 +452,7 @@ Music: 120 BPM, scene changes every 4 bars, impact on the ball hit. Test frames 
 </section>
 
 <!-- ======================= REFERENCE ======================= -->
-<div class="part">REFERENCE</div>
+<div class="part" id="part-reference" data-grp="REFERENCE"><span class="pn">PART 5 OF 5</span><b>Reference</b><p>Look things up: every technique in one table, the glossary and how the reel was made.</p><div class="jump"></div></div>
 <section class="sec" id="index">
   <h2><span class="n">23</span>Technique index</h2>
   <p class="lead">Everything on this page in one table, built automatically from the catalog, so it can never fall out of date. The search box filters it too.</p>

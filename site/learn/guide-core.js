@@ -1,6 +1,7 @@
 // Shared helpers and the vocabulary demos for the Motion Studio page:
 // easing playground, stagger, squash and stretch, anticipation, prompt builder, copy buttons.
-// addLoop(el, fn) runs fn(t) every frame only while el is on screen.
+// addLoop(el, fn) runs fn(t) every frame only while el is on screen and returns the loop L.
+// redraw(L) runs fn again at the last t while el is on screen, for example after a resize cleared the canvas.
 const clamp01 = x => Math.min(1, Math.max(0, x));
 const lerp = (a, b, t) => a + (b - a) * t;
 /** @type {Record<string, [(x: number) => number, string, string]>} */
@@ -19,28 +20,50 @@ const eOut = EASES['ease-out'][0], eInOut = EASES['ease-in-out'][0], eBack = EAS
 const COLORS = ['#ff5a36', '#ffb020', '#2bc4e6', '#7a5cff', '#ece7de'];
 
 const loops = [];
-function addLoop(el, fn) { const L = { el, fn, vis: false, t0: performance.now() }; loops.push(L); guideIO.observe(el); return L; }
+function addLoop(el, fn) { const L = { el, fn, vis: false, t0: performance.now(), t: 0 }; loops.push(L); guideIO.observe(el); return L; }
 const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of loops) if (L.el === e.target) L.vis = e.isIntersecting; }), { threshold: 0.05 });
-(function frame(now) { for (const L of loops) if (L.vis) L.fn((now - L.t0) / 1000); requestAnimationFrame(frame); })(performance.now());
+(function frame(now) { for (const L of loops) if (L.vis) L.fn(L.t = (now - L.t0) / 1000); requestAnimationFrame(frame); })(performance.now());
+// Reads the layout, not L.vis: a resize can move a canvas into view before the IntersectionObserver reports it.
+function redraw(L) { const b = L.el.getBoundingClientRect(); if (b.width && b.bottom > 0 && b.top < innerHeight) L.fn(L.t); }
+
+// addDemo(cv, size, draw) is addLoop for a 2D demo drawn in design units. size(narrow, cw) returns the design
+// [W, H]; narrow is true while the canvas shows under 720 css px (phones), so a demo can switch to a layout
+// whose text stays readable, and cw is the shown width in css px for demos that need their own switch point. The bitmap follows the shown size times devicePixelRatio, so the drawing is
+// sharp at any card width. draw(g, t, W, H, narrow) runs each visible frame with the design scale set.
+// A new bitmap size clears the canvas after this frame's draw and before paint, so fit() redraws at once;
+// otherwise every frame of a live window resize would show an empty canvas.
+function addDemo(cv, size, draw) {
+  const g = cv.getContext('2d'); let W = cv.width, H = cv.height, narrow = false;
+  const L = addLoop(cv, t => { const k = cv.width / W; g.setTransform(k, 0, 0, k, 0, 0); g.globalAlpha = 1; g.filter = 'none'; draw(g, t, W, H, narrow); });
+  const fit = () => {
+    const cw = cv.clientWidth; if (!cw) return;
+    narrow = cw < 720; [W, H] = size(narrow, cw);
+    const w = Math.round(cw * devicePixelRatio), h = Math.round(w * H / W);
+    if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; redraw(L); }
+  };
+  new ResizeObserver(fit).observe(cv); fit();
+  return L;
+}
 
 // ---------------- easing playground ----------------
 (() => {
-  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-ease')); if (!cv) return; const g = cv.getContext('2d');
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-ease')); if (!cv) return;
   let cur = 'back-out'; const btns = document.getElementById('ease-btns');
   for (const k of Object.keys(EASES)) { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { cur = k; L.t0 = performance.now(); sync(); }; btns.appendChild(b); }
   function sync() { [...btns.children].forEach(b => b.classList.toggle('on', b.textContent === cur)); document.getElementById('ease-desc').textContent = EASES[cur][1]; document.getElementById('ease-say').textContent = EASES[cur][2]; }
   sync();
-  const L = addLoop(cv, t => {
+  // Graph on the left, track on the right; on phones the track goes under the graph.
+  const L = addDemo(cv, narrow => narrow ? [500, 430] : [1000, 300], (g, t, W, H, narrow) => {
     const f = EASES[cur][0], cyc = t % 3.2, p = clamp01((cyc - 0.4) / 1.4);
-    g.fillStyle = '#08080c'; g.fillRect(0, 0, 1000, 300);
-    const gx = 40, gy = 40, gw = 300, gh = 200;
+    g.fillStyle = '#08080c'; g.fillRect(0, 0, W, H);
+    const gx = narrow ? 60 : 40, gy = narrow ? 24 : 40, gw = narrow ? 400 : 300, gh = 200;
     g.strokeStyle = '#2a2a38'; g.lineWidth = 1; g.strokeRect(gx, gy, gw, gh);
-    g.fillStyle = '#6d6a76'; g.font = '13px Consolas'; g.fillText('time →', gx + gw - 60, gy + gh + 22); g.save(); g.translate(gx - 12, gy + gh); g.rotate(-Math.PI / 2); g.fillText('position →', 0, 0); g.restore();
+    g.fillStyle = '#6d6a76'; g.font = (narrow ? 15 : 13) + 'px Consolas'; g.fillText('time →', gx + gw - 60, gy + gh + 22); g.save(); g.translate(gx - 12, gy + gh); g.rotate(-Math.PI / 2); g.fillText('position →', 0, 0); g.restore();
     g.strokeStyle = '#ff5a36'; g.lineWidth = 3; g.beginPath();
     for (let i = 0; i <= 120; i++) { const x = i / 120, y = f(x), X = gx + x * gw, Y = gy + gh - y * gh * 0.8 - gh * 0.1; i ? g.lineTo(X, Y) : g.moveTo(X, Y); }
     g.stroke();
     const py = f(p); g.fillStyle = '#fff'; g.beginPath(); g.arc(gx + p * gw, gy + gh - py * gh * 0.8 - gh * 0.1, 6, 0, 7); g.fill();
-    const tx = 420, tw = 520, ty = 150;
+    const tx = narrow ? 0 : 420, tw = narrow ? 500 : 520, ty = narrow ? 310 : 150;
     g.strokeStyle = '#2a2a38'; g.lineWidth = 2; g.beginPath(); g.moveTo(tx, ty + 40); g.lineTo(tx + tw, ty + 40); g.stroke();
     for (let i = 0; i <= 12; i++) { const x = f(i / 12); g.fillStyle = 'rgba(255,176,32,0.25)'; g.beginPath(); g.arc(tx + 30 + x * (tw - 60), ty + 70, 4, 0, 7); g.fill(); }
     g.fillStyle = '#6d6a76'; g.fillText('dots = position at equal time steps (spacing)', tx + 30, ty + 98);
@@ -50,13 +73,13 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- stagger ----------------
 (() => {
-  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-stagger')); if (!cv) return; const g = cv.getContext('2d');
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-stagger')); if (!cv) return;
   const pats = { 'none (all at once)': () => 0, 'left to right': i => i * 0.05, 'center out': (i, j) => Math.hypot(i - 9.5, j - 3) * 0.06, 'diagonal': (i, j) => (i + j) * 0.035, 'random': (i, j) => ((Math.sin(i * 12.9898 + j * 78.233) * 43758.5453) % 1 + 1) % 1 * 0.8 };
   let cur = 'center out'; const btns = document.getElementById('stg-btns');
   for (const k of Object.keys(pats)) { const b = document.createElement('button'); b.textContent = k; b.onclick = () => { cur = k; L.t0 = performance.now(); sync(); }; btns.appendChild(b); }
   function sync() { [...btns.children].forEach(b => b.classList.toggle('on', b.textContent === cur)); }
   sync();
-  const L = addLoop(cv, t => {
+  const L = addDemo(cv, () => [1000, 300], (g, t) => {
     const cyc = t % 3.8; g.fillStyle = '#08080c'; g.fillRect(0, 0, 1000, 300);
     for (let i = 0; i < 20; i++) for (let j = 0; j < 7; j++) {
       const d = pats[cur](i, j), k = eBack(clamp01((cyc - 0.2 - d) / 0.5)) * (1 - eOut(clamp01((cyc - 3.0 - d * 0.3) / 0.35)));
@@ -68,9 +91,9 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- squash and stretch ----------------
 (() => {
-  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-squash')); if (!cv) return; const g = cv.getContext('2d'); let on = true;
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-squash')); if (!cv) return; let on = true;
   const b = document.getElementById('sq-toggle'); b.onclick = () => { on = !on; b.classList.toggle('on', on); b.textContent = 'Squash and stretch: ' + (on ? 'ON' : 'OFF'); };
-  addLoop(cv, t => {
+  addDemo(cv, () => [480, 300], (g, t) => {
     g.fillStyle = '#08080c'; g.fillRect(0, 0, 480, 300);
     const floorY = 250, R = 34, u = (t / 0.8) % 1, h = 4 * u * (1 - u) * 170, speed = Math.abs(1 - 2 * u), contact = Math.exp(-Math.min(u, 1 - u) * 45);
     const sy = on ? lerp(1 + 0.3 * speed, 0.58, contact) : 1, sx = 1 / sy;
@@ -82,10 +105,10 @@ const guideIO = new IntersectionObserver(es => es.forEach(e => { for (const L of
 
 // ---------------- anticipation + overshoot ----------------
 (() => {
-  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-antic')); if (!cv) return; const g = cv.getContext('2d'); let on = true;
+  const cv = /** @type {HTMLCanvasElement} */ (document.getElementById('c-antic')); if (!cv) return; let on = true;
   const b = document.getElementById('an-toggle'); b.onclick = () => { on = !on; b.classList.toggle('on', on); b.textContent = 'Anticipation + overshoot: ' + (on ? 'ON' : 'OFF'); };
   const inOutBack = x => { const c = 1.70158 * 1.525; return x < .5 ? (Math.pow(2 * x, 2) * ((c + 1) * 2 * x - c)) / 2 : (Math.pow(2 * x - 2, 2) * ((c + 1) * (x * 2 - 2) + c) + 2) / 2; };
-  addLoop(cv, t => {
+  addDemo(cv, () => [480, 300], (g, t) => {
     g.fillStyle = '#08080c'; g.fillRect(0, 0, 480, 300);
     const cyc = t % 3.0; let p = clamp01((cyc - 0.5) / 1.0); if (cyc > 1.9) p = 1 - clamp01((cyc - 2.1) / 0.6);
     const k = on && cyc < 1.9 ? inOutBack(p) : eInOut(p), x = lerp(90, 390, k);

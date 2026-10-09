@@ -44,6 +44,8 @@ const browser = await chromium.launch({ executablePath: 'C:/Program Files/Google
 const page = await browser.newPage({ viewport: { width: 1700, height: 1000 } });
 await page.goto(pathToFileURL(path.join(ROOT, 'index.html')).href);
 await page.waitForTimeout(600);
+// Catalog sections show 6 cards until "Show all"; open them all so every card can be scrolled to.
+await page.evaluate(() => document.querySelectorAll('section.cat').forEach(s => s.classList.add('open')));
 
 for (const [id, name] of LIVE.filter(([, n]) => want(n))) {
   const el = await page.$('#' + id); if (!el) { console.log('skip, not found:', id); continue; }

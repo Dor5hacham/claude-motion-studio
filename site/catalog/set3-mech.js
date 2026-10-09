@@ -8,7 +8,7 @@
     notice: 'One crank turns and two mirrored legs walk, using the lengths Theo Jansen found for his beach animals. Each joint is solved every frame as the crossing point of two circles, so nothing is keyframed. The coral curve is the true foot path: flat along the ground, then a lifted arc back.',
     use: 'engineering explainers, kinetic art, robot and machine motion',
     params: [{ key: 'speed', label: 'Crank speed', min: 0.1, max: 1.5, step: 0.05, value: 0.45, unit: ' rev/s' }, { key: 'crank', label: 'Crank length', min: 11, max: 17, step: 0.1, value: 15 }],
-    prompt: "A Theo Jansen Strandbeest leg linkage walking, solved with real kinematics from Jansen's holy numbers (crank length {crank}), the crank turning at {speed} rev/s, two mirrored legs plus a dim back pair, the foot path traced in coral, clean technical-illustration line style on a dark background.",
+    prompt: "A Theo Jansen Strandbeest leg linkage walking, solved with real kinematics from Jansen's holy numbers (crank length {crank}), the crank turning at {speed}, two mirrored legs plus a dim back pair, the foot path traced in coral, clean technical-illustration line style on a dark background.",
     setup(stage, L) {
       const g = stage.getContext('2d');
       // Jansen's holy numbers (a, l, b, c, d, e, f, g, h, i, j, k); the crank length m comes from the slider.
