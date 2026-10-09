@@ -16,8 +16,8 @@
 <div align="center">
 <table>
 <tr>
-<td align="center"><img src="media/readme/hero-reel.gif" width="420" alt="The reel, one second per scene"><br><sub>Reel 1, 60 s: shaders, a Blender physics shot, a synthesized score</sub></td>
-<td align="center"><img src="media/readme/hero-reel-2.gif" width="420" alt="The second reel"><br><sub>Reel 2, 42 s: 29 clips of the second set cut to a synthesized beat</sub></td>
+<td align="center"><img src="media/readme/hero-reel.gif" width="390" alt="The reel, one second per scene"><br><sub>Reel 1, 60 s: shaders, a Blender physics shot, a synthesized score</sub></td>
+<td align="center"><img src="media/readme/hero-reel-2.gif" width="390" alt="The second reel"><br><sub>Reel 2, 42 s: 29 clips of the second set cut to a synthesized beat</sub></td>
 </tr>
 </table>
 </div>
@@ -836,11 +836,11 @@ README.md             this tutorial and cheat sheet
 LICENSE               proprietary license: all rights reserved
 THIRD_PARTY_NOTICES.md  third-party libraries and data, with their licenses
 media/
-  reel/               the two reels (web versions; the full-quality master of the first is a Release asset)
+  reel/               the two reels (web versions; the full-quality master is a Release asset)
   clips/              scenes cut from the reel
   engine/             Blender and Unreal clips
-  tools/              Remotion, HyperFrames, Motion Canvas, Manim, Three.js, WebGPU, Taichi, Matplotlib,
-                      PyVista and FFmpeg-graph clips, plus the native Rust and Go clips
+  tools/              Remotion, HyperFrames, Motion Canvas, Manim, Three.js, WebGPU, Taichi,
+                      Matplotlib, PyVista and FFmpeg-graph clips, plus the native Rust and Go clips
   edit/               FFmpeg editing tricks
   readme/             GIFs, posters and SVG art (art/) used in this README
 site/
